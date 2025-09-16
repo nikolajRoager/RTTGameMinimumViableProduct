@@ -15,6 +15,8 @@ scenario::~scenario() {
 
 void scenario::render(SDL_Renderer* renderer) {
 
+    //Draw hexagon outline
+
 }
 
 void scenario::update() {
