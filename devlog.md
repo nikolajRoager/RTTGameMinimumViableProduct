@@ -38,5 +38,7 @@ Oh, and I have decided I want a hexagonal grid for sure, and I have started pain
 
 One problem I have is that Greenland is much taller than it is wide, but my screen is wider than it is tall, so there is a lot of uggly black-space next to greenland.
 
-Maybe I will put Denmark the rest of Europe there ... or maybe use it for some kind of menu... or maybe if I rotated greenland 90 degrees... I really should also include part of the continental US, so we have somewhere to be attacked from
+For now, I included the rest of Europe and the continental US, I am still not sure of the art style for the map though
+
+I also now need to add zooming and panning to the map, but this is enough work for one day
 

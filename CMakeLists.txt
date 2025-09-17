@@ -41,5 +41,4 @@ add_executable(PreMVPMapGame main.cpp
         src/engine.cpp
         src/scenario.cpp
         src/texwrap.cpp
-        include/hexTile.h
 )

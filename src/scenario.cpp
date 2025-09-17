@@ -4,21 +4,34 @@
 
 #include "scenario.h"
 
-scenario::scenario(SDL_Renderer* renderer) : background("assets/greenland.png",renderer), hexSelectionOutline("assets/hexoutline.png",renderer) {
+#include <fstream>
+#include <iostream>
+
+scenario::scenario(SDL_Renderer* renderer) : background("assets/background.png",renderer), hexSelectionOutline("assets/hexoutline.png",renderer) {
     ///Width of the hexagons making up the game grid in pixels (can not be regular hexagons for rounding reasons)
-    hexGridWidth=5;
+    hexGridWidth=19;
     ///height of the hexagons making up the game grid in pixels (can not be regular hexagons for rounding reasons)
-    hexGridHeight=5;
+    hexGridHeight=12;
 
-    //Hardcoded hex map of a sort-of, facing worlds scenario
-    hexTiles = {
-        hexTile(hexTile::FRIEND),hexTile(hexTile::SEA),hexTile(hexTile::SEA),hexTile(hexTile::SEA),hexTile(hexTile::FOE),
-        hexTile(hexTile::FRIEND),hexTile(hexTile::SEA),hexTile(hexTile::SEA),hexTile(hexTile::SEA),hexTile(hexTile::FOE),
-        hexTile(hexTile::FRIEND),hexTile(hexTile::SEA),hexTile(hexTile::SEA),hexTile(hexTile::SEA),hexTile(hexTile::FOE),
-        hexTile(hexTile::FRIEND),hexTile(hexTile::NEUTRAL),hexTile(hexTile::NEUTRAL),hexTile(hexTile::FOE),hexTile(hexTile::FOE),
-        hexTile(hexTile::NEUTRAL),hexTile(hexTile::NEUTRAL),hexTile(hexTile::NEUTRAL),hexTile(hexTile::NEUTRAL),hexTile(hexTile::FOE),
-    };
 
+    //todo, replace with better scenario loading
+    std::ifstream TEMP_INPUT("assets/TEMP.txt");
+
+    if (!TEMP_INPUT.is_open())
+        throw std::runtime_error("unable to open file assets/TEMPT.txt");
+
+    hexTiles.clear();
+
+    for (int hexX = 0; hexX < hexGridWidth; hexX++) {
+        for (int hexY = 0; hexY < hexGridHeight; hexY++) {
+            int friendOrFoe;
+            TEMP_INPUT>>friendOrFoe;
+            hexTiles.emplace_back(static_cast<hexTile::hexStatus>(friendOrFoe));
+        }
+    }
+
+
+    TEMP_INPUT.close();
 
 
 
@@ -41,7 +54,7 @@ scenario::~scenario() {
 
 void scenario::render(SDL_Renderer* renderer) {
 
-    //background.render(0,0,renderer,nullptr,1);
+    background.render(0,0,renderer,nullptr,1);
 
     //For debugging, draw hexagonal grid on top of everything
 

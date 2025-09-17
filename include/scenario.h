@@ -33,7 +33,7 @@ private:
     std::vector<hexTile> hexTiles;
 
 public:
-        scenario(SDL_Renderer* renderer);
+    explicit scenario(SDL_Renderer* renderer);
     ~scenario();
 
     void render(SDL_Renderer* renderer);

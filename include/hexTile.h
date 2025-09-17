@@ -9,10 +9,10 @@ class hexTile {
 public:
     //The current itteration of the game can only handle two combatent sides
     enum hexStatus {
-        FRIEND,
-        FOE,
-        NEUTRAL,
-        SEA,
+        SEA=0,
+        FRIEND=1,
+        FOE=2,
+        NEUTRAL=3,
     };
 private:
     hexStatus status;
