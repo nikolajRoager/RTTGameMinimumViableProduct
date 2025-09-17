@@ -18,7 +18,9 @@ private:
     //The window renderer
     SDL_Renderer* renderer;
 
-    scenario theScenario;
+    scenario* theScenario;
+
+
 
     int windowWidthPx;
     int windowHeightPx;

@@ -12,7 +12,7 @@
 #include <SDL2/SDL_image.h>
 
 
-engine::engine(): theScenario() {
+engine::engine() {
     window = nullptr;
     renderer = nullptr;
 
@@ -50,10 +50,15 @@ engine::engine(): theScenario() {
     {
         throw std::runtime_error( "SDL_image could not initialize! SDL Error:" + std::string( SDL_GetError() ) );
     }
+
+
+    //Only load scenario AFTER SDL
+    theScenario = new scenario(renderer);
 }
 
 engine::~engine() {
 
+    delete theScenario;
     if (renderer!=nullptr)
         SDL_DestroyRenderer(renderer);
     if (window!=nullptr)
@@ -81,12 +86,12 @@ void engine::run() {
                 }
 
             }
-            theScenario.update();
+            theScenario->update();
 
             //Black background, shouldn't be seen but won't hurt
             SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0x00);
             SDL_RenderClear( renderer );
-            theScenario.render(renderer);
+            theScenario->render(renderer);
             SDL_RenderPresent( renderer );
         }
     }
