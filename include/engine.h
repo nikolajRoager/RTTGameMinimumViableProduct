@@ -25,6 +25,12 @@ private:
     int windowWidthPx;
     int windowHeightPx;
 
+    int mouseXPos;
+    int mouseYPos;
+
+    bool mouseDown;
+    bool prevMouseDown;
+
 
     public:
     engine();

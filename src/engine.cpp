@@ -52,8 +52,13 @@ engine::engine() {
     }
 
 
+    SDL_GetMouseState( &mouseXPos, &mouseYPos );
+
     //Only load scenario AFTER SDL
     theScenario = new scenario(renderer);
+
+    mouseDown=false;
+    prevMouseDown=false;
 }
 
 engine::~engine() {
@@ -69,7 +74,9 @@ engine::~engine() {
 
 void engine::run() {
     bool quit = false;
+
     while (!quit) {
+        prevMouseDown=mouseDown;
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) {
@@ -86,14 +93,24 @@ void engine::run() {
                 }
 
             }
-            theScenario->update();
-
-            //Black background, shouldn't be seen but won't hurt
-            SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0x00);
-            SDL_RenderClear( renderer );
-            theScenario->render(renderer);
-            SDL_RenderPresent( renderer );
+            if (event.type == SDL_MOUSEMOTION) {
+                SDL_GetMouseState( &mouseXPos, &mouseYPos );
+            }
+            if (event.type == SDL_MOUSEBUTTONDOWN) {
+                mouseDown=true;
+            }
+            if (event.type == SDL_MOUSEBUTTONUP) {
+                mouseDown=false;
+            }
         }
+
+        theScenario->update(windowWidthPx,windowHeightPx,mouseXPos,mouseYPos,(mouseDown && !prevMouseDown));
+
+        //Black background, shouldn't be seen but won't hurt
+        SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0x00);
+        SDL_RenderClear( renderer );
+        theScenario->render(renderer,windowWidthPx,windowHeightPx);
+        SDL_RenderPresent( renderer );
     }
 }
 

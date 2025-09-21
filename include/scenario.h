@@ -4,40 +4,44 @@
 
 #ifndef PREMVPMAPGAME_SCENARIO_H
 #define PREMVPMAPGAME_SCENARIO_H
+#include <map>
 #include <vector>
 #include <SDL2/SDL_render.h>
 
+#include "hexGrid.h"
 #include "hexTile.h"
 #include "texwrap.h"
+#include "unit.h"
+#include "unitType.h"
 
 class scenario {
 private:
     texwrap background;
     texwrap hexSelectionOutline;
 
-    ///Width of the hexagons making up the game grid in pixels (can not be regular hexagons for rounding reasons)
-    int hexWidthPx;
-    ///height of the hexagons making up the game grid in pixels (can not be regular hexagons for rounding reasons)
-    int hexHeightPx;
+    std::vector<unitType> unitLibrary;
 
-    ///half the width of the hexagons making up the game grid in pixels (can not be regular hexagons for rounding reasons)
-    int hexHalfWidthPx;
-    ///three quarters of the height of the hexagons making up the game grid in pixels (can not be regular hexagons for rounding reasons)
-    int hex34HeightPx;
+    ///Units of the player side (side=true)
+    std::vector<unit> unitsA;
+    ///Units of the other side (side=false)
+    std::vector<unit> unitsB;
 
-    ///Width of the hexagonal grid this game is being played on, in hexagons
-    int hexGridWidth;
-    ///Height of the hexagonal grid this game is being played on, in hexagons
-    int hexGridHeight;
+    int scenarioWidthPx;
+    int scenarioHeightPx;
 
-    std::vector<hexTile> hexTiles;
+    ///What tile is the mouse currently over
+    int mouseOverTile;
+    ///What tile, if any is currently selected (-1 if none)
+    int selectedTile=-1;
+
+    hexGrid grid;
 
 public:
     explicit scenario(SDL_Renderer* renderer);
     ~scenario();
 
-    void render(SDL_Renderer* renderer);
-    void update();
+    void render(SDL_Renderer* renderer, int screenWidth, int screenHeight) const;
+    void update(int screenWidth, int screenHeight, int mouseX, int mouseY, bool isRightMouseClick);
 };
 
 #endif //PREMVPMAPGAME_SCENARIO_H

@@ -41,4 +41,8 @@ add_executable(PreMVPMapGame main.cpp
         src/engine.cpp
         src/scenario.cpp
         src/texwrap.cpp
+        src/unitType.cpp
+        src/unit.cpp
+        include/hexGrid.h
+        src/hexGrid.cpp
 )

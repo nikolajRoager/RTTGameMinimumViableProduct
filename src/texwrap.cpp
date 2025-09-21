@@ -28,16 +28,16 @@ texwrap::texwrap(std::string path, SDL_Renderer* renderer) {
     width = surface->w;
     height = surface->h;
 }
-void texwrap::render(int x, int y, SDL_Renderer *renderer, SDL_Rect *clip, double scale) {
-    render(x,y,255,255,255,renderer,clip,scale);
+void texwrap::render(double x, double y, SDL_Renderer *renderer, SDL_Rect *clip, double scale,bool center) const {
+    render(x,y,255,255,255,renderer,clip,scale,center);
 }
 
-void texwrap::render(int x, int y, Uint8 r, Uint8 g, Uint8 b, SDL_Renderer *renderer, SDL_Rect *clip, double scale) {
+void texwrap::render(double x, double y, Uint8 r, Uint8 g, Uint8 b, SDL_Renderer *renderer, SDL_Rect *clip, double scale, bool center) const {
     //Set rendering space and render to screen
-    SDL_Rect renderQuad = { x, y, width, height};
+    SDL_Rect renderQuad = { static_cast<int>(x), static_cast<int>(y), width, height};
 
     //Set clip rendering dimensions
-    if( clip != NULL )
+    if( clip != nullptr )
     {
         renderQuad.w = clip->w;
         renderQuad.h = clip->h;
@@ -45,6 +45,11 @@ void texwrap::render(int x, int y, Uint8 r, Uint8 g, Uint8 b, SDL_Renderer *rend
 
     renderQuad.w *= scale;
     renderQuad.h *= scale;
+
+    if (center) {
+        renderQuad.x -= renderQuad.w/2;
+        renderQuad.y -= renderQuad.h/2;
+    }
 
     //Render to screen
     SDL_SetTextureColorMod(tex, r,g,b);

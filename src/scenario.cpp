@@ -7,43 +7,22 @@
 #include <fstream>
 #include <iostream>
 
-scenario::scenario(SDL_Renderer* renderer) : background("assets/background.png",renderer), hexSelectionOutline("assets/hexoutline.png",renderer) {
-    ///Width of the hexagons making up the game grid in pixels (can not be regular hexagons for rounding reasons)
-    hexGridWidth=19;
-    ///height of the hexagons making up the game grid in pixels (can not be regular hexagons for rounding reasons)
-    hexGridHeight=12;
+scenario::scenario(SDL_Renderer* renderer) : background("assets/background.png",renderer), hexSelectionOutline("assets/hexoutline.png",renderer), grid("assets/",renderer) {
 
 
-    //todo, replace with better scenario loading
-    std::ifstream TEMP_INPUT("assets/TEMP.txt");
+    //Will instantly be overwritten
+    mouseOverTile=0;
 
-    if (!TEMP_INPUT.is_open())
-        throw std::runtime_error("unable to open file assets/TEMPT.txt");
+    //TODO: load from disk
+    unitLibrary.clear();
+    unitLibrary.emplace_back(true,"assets/SAMTruck.png",renderer);
 
-    hexTiles.clear();
+    //TODO: load from disk, and allow spawning
+    unitsA.clear();
+    unitsA.emplace_back(unitLibrary[0],true,20,8);
 
-    for (int hexX = 0; hexX < hexGridWidth; hexX++) {
-        for (int hexY = 0; hexY < hexGridHeight; hexY++) {
-            int friendOrFoe;
-            TEMP_INPUT>>friendOrFoe;
-            hexTiles.emplace_back(static_cast<hexTile::hexStatus>(friendOrFoe));
-        }
-    }
-
-
-    TEMP_INPUT.close();
-
-
-
-    ///Width of the hexagonal grid this game is being played on, in hexagons
-    hexWidthPx=hexSelectionOutline.getWidth();
-    ///Height of the hexagonal grid this game is being played on, in hexagons
-    hexHeightPx=hexSelectionOutline.getHeight();
-
-    //Divisions are evil and should be kept out of the loop
-    hexHalfWidthPx=hexSelectionOutline.getWidth()/2;
-    hex34HeightPx=(hexSelectionOutline.getHeight()*3)/4;
-
+    scenarioWidthPx=grid.getScenarioWidth();
+    scenarioHeightPx=grid.getScenarioHeight();
 }
 
 scenario::~scenario() {
@@ -52,40 +31,37 @@ scenario::~scenario() {
 }
 
 
-void scenario::render(SDL_Renderer* renderer) {
+void scenario::render(SDL_Renderer* renderer, int screenWidth, int screenHeight) const {
 
-    background.render(0,0,renderer,nullptr,1);
+    double scale = std::min(static_cast<double>(screenWidth) / static_cast<double>(scenarioWidthPx),static_cast<double>(screenHeight) / static_cast<double>(scenarioHeightPx));
 
-    //For debugging, draw hexagonal grid on top of everything
-
-    //Yes divisions are slow, but a few each frame beats saving dozens of constant variables making the code uggly
-    for (int hexX = 0; hexX < hexGridWidth; hexX++) {
-        for (int hexY = 0; hexY < hexGridHeight; hexY++) {
-
-            const hexTile& tile = hexTiles[hexX+hexY*hexGridWidth];
-            int hexTopLeftX = hexX * hexWidthPx+(hexY%2) * hexHalfWidthPx;
-            int hexTopLeftY = hexY * hex34HeightPx;
+    background.render(0,0,renderer,nullptr,scale);
 
 
-            switch (tile.getStatus()) {
-                case hexTile::FRIEND:
-            hexSelectionOutline.render(hexTopLeftX,hexTopLeftY,0,255,0,renderer);
-                    break;
-                case hexTile::FOE:
-            hexSelectionOutline.render(hexTopLeftX,hexTopLeftY,255,0,0,renderer);
-                    break;
-                case hexTile::NEUTRAL:
-            hexSelectionOutline.render(hexTopLeftX,hexTopLeftY,125,125,125,renderer);
-                    break;
-                case hexTile::SEA:
-            hexSelectionOutline.render(hexTopLeftX,hexTopLeftY,0,125,255,renderer);
-                    break;
-            }
-        }
+    //Show the tile the mouse is over
+    grid.drawTile(renderer,mouseOverTile,scale);
+
+    std::set<int> tilesNearSelection=grid.getNeighbours(selectedTile);
+
+    grid.drawTiles(renderer,tilesNearSelection,scale,hexGrid::COLOR);
+
+    for (const unit& U: unitsA) {
+        //It is the scenario which is responsible for the grid, so we are responsible for getting the coordinates
+        int hexX = U.getHexX();
+        int hexY = U.getHexY();
+
+        const hexTile& unitTile = grid.getHexTile(hexX, hexY);
+
+        U.render(unitTile.getHexCenterX()*scale,unitTile.getHexCenterY()*scale,scale,renderer);
     }
-
 }
 
-void scenario::update() {
+void scenario::update(int screenWidth, int screenHeight,  int mouseX, int mouseY, bool isRightMouseClick) {
+    double scale = std::min(static_cast<double>(screenWidth) / static_cast<double>(scenarioWidthPx),static_cast<double>(screenHeight) / static_cast<double>(scenarioHeightPx));
 
+    mouseOverTile=grid.getHexFromLocation(mouseX,mouseY,scale);
+
+    if (isRightMouseClick) {
+        selectedTile = mouseOverTile;
+    }
 }

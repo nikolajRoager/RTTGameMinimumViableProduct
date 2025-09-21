@@ -17,11 +17,16 @@ public:
 private:
     hexStatus status;
 
+    double hexCenterX;
+    double hexCenterY;
+
 public:
-    explicit hexTile(hexStatus _status): status(_status) {}
+    hexTile(hexStatus _status, double _hexCenterX, double _hexCenterY): status(_status),hexCenterX(_hexCenterX),hexCenterY(_hexCenterY) {}
 
     [[nodiscard]] hexStatus getStatus() const { return status; }
 
+    [[nodiscard]] double getHexCenterX() const { return hexCenterX; }
+    [[nodiscard]] double getHexCenterY() const { return hexCenterY; }
 };
 
 #endif //PREMVPMAPGAME_HEXTILE_H

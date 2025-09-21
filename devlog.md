@@ -42,3 +42,36 @@ For now, I included the rest of Europe and the continental US, I am still not su
 
 I also now need to add zooming and panning to the map, but this is enough work for one day
 
+Day 3, Friday 19/9/2025 CE
+===========================
+Background
+----
+Yesterday I didn't have time to work on the project, we finally got the files we needed at work and I had something to work on
+
+Today on the other hand, I did have a little spare time, (after finishing my work way ahead of schedule), so at least I did something on this project.
+
+work
+----
+I have not coded today, I spent all the time drawing a really detailed map of the north atlantic region. It took many hours, but I am extremely satisfied with the direction of the art-style.
+
+Tomorrow, it is time to get scaling and maybe zooming and panning of the map to work. It must work on any size display.
+
+Day 4, Saturday 20/9/2025 CE
+========
+Background
+----------
+Weekend, I did work on another video, but I still had some time to work on this.
+
+It begins to dawn on me what a massive project this is, and how little time I have for it
+
+Work
+----
+I have done some work on selecting hexes, and I have begun working on adding units to the map.
+
+I still can't select them or move them around, and they are not animated, but some of the framework is there
+
+One Issue I have is that the hexes are too large, I think a reduction to 1/2 side is called for. This will be a lot of work, but I think it is necessary (the unit texture I made has to be thrown out), but better do it sooner rather than later
+
+In the meantime, I should also work on adding a "coastal" hex, which both allows ships and land-units
+
+Actually, come to think of it, terrain type and ownership should be a separate stat
