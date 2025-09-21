@@ -41,7 +41,7 @@ void scenario::render(SDL_Renderer* renderer, int screenWidth, int screenHeight)
     //Show the tile the mouse is over
     grid.drawTile(renderer,mouseOverTile,scale);
 
-    std::set<int> tilesNearSelection=grid.getNeighbours(selectedTile);
+    std::set<int> tilesNearSelection=grid.getNeighbours(selectedTile,4,unitsA,unitsB);
 
     grid.drawTiles(renderer,tilesNearSelection,scale,hexGrid::COLOR);
 

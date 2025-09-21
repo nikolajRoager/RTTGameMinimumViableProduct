@@ -4,6 +4,7 @@
 
 #include "hexGrid.h"
 
+#include <cmath>
 #include <fstream>
 #include <stdexcept>
 
@@ -95,7 +96,7 @@ int hexGrid::getHexFromLocation(double x, double y, double scale) const {
             hexCenterX *= scale;
             hexCenterY *= scale;
 
-            double thisDist = pow(hexCenterX-x,2)+pow(hexCenterY-y,2);
+            double thisDist = std::pow(hexCenterX-x,2)+pow(hexCenterY-y,2);
             if (thisDist < dist || dist<0) {
                 dist=thisDist;
                 foundTile=hexX+hexY*hexGridWidth;
@@ -105,14 +106,22 @@ int hexGrid::getHexFromLocation(double x, double y, double scale) const {
     return foundTile;
 }
 
-std::set<int> hexGrid::getNeighbours(int hexId,int steps) const {
+std::set<int> hexGrid::getNeighbours(int hexId,int steps,const std::vector<unit>& obstructionsA,const std::vector<unit>& obstructionsB) const {
     std::set<int> visited;
-    //Get the x and y hex coordinates
-    int hexX = hexId % hexGridWidth;
-    //Intentionally using Integer division
-    int hexY = hexId / hexGridWidth;
+    std::set<int> obstructed;
+    for (const auto& obs : obstructionsA) {
+        obstructed.insert(obs.getHexX()+obs.getHexY()*hexGridWidth);
+    }
+    for (const auto& obs : obstructionsB) {
+        obstructed.insert(obs.getHexX()+obs.getHexY()*hexGridWidth);
+    }
 
-    int depth;
+    //If the hex is out of bound, disregard it
+    if (hexId<0 || hexId>=hexTiles.size())
+        return visited;
+
+    const auto startingStatus = hexTiles[hexId].getStatus();
+
     //The queue of the current layer we are searching for neighbours of
     std::set<int> oldQueue;
 
@@ -121,8 +130,56 @@ std::set<int> hexGrid::getNeighbours(int hexId,int steps) const {
 
     oldQueue.insert(hexId);
 
+    for (int depth = 0; depth < steps+1/*Add 1, because step 0 is the starting hex*/; depth++) {
 
-    //swap buffers and reset old queue
+        for (int i : oldQueue) {
+            //All the checks whether to check this hex is done here,
+            if (i!=hexId)//Skip all checks for the initial hex
+                if (visited.contains(i) || startingStatus != hexTiles[i].getStatus() || obstructed.contains(i))
+                    continue;
+            visited.insert(i);
+
+
+            //Get the x and y hex coordinates
+            int hexX = i% hexGridWidth;
+            //Intentionally using Integer division
+            int hexY = i/ hexGridWidth;
+
+            if (depth<steps)
+            {
+                //There are up to six neighbours, lets add them to the new Queue if we haven't already visited them
+                //Neighbour in front
+                if (hexX+1<hexGridWidth) {
+                    newQueue.insert(i+1);
+                }
+                if (hexX>=1) {
+                    newQueue.insert(i-1);
+                }
+                if (hexY>=1) {
+                    newQueue.insert(i-hexGridWidth);
+                    if (hexY%2==0) {
+                        if (hexX+1<hexGridWidth) newQueue.insert(i+1-hexGridWidth);
+                    }
+                    else
+                        if (hexX>=1) newQueue.insert(i-1-hexGridWidth);
+                }
+                if (hexY+1<hexGridHeight) {
+                    newQueue.insert(i+hexGridWidth);
+                    if (hexY%2==0) {
+                        if (hexX+1<hexGridWidth) newQueue.insert(i+1+hexGridWidth);
+                    }
+                    else
+                        if (hexX>=1) newQueue.insert(i-1+hexGridWidth);
+                }
+            }
+        }
+        //swap buffers and reset new queue
+        newQueue.swap(oldQueue);
+        newQueue.clear();
+
+    }
+
+
     visited.insert(hexId);
     return visited;
     }

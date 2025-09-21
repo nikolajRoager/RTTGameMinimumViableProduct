@@ -9,6 +9,7 @@
 
 #include "hexTile.h"
 #include "texwrap.h"
+#include "unit.h"
 
 class hexGrid {
 private:
@@ -51,11 +52,13 @@ public:
     void drawTile(SDL_Renderer *renderer, int hexId, double scale, tileDisplayMode=STATUS, Uint8 r=255, Uint8 g=125, Uint8 b=125, Uint8 a=125) const;
 
 
-    void drawTiles(SDL_Renderer *renderer, const std::set<int> tiles , double scale, tileDisplayMode display_mode=STATUS, Uint8 r=255, Uint8 g=125, Uint8 b=125, Uint8 a=125) const {
-        for (int hexId: tiles) {
+    void drawTiles(SDL_Renderer *renderer, const std::set<int>& tilesToDraw , double scale, tileDisplayMode display_mode=STATUS, Uint8 r=255, Uint8 g=125, Uint8 b=125, Uint8 a=125) const {
+        for (int hexId: tilesToDraw) {
             drawTile(renderer,hexId,scale,display_mode,r,g,b,a);
         }
     }
+
+    void drawPath(SDL_Renderer *renderer,const std::vector<int>& pathToDraw, double scale);
 
 
     [[nodiscard]] int getHexFromLocation(double x, double y, double scale) const;
@@ -68,7 +71,8 @@ public:
     }
 
     //Get the ID's of all neighbour
-    [[nodiscard]] std::set<int> getNeighbours(int hexId,int steps) const;
+    [[nodiscard]] std::set<int> getNeighbours(int hexId,int steps,const std::vector<unit>& obstructionsA,const std::vector<unit>& obstructionsB) const;
+
 
 };
 
