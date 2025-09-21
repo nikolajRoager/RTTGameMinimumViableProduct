@@ -182,5 +182,17 @@ std::set<int> hexGrid::getNeighbours(int hexId,int steps,const std::vector<unit>
 
     visited.insert(hexId);
     return visited;
+}
+
+void hexGrid::drawPath(SDL_Renderer *renderer, const std::vector<int> &pathToDraw, double scale) const {
+    for (int i =0; i+1 < pathToDraw.size(); i++) {
+        double x0 = hexTiles[pathToDraw[i]].getHexCenterX()*scale;
+        double y0 = hexTiles[pathToDraw[i]].getHexCenterY()*scale;
+
+        double x1 = hexTiles[pathToDraw[i+1]].getHexCenterX()*scale;
+        double y1 = hexTiles[pathToDraw[i+1]].getHexCenterY()*scale;
+        SDL_SetRenderDrawColor(renderer,255,0,0,255);
+        SDL_RenderDrawLine(renderer, x0,y0,x1,y1);
     }
+}
 

@@ -58,7 +58,7 @@ public:
         }
     }
 
-    void drawPath(SDL_Renderer *renderer,const std::vector<int>& pathToDraw, double scale);
+    void drawPath(SDL_Renderer *renderer,const std::vector<int>& pathToDraw, double scale) const;
 
 
     [[nodiscard]] int getHexFromLocation(double x, double y, double scale) const;

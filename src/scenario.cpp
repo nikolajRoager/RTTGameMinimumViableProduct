@@ -41,14 +41,18 @@ void scenario::render(SDL_Renderer* renderer, int screenWidth, int screenHeight)
     //Show the tile the mouse is over
     grid.drawTile(renderer,mouseOverTile,scale);
 
-    std::set<int> tilesNearSelection=grid.getNeighbours(selectedTile,4,unitsA,unitsB);
-
+    const std::set<int> tilesNearSelection=grid.getNeighbours(selectedTile,4,unitsA,unitsB);
     grid.drawTiles(renderer,tilesNearSelection,scale,hexGrid::COLOR);
+
+    if (selectedTile!=-1) {
+        std::vector<int> TEMP_line {selectedTile,selectedTile+1,selectedTile+2};
+        grid.drawPath(renderer,TEMP_line,scale);
+    }
 
     for (const unit& U: unitsA) {
         //It is the scenario which is responsible for the grid, so we are responsible for getting the coordinates
-        int hexX = U.getHexX();
-        int hexY = U.getHexY();
+        const int hexX = U.getHexX();
+        const int hexY = U.getHexY();
 
         const hexTile& unitTile = grid.getHexTile(hexX, hexY);
 

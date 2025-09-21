@@ -17,6 +17,10 @@ For now, all assets loaded and settings will be hardcoded in the scenario, but I
 
 C++ + SDL Is much slower than C# + Monogame to work in for sure, since I have to think about memory management myself.
 
+todo
+----
+we will see
+
 Day 2, Wednesday 17/9/2025 CE
 =====================================
 background
@@ -40,7 +44,9 @@ One problem I have is that Greenland is much taller than it is wide, but my scre
 
 For now, I included the rest of Europe and the continental US, I am still not sure of the art style for the map though
 
-I also now need to add zooming and panning to the map, but this is enough work for one day
+todo
+-----
+I also now need to add zooming and panning to the map
 
 Day 3, Friday 19/9/2025 CE
 ===========================
@@ -54,6 +60,8 @@ work
 ----
 I have not coded today, I spent all the time drawing a really detailed map of the north atlantic region. It took many hours, but I am extremely satisfied with the direction of the art-style.
 
+todo
+-----
 Tomorrow, it is time to get scaling and maybe zooming and panning of the map to work. It must work on any size display.
 
 Day 4, Saturday 20/9/2025 CE
@@ -70,8 +78,34 @@ I have done some work on selecting hexes, and I have begun working on adding uni
 
 I still can't select them or move them around, and they are not animated, but some of the framework is there
 
+I decided to not do scaling and panning, so far the entire game fits on the screen, and I will keep it that way for now
+
+todo
+----
 One Issue I have is that the hexes are too large, I think a reduction to 1/2 side is called for. This will be a lot of work, but I think it is necessary (the unit texture I made has to be thrown out), but better do it sooner rather than later
 
-In the meantime, I should also work on adding a "coastal" hex, which both allows ships and land-units
+Day 5, Sunday 21/9/2025 CE
+==========================
+Background
+---------
+I had a lot of time to work today, I don't feel like I had a lot of progress though
 
-Actually, come to think of it, terrain type and ownership should be a separate stat
+Day 5, that is 1/20 of the way to 100, time really does fly and I doubt I will be able to finish this project
+
+I should aim for being done with the Mimimum viable product by day 20
+
+Work
+-----
+I re-scaled the hexagons to be half the size, I much prefer it this way. It took a lot of time since I am still manually hardcoding the individual hexagons
+
+I also refactored the code, now there is a hexGrid class which handles the grid, including rendering and pathfinding utilities ...
+
+... well ok, pathfinding was supposed to work today, but it does not.
+
+I can however find the neighbours of each hex, and find the hexes within a number of steps of each hex.
+
+todo
+----
+Next day I work (i.d.k. if it will be tomorrow) I need to get Dijkstra pathfinding to work.
+
+I also need some kind of arrow rendering, so that I can draw arrows from the selected units to wherever they can go.
