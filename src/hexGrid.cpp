@@ -64,20 +64,20 @@ void hexGrid::drawTile(SDL_Renderer *renderer, const int hexId, const double sca
     if (displayMode==STATUS)
         switch (tile.getStatus()) {
             case hexTile::FRIEND:
-                hexSelectionOutline.render(hexTopLeftX,hexTopLeftY,0,255,0,renderer,nullptr,scale);
+                hexSelectionOutline.render(hexTopLeftX,hexTopLeftY,0,255,0,renderer,scale);
                 break;
             case hexTile::FOE:
-                hexSelectionOutline.render(hexTopLeftX,hexTopLeftY,255,0,0,renderer,nullptr,scale);
+                hexSelectionOutline.render(hexTopLeftX,hexTopLeftY,255,0,0,renderer,scale);
                 break;
             case hexTile::NEUTRAL:
-                hexSelectionOutline.render(hexTopLeftX,hexTopLeftY,125,125,125,renderer,nullptr,scale);
+                hexSelectionOutline.render(hexTopLeftX,hexTopLeftY,125,125,125,renderer,scale);
                 break;
             case hexTile::SEA:
-                hexSelectionOutline.render(hexTopLeftX,hexTopLeftY,0,125,255,renderer,nullptr,scale);
+                hexSelectionOutline.render(hexTopLeftX,hexTopLeftY,0,125,255,renderer,scale);
                 break;
         }
     else if (displayMode==COLOR) {
-        hexSelectionOutline.render(hexTopLeftX,hexTopLeftY,r,g,b,a,renderer,nullptr,scale);
+        hexSelectionOutline.render(hexTopLeftX,hexTopLeftY,r,g,b,a,renderer,scale);
     }
 }
 

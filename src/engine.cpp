@@ -20,8 +20,7 @@ engine::engine() {
         throw std::runtime_error( "SDL_Init Error: " + std::string( SDL_GetError() ) );
     }
 
-    //Nearest interpolation, aka pixelation
-    SDL_SetHint( SDL_HINT_RENDER_SCALE_QUALITY, "0" );
+    SDL_SetHint( SDL_HINT_RENDER_SCALE_QUALITY, "1" );
 
 
     SDL_DisplayMode DM;
@@ -56,6 +55,12 @@ engine::engine() {
     //Only load scenario AFTER SDL
     theScenario = new scenario(renderer);
 
+    mouseXPos=0;
+    mouseYPos=0;
+    rightMouseDown=false;
+    prevRightMouseDown=false;
+    leftMouseDown=false;
+    prevLeftMouseDown=false;
 }
 
 engine::~engine() {
@@ -80,6 +85,7 @@ void engine::run() {
         prevRightMouseDown=rightMouseDown;
         prevLeftMouseDown=leftMouseDown;
         SDL_Event event;
+        //First handle events
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) {
                 quit = true;
@@ -115,13 +121,15 @@ void engine::run() {
                 }
             }
         }
+        //Milli seconds since program start is preferred time measurement for animations
+        unsigned int millis = SDL_GetTicks();
 
-        theScenario->update(windowWidthPx,windowHeightPx,mouseXPos,mouseYPos,(leftMouseDown && !prevLeftMouseDown),(rightMouseDown && !prevRightMouseDown));
+        theScenario->update(windowWidthPx,windowHeightPx,mouseXPos,mouseYPos,(leftMouseDown && !prevLeftMouseDown),(rightMouseDown && !prevRightMouseDown),millis);
 
         //Black background, shouldn't be seen but won't hurt
         SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0x00);
         SDL_RenderClear( renderer );
-        theScenario->render(renderer,windowWidthPx,windowHeightPx);
+        theScenario->render(renderer,windowWidthPx,windowHeightPx,millis);
         SDL_RenderPresent( renderer );
     }
 }

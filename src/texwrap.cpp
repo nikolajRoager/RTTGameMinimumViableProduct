@@ -28,29 +28,26 @@ texwrap::texwrap(std::string path, SDL_Renderer* renderer) {
     width = surface->w;
     height = surface->h;
 }
-void texwrap::render(double x, double y, SDL_Renderer *renderer, SDL_Rect *clip, double scale,bool center) const {
-    render(x,y,255,255,255,255,renderer,clip,scale,center);
+void texwrap::render(double x, double y, SDL_Renderer *renderer, double scale,bool center, unsigned int frames,unsigned int frame) const {
+    render(x,y,255,255,255,255,renderer,scale,center,frames,frame);
 }
 
-void texwrap::render(double x, double y, Uint8 r, Uint8 g, Uint8 b, SDL_Renderer *renderer, SDL_Rect *clip, double scale, bool center) const {
+void texwrap::render(double x, double y, Uint8 r, Uint8 g, Uint8 b, SDL_Renderer *renderer, double scale, bool center, unsigned int frames,unsigned  int frame) const {
 
-    render(x,y,r,g,b,255,renderer,clip,scale,center);
+    render(x,y,r,g,b,255,renderer,scale,center,frames,frame);
 }
 
 
-void texwrap::render(double x, double y, Uint8 r, Uint8 g, Uint8 b, Uint8 a, SDL_Renderer *renderer, SDL_Rect *clip, double scale, bool center) const {
+void texwrap::render(double x, double y, Uint8 r, Uint8 g, Uint8 b, Uint8 a, SDL_Renderer *renderer, double scale, bool center,unsigned int frames,unsigned int frame) const {
     //Set rendering space and render to screen
-    SDL_Rect renderQuad = { static_cast<int>(x), static_cast<int>(y), width, height};
+    int w = (width)/frames;
 
-    //Set clip rendering dimensions
-    if( clip != nullptr )
-    {
-        renderQuad.w = clip->w;
-        renderQuad.h = clip->h;
-    }
+    SDL_Rect renderQuad = { static_cast<int>(x), static_cast<int>(y), w, height};
 
     renderQuad.w *= scale;
     renderQuad.h *= scale;
+
+    SDL_Rect srect = { w*(int)frame, 0, w, height };
 
     if (center) {
         renderQuad.x -= renderQuad.w/2;
@@ -60,7 +57,7 @@ void texwrap::render(double x, double y, Uint8 r, Uint8 g, Uint8 b, Uint8 a, SDL
     //Render to screen
     SDL_SetTextureColorMod(tex, r,g,b);
     SDL_SetTextureAlphaMod(tex,a);
-    SDL_RenderCopy( renderer, tex, clip, &renderQuad );
+    SDL_RenderCopy( renderer, tex, &srect, &renderQuad );
 }
 
 

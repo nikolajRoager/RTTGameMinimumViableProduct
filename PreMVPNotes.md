@@ -35,14 +35,15 @@ Each unit should have a number of animations
 
 * idle (MAY just be an image)
 * Move left (can be mirrored)
-* Prepare attack (select)
+* Prepare attack (aka. select)
+* ready (idle after prepare)
 * un-prepare attack (deselect)
 * attack+recover
 * die
 
 In the finished game, some animations may spawn particles using the poisson distribution
 
-
+units are loaded from a folder structure like this
 
 Types of units in minimal viable product
 

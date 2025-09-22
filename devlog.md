@@ -126,10 +126,14 @@ Pathfinding was surprisingly easy to get working, it is not Dijkstra's algorithm
 
 I thought that would be a full day of work. What on Earth do I do now!?
 
-... I guess it is time to add more units, and more types of units, and actually add a movement planning and executition phase.
+Well, I decided to work on animations, now units have a distinct animation when selected and deselected, and I think that works really well.
 
+A lot of refactoring was needed to make the animations work, so I didn't have time to execute the movement phase, but some initial work was done.
 
 Todo
 ----
-You know, now might be time to make the first video report, let us do that today, or next day I have time to work.
+Actually adding in an execution phase to the movement is really called for.
 
+Actually, I need a movement phase for the other player as well, followed by
+
+You know, now might be time to make the first video report, let us do that next day I have time to work.

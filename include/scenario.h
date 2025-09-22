@@ -24,7 +24,7 @@ private:
     ///Units of the player side
     std::vector<unit> unitsFriend;
     ///Units of the other side
-    std::vector<unit> unitsFoes;
+    std::vector<unit> unitsFoe;
 
     int scenarioWidthPx;
     int scenarioHeightPx;
@@ -39,12 +39,12 @@ private:
     hexGrid grid;
 
     enum phase {
-        MOVEMENT_PLANNING,
+        MOVEMENT_PLANNING_FRIEND,
         MOVEMENT_EXECUTION,
     };
 
     ///What phase of the game are we going through
-    phase currentPhase=MOVEMENT_PLANNING;
+    phase currentPhase=MOVEMENT_PLANNING_FRIEND;
 
 
     ///A plan to move a particular unit somewhere else
@@ -66,8 +66,8 @@ public:
     explicit scenario(SDL_Renderer* renderer);
     ~scenario();
 
-    void render(SDL_Renderer* renderer, int screenWidth, int screenHeight) const;
-    void update(int screenWidth, int screenHeight, int mouseX, int mouseY, bool isLeftMouseClick, bool isRightMouseClick);
+    void render(SDL_Renderer* renderer, int screenWidth, int screenHeight, uint32_t millis) const;
+    void update(int screenWidth, int screenHeight, int mouseX, int mouseY, bool isLeftMouseClick, bool isRightMouseClick,uint32_t millis);
 };
 
 #endif //PREMVPMAPGAME_SCENARIO_H
