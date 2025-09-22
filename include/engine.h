@@ -28,8 +28,11 @@ private:
     int mouseXPos;
     int mouseYPos;
 
-    bool mouseDown;
-    bool prevMouseDown;
+    bool rightMouseDown;
+    bool prevRightMouseDown;
+
+    bool leftMouseDown;
+    bool prevLeftMouseDown;
 
 
     public:

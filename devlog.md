@@ -109,3 +109,27 @@ todo
 Next day I work (i.d.k. if it will be tomorrow) I need to get Dijkstra pathfinding to work.
 
 I also need some kind of arrow rendering, so that I can draw arrows from the selected units to wherever they can go.
+
+On a second thought, arrow rendering might be too much for a minimum viable product, lets save that for later
+
+Day 6, Monday 22/09/2025 CE
+=====
+background
+----------
+Today I successfully finished my work surprisingly early, now I need to wait for a meeting tomorrow before I get a new task.
+
+Which means ... I have time to work on THIS project
+
+Work
+-----
+Pathfinding was surprisingly easy to get working, it is not Dijkstra's algorithm, but rather a custom algorithm for pathfinding on a hexagonal grid.
+
+I thought that would be a full day of work. What on Earth do I do now!?
+
+... I guess it is time to add more units, and more types of units, and actually add a movement planning and executition phase.
+
+
+Todo
+----
+You know, now might be time to make the first video report, let us do that today, or next day I have time to work.
+

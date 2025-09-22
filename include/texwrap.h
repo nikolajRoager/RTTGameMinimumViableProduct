@@ -25,6 +25,8 @@ public:
 
     void render(double x, double y, Uint8 r, Uint8 g, Uint8 b, SDL_Renderer* renderer, SDL_Rect *clip = nullptr, double scale=1.0, bool center=false) const;
 
+    void render(double x, double y, Uint8 r, Uint8 g, Uint8 b, Uint8 a, SDL_Renderer* renderer, SDL_Rect *clip = nullptr, double scale=1.0, bool center=false) const;
+
     ///Get width of image in pixels
     [[nodiscard]] int getWidth() const {return width;}
     ///Get height of image in pixels

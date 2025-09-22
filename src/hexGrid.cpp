@@ -6,6 +6,7 @@
 
 #include <cmath>
 #include <fstream>
+#include <map>
 #include <stdexcept>
 
 hexGrid::hexGrid(const std::string &path, SDL_Renderer* renderer):hexSelectionOutline("assets/hexoutline.png",renderer) {
@@ -76,7 +77,7 @@ void hexGrid::drawTile(SDL_Renderer *renderer, const int hexId, const double sca
                 break;
         }
     else if (displayMode==COLOR) {
-        hexSelectionOutline.render(hexTopLeftX,hexTopLeftY,r,g,b,renderer,nullptr,scale);
+        hexSelectionOutline.render(hexTopLeftX,hexTopLeftY,r,g,b,a,renderer,nullptr,scale);
     }
 }
 
@@ -131,10 +132,12 @@ std::set<int> hexGrid::getNeighbours(int hexId,int steps,const std::vector<unit>
     oldQueue.insert(hexId);
 
     for (int depth = 0; depth < steps+1/*Add 1, because step 0 is the starting hex*/; depth++) {
+        if (oldQueue.empty())
+            break;
 
         for (int i : oldQueue) {
             //All the checks whether to check this hex is done here,
-            if (i!=hexId)//Skip all checks for the initial hex
+            if (i!=hexId)//Skip all checks for the initial hex (there is likely a unit there, and that is ok, I bet it was they who asked for the pathfinding to start)
                 if (visited.contains(i) || startingStatus != hexTiles[i].getStatus() || obstructed.contains(i))
                     continue;
             visited.insert(i);
@@ -176,13 +179,117 @@ std::set<int> hexGrid::getNeighbours(int hexId,int steps,const std::vector<unit>
         //swap buffers and reset new queue
         newQueue.swap(oldQueue);
         newQueue.clear();
-
     }
 
 
     visited.insert(hexId);
     return visited;
 }
+
+std::vector<int> hexGrid::findPath(int startId, int stopId, const std::vector<unit> &obstructionsA, const std::vector<unit> &obstructionsB, bool ignoreObstructedGoal) const {
+    //The hexagon pathfinding algorithm is largely based on the find-neighbours algorithm
+    //We are going to be searching in layers of hexes
+
+
+    std::map<int,int> visitedBacktrack;
+    std::set<int> obstructed;
+    for (const auto& obs : obstructionsA) {
+        obstructed.insert(obs.getHexX()+obs.getHexY()*hexGridWidth);
+    }
+    for (const auto& obs : obstructionsB) {
+        obstructed.insert(obs.getHexX()+obs.getHexY()*hexGridWidth);
+    }
+
+    //If the start or stop hex is out of bound, disregard it
+    if (startId<0 || startId>=hexTiles.size())
+        return {};
+    if (stopId<0 || stopId>=hexTiles.size())
+        return {};
+
+    const auto startingStatus = hexTiles[startId].getStatus();
+
+    //The queue of the current layer we are searching for neighbours of, and where we came from
+    std::map<int,int> oldQueue;
+
+    //The queue of the next layer, which we will search shortly, and where we came from
+    std::map<int,int> newQueue;
+
+    //We will be searching backwards, to make back-tracking give us the correct path
+    oldQueue.emplace(stopId,stopId);
+
+    while (!oldQueue.empty()) {
+
+        for (auto i_from : oldQueue) {
+            int i = i_from.first;
+            int from = i_from.second;
+
+            //All the checks whether to check this hex is done here,
+            if (i!=startId)//Skip all checks for the initial hex (there is likely a unit there, and that is ok)
+            {
+
+                if (i!=stopId) {
+                    if (!ignoreObstructedGoal)
+                        if (visitedBacktrack.contains(i) || startingStatus != hexTiles[i].getStatus() || obstructed.contains(i))
+                            continue;
+                }
+                else
+                    if (visitedBacktrack.contains(i) || startingStatus != hexTiles[i].getStatus() || obstructed.contains(i))
+                        continue;
+            }
+            else {
+                //Oh, we found the target, start backtracking
+                std::vector<int> out = {startId};
+                for (int j = from; j!=stopId; j=visitedBacktrack[j])
+                    out.push_back(j);
+                out.push_back(stopId);
+                return out;
+            }
+            visitedBacktrack.emplace(i,from);
+
+
+            //Get the x and y hex coordinates
+            int hexX = i% hexGridWidth;
+            //Intentionally using Integer division
+            int hexY = i/ hexGridWidth;
+
+            {
+                //There are up to six neighbours, lets add them to the new Queue if we haven't already visited them
+                //Neighbour in front
+                if (hexX+1<hexGridWidth) {
+                    newQueue.emplace(i+1,i);
+                }
+                if (hexX>=1) {
+                    newQueue.emplace(i-1,i);
+                }
+                if (hexY>=1) {
+                    newQueue.emplace(i-hexGridWidth,i);
+                    if (hexY%2==0) {
+                        if (hexX+1<hexGridWidth) newQueue.emplace(i+1-hexGridWidth,i);
+                    }
+                    else
+                        if (hexX>=1) newQueue.emplace(i-1-hexGridWidth,i);
+                }
+                if (hexY+1<hexGridHeight) {
+                    newQueue.emplace(i+hexGridWidth,i);
+                    if (hexY%2==0) {
+                        if (hexX+1<hexGridWidth) newQueue.emplace(i+1+hexGridWidth,i);
+                    }
+                    else
+                        if (hexX>=1) newQueue.emplace(i-1+hexGridWidth,i);
+                }
+            }
+
+
+        }
+        //swap buffers and reset new queue
+        newQueue.swap(oldQueue);
+        newQueue.clear();
+    }
+
+    //If we got here, we FAILED to find a valid path
+    return {};
+}
+
 
 void hexGrid::drawPath(SDL_Renderer *renderer, const std::vector<int> &pathToDraw, double scale) const {
     for (int i =0; i+1 < pathToDraw.size(); i++) {
@@ -195,4 +302,3 @@ void hexGrid::drawPath(SDL_Renderer *renderer, const std::vector<int> &pathToDra
         SDL_RenderDrawLine(renderer, x0,y0,x1,y1);
     }
 }
-

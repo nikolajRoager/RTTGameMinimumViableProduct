@@ -5,7 +5,6 @@
 #include "engine.h"
 
 #include <iostream>
-#include <ostream>
 #include <stdexcept>
 #include <string>
 #include <SDL2/SDL.h>
@@ -57,8 +56,6 @@ engine::engine() {
     //Only load scenario AFTER SDL
     theScenario = new scenario(renderer);
 
-    mouseDown=false;
-    prevMouseDown=false;
 }
 
 engine::~engine() {
@@ -74,9 +71,14 @@ engine::~engine() {
 
 void engine::run() {
     bool quit = false;
+    rightMouseDown=false;
+    prevRightMouseDown=false;
+    leftMouseDown=false;
+    prevLeftMouseDown=false;
 
     while (!quit) {
-        prevMouseDown=mouseDown;
+        prevRightMouseDown=rightMouseDown;
+        prevLeftMouseDown=leftMouseDown;
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) {
@@ -97,14 +99,24 @@ void engine::run() {
                 SDL_GetMouseState( &mouseXPos, &mouseYPos );
             }
             if (event.type == SDL_MOUSEBUTTONDOWN) {
-                mouseDown=true;
+                if (event.button.button == SDL_BUTTON_LEFT) {
+                    leftMouseDown=true;
+                }
+                else if (event.button.button == SDL_BUTTON_RIGHT) {
+                    rightMouseDown=true;
+                }
             }
             if (event.type == SDL_MOUSEBUTTONUP) {
-                mouseDown=false;
+                if (event.button.button == SDL_BUTTON_LEFT) {
+                    leftMouseDown=false;
+                }
+                else if (event.button.button == SDL_BUTTON_RIGHT) {
+                    rightMouseDown=false;
+                }
             }
         }
 
-        theScenario->update(windowWidthPx,windowHeightPx,mouseXPos,mouseYPos,(mouseDown && !prevMouseDown));
+        theScenario->update(windowWidthPx,windowHeightPx,mouseXPos,mouseYPos,(leftMouseDown && !prevLeftMouseDown),(rightMouseDown && !prevRightMouseDown));
 
         //Black background, shouldn't be seen but won't hurt
         SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0x00);
