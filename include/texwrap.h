@@ -8,6 +8,7 @@
 #include <SDL2/SDL_render.h>
 
 
+
 ///Texture wrapper class
 class texwrap {
 private:
@@ -18,14 +19,14 @@ private:
     int height;
 
 public:
-    explicit texwrap(std::string path, SDL_Renderer* renderer);
+    texwrap(std::string path, SDL_Renderer* renderer);
     ~texwrap();
 
-    void render(double x, double y, SDL_Renderer* renderer,  double scale=1.0, bool center=false, unsigned int frames=1, unsigned int frame=0) const;
+    void render(double x, double y, SDL_Renderer* renderer,  double scale=1.0, bool center=false, bool flip=false, unsigned int frames=1, unsigned int frame=0) const;
 
-    void render(double x, double y, Uint8 r, Uint8 g, Uint8 b, SDL_Renderer* renderer, double scale=1.0, bool center=false, unsigned int frames=1, unsigned int frame=0) const;
+    void render(double x, double y, Uint8 r, Uint8 g, Uint8 b, SDL_Renderer* renderer, double scale=1.0, bool center=false, bool flip=false, unsigned int frames=1, unsigned int frame=0) const;
 
-    void render(double x, double y, Uint8 r, Uint8 g, Uint8 b, Uint8 a, SDL_Renderer* renderer, double scale=1.0, bool center=false, unsigned int frames=1, unsigned int frame=0) const;
+    void render(double x, double y, Uint8 r, Uint8 g, Uint8 b, Uint8 a, SDL_Renderer* renderer, double scale=1.0, bool center=false, bool flip=false, unsigned int frames=1, unsigned int frame=0) const;
 
     ///Get width of image in pixels
     [[nodiscard]] int getWidth() const {return width;}

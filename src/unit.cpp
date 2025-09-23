@@ -5,8 +5,8 @@
 #include "unit.h"
 
 
-void unit::render(double x, double y, double scale,uint32_t millis, SDL_Renderer *renderer) const {
-    myType.render(x, y, scale,millis-animationStart, renderer,myPhase);
+void unit::render(double scale,uint32_t millis, SDL_Renderer *renderer) const {
+    myType.render(x, y, scale,millis-animationStart, renderer,myPhase,flip);
 }
 
 void unit::updateAnimation(uint32_t millis) {
@@ -31,4 +31,14 @@ void unit::updateAnimation(uint32_t millis) {
         myPhase=unitType::IDLE;
         animationStart=millis;
     }
+}
+
+unit::unit(const unitType& type, bool _side, int _hexX, int _hexY):
+myType(type), myPhase(unitType::IDLE), side(_side), hexX(_hexX), hexY(_hexY), readyAttack(false)
+{
+    //The scenario is responsible for updating our location based on our hexagon coordinates
+    x=0;
+    y=0;
+    //pseudo Random starting flip
+    flip = hexX%2==hexY%2;
 }

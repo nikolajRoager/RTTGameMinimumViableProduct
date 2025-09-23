@@ -47,27 +47,17 @@ private:
     phase currentPhase=MOVEMENT_PLANNING_FRIEND;
 
 
-    ///A plan to move a particular unit somewhere else
-    struct movementPlan {
-        ///What unit will do the movement
-        int unitId;
-        ///What tiles will we move through
-        std::vector<int> tiles;
-        ///Where will we end up
-        int destinationTile;
-    };
-
-    ///The queued up movements for the good guys
-    std::vector<movementPlan> FriendMovementPlans;
+    ///The queued up movements for the good guys, indexed by unit id,
+    std::map<int,std::vector<int> > friendMovementPlans;
     ///Queued up movements for the bad guys
-    std::vector<movementPlan> FoeMovementPlans;
+    std::map<int,std::vector<int> > foeMovementPlans;
 
 public:
     explicit scenario(SDL_Renderer* renderer);
     ~scenario();
 
     void render(SDL_Renderer* renderer, int screenWidth, int screenHeight, uint32_t millis) const;
-    void update(int screenWidth, int screenHeight, int mouseX, int mouseY, bool isLeftMouseClick, bool isRightMouseClick,uint32_t millis);
+    void update(int screenWidth, int screenHeight, int mouseX, int mouseY, bool isLeftMouseClick, bool isRightMouseClick, bool executeClick, uint32_t millis);
 };
 
 #endif //PREMVPMAPGAME_SCENARIO_H

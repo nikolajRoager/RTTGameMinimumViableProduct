@@ -63,11 +63,11 @@ public:
 
     [[nodiscard]] int getHexFromLocation(double x, double y, double scale) const;
 
-    [[nodiscard]] const hexTile& getHexTile(int hexX, int hexY) const {
+    [[nodiscard]] const hexTile& getHexTile(const int hexX, const int hexY) const {
         return hexTiles[hexY*hexGridWidth+hexX];
     }
 
-    [[nodiscard]] int getHexId(int hexX, int hexY) const {
+    [[nodiscard]] int getHexId(const int hexX, const int hexY) const {
         return hexY*hexGridWidth+hexX;
     }
 

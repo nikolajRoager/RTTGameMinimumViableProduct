@@ -6,6 +6,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <ranges>
 
 scenario::scenario(SDL_Renderer* renderer) : background("assets/background.png",renderer), hexSelectionOutline("assets/hexoutline.png",renderer), grid("assets/",renderer) {
 
@@ -55,21 +56,70 @@ void scenario::render(SDL_Renderer* renderer, int screenWidth, int screenHeight,
             grid.drawPath(renderer,line,scale);
         }
 
+        for (const auto &val: friendMovementPlans | std::views::values) {
+            grid.drawPath(renderer,val,scale);
+        }
+
 
         for (const unit& U: unitsFriend) {
-            //It is the scenario which is responsible for the grid, so we are responsible for getting the coordinates
-            const int hexX = U.getHexX();
-            const int hexY = U.getHexY();
+            U.render(scale,millis,renderer);
+        }
+    }
+    else if (currentPhase==MOVEMENT_EXECUTION) {
 
-            const hexTile& unitTile = grid.getHexTile(hexX, hexY);
+        for (int i = 0; i < unitsFriend.size(); i++) {
+            const unit& U = unitsFriend[i];
+            U.render(scale,millis,renderer);
+         /*   const unit& U = unitsFriend[i];
+            if (U.getAnimationPhase()!=unitType::MOVE || !friendMovementPlans.contains(i)) {
+                //It is the scenario which is responsible for the grid, so we are responsible for getting the coordinates
+                const int hexX = U.getHexX();
+                const int hexY = U.getHexY();
+                const hexTile& unitTile = grid.getHexTile(hexX, hexY);
 
-            U.render(unitTile.getHexCenterX()*scale,unitTile.getHexCenterY()*scale,scale,millis,renderer);
+                U.render(unitTile.getHexCenterX()*scale,unitTile.getHexCenterY()*scale,scale,millis,renderer);
+            }
+            else {
+                double hexPerMs = 1.0/1000;
+                uint32_t millisSinceMovementStart = U.timeSinceAnimationStart(millis);
+                double progress = millisSinceMovementStart *hexPerMs;
+                //We already checked that the path exists for this thing
+                const auto& path = friendMovementPlans.at(i);
+
+                //Get the hex just before, and just after the current location (id in the path)
+                int hexBefore = std::min(static_cast<int>(progress),static_cast<int>(path.size())-1);
+                double fac = progress-hexBefore;
+
+                int hexBeforeId;
+                int hexAfterId;
+                //Huh, I guess the path is empty, fine just use the current unit location
+                if (hexBefore ==-1) {
+                    hexBeforeId=grid.getHexId( U.getHexX(),U.getHexY());
+                    hexAfterId=grid.getHexId( U.getHexX(),U.getHexY());
+                }
+                else {
+                    hexBeforeId=path[hexBefore];
+                    if (hexBefore+1<path.size()) {
+                        hexAfterId=path[hexBefore+1];
+                    }
+                    else
+                        hexAfterId=hexBeforeId;
+                }
+
+                const hexTile& hexBeforeTile = grid.getHexTile(hexBeforeId);
+                const hexTile& hexAfterTile = grid.getHexTile(hexAfterId);
+
+                U.render(hexBeforeTile.getHexCenterX()*scale*(1-fac)+hexAfterTile.getHexCenterX()*scale*fac,hexBeforeTile.getHexCenterY()*scale*(1-fac)+hexAfterTile.getHexCenterY()*scale*fac,scale,millis,renderer);
+
+
+            }
+            */
         }
     }
 }
 
-void scenario::update(int screenWidth, int screenHeight,  int mouseX, int mouseY, bool isLeftMouseClick, bool isRightMouseClick,uint32_t millis) {
-    double scale = std::min(static_cast<double>(screenWidth) / static_cast<double>(scenarioWidthPx),static_cast<double>(screenHeight) / static_cast<double>(scenarioHeightPx));
+void scenario::update(int screenWidth, int screenHeight,  int mouseX, int mouseY, bool isLeftMouseClick, bool isRightMouseClick, bool executeClick,uint32_t millis) {
+    const double scale = std::min(static_cast<double>(screenWidth) / static_cast<double>(scenarioWidthPx),static_cast<double>(screenHeight) / static_cast<double>(scenarioHeightPx));
 
 
     mouseOverTile=grid.getHexFromLocation(mouseX,mouseY,scale);
@@ -79,6 +129,7 @@ void scenario::update(int screenWidth, int screenHeight,  int mouseX, int mouseY
         //Right click to select units
         if (isRightMouseClick) {
             selectedTile=-1;
+            //Deselect selected unit
             if (selectedUnit!=-1)
                 unitsFriend[selectedUnit].unreadyAttack();
             selectedUnit=-1;
@@ -94,14 +145,106 @@ void scenario::update(int screenWidth, int screenHeight,  int mouseX, int mouseY
 
         //Left click to queue movement
         if (isLeftMouseClick) {
-            selectedTile=-1;
             if (selectedUnit != -1) {
                 unitsFriend[selectedUnit].unreadyAttack();
-                selectedTile=-1;
+
+                //I am pretty sure this has already been set
+                if (selectedTile == -1) {
+                    selectedUnit = grid.getHexId(unitsFriend[selectedUnit].getHexX(),unitsFriend[selectedUnit].getHexY());
+                }
+
+                if (friendMovementPlans.contains(selectedUnit))
+                    friendMovementPlans.at(selectedUnit)=grid.findPath(selectedTile,mouseOverTile,unitsFriend,unitsFoe);
+                else
+                    friendMovementPlans.insert(std::make_pair(selectedUnit,grid.findPath(selectedTile,mouseOverTile,unitsFriend,unitsFoe) ));
+
                 selectedUnit=-1;
             }
+            selectedTile=-1;
 
         }
+
+
+        //Update animation of friendly and todo hostile units
+        for (auto & U : unitsFriend) {
+            //It is the scenario which is responsible for the grid, so we are responsible for getting the coordinates
+            const int hexX = U.getHexX();
+            const int hexY = U.getHexY();
+
+            const hexTile& unitTile = grid.getHexTile(hexX, hexY);
+
+            U.setX(unitTile.getHexCenterX()*scale);
+            U.setY(unitTile.getHexCenterY()*scale);
+
+        }
+
+
+        if (executeClick) {
+            currentPhase=MOVEMENT_EXECUTION;
+        }
+    }
+    else if (currentPhase == MOVEMENT_EXECUTION) {
+        //Update animation of units, friends as well as todo foes
+        for (int i = 0; i < unitsFriend.size(); i++) {
+            auto& U = unitsFriend[i];
+            U.unreadyAttack();
+
+
+            {
+                if (U.getAnimationPhase()!=unitType::MOVE || !friendMovementPlans.contains(i)) {
+                    //It is the scenario which is responsible for the grid, so we are responsible for getting the coordinates
+                    const int hexX = U.getHexX();
+                    const int hexY = U.getHexY();
+                    const hexTile& unitTile = grid.getHexTile(hexX, hexY);
+
+                    U.setX(unitTile.getHexCenterX()*scale);
+                    U.setY(unitTile.getHexCenterY()*scale);
+
+                    if (friendMovementPlans.contains(i))
+                        U.startMovement(millis);
+                }
+                else {
+                    double hexPerMs = 1.0/1000;
+                    uint32_t millisSinceMovementStart = U.timeSinceAnimationStart(millis);
+                    double progress = millisSinceMovementStart *hexPerMs;
+                    //We already checked that the path exists for this thing
+                    const auto& path = friendMovementPlans.at(i);
+
+                    //Get the hex just before, and just after the current location (id in the path)
+                    int hexBefore = std::min(static_cast<int>(progress),static_cast<int>(path.size())-1);
+                    double fac = progress-hexBefore;
+
+                    int hexBeforeId;
+                    int hexAfterId;
+                    //Huh, I guess the path is empty, fine just use the current unit location
+                    if (hexBefore ==-1) {
+                        hexBeforeId=grid.getHexId( U.getHexX(),U.getHexY());
+                        hexAfterId=grid.getHexId( U.getHexX(),U.getHexY());
+                    }
+                    else {
+                        hexBeforeId=path[hexBefore];
+                        if (hexBefore+1<path.size()) {
+                            hexAfterId=path[hexBefore+1];
+                        }
+                        else
+                            hexAfterId=hexBeforeId;
+                    }
+
+                    const hexTile& hexBeforeTile = grid.getHexTile(hexBeforeId);
+                    const hexTile& hexAfterTile = grid.getHexTile(hexAfterId);
+
+                    double xbefore=hexBeforeTile.getHexCenterX()*scale;
+                    double xafter=hexAfterTile.getHexCenterX()*scale;
+                    U.setX(xbefore*(1-fac)+xafter*fac);
+                    U.setY(hexBeforeTile.getHexCenterY()*scale*(1-fac)+hexAfterTile.getHexCenterY()*scale*fac);
+                    if (hexAfterId!=hexBeforeId)
+                        U.setFlip(xbefore<xafter);
+                }
+            }
+        }
+        for (auto& unit : unitsFoe) unit.unreadyAttack();
+
+
     }
 
     for (unit& U: unitsFriend) {

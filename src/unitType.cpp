@@ -7,30 +7,30 @@
 #include <fstream>
 #include <iostream>
 
-void unitType::render(double x, double y, double scale,uint32_t millis,SDL_Renderer *renderer, animationPhase phase) const {
+void unitType::render(double x, double y, double scale,uint32_t millis,SDL_Renderer *renderer, animationPhase phase,bool flip) const {
 
-    uint32_t MSPF = getMsPerFrame();
-    uint32_t frame = ((millis / MSPF));
+    const uint32_t MSPF = getMsPerFrame();
+    const uint32_t frame = ((millis / MSPF));
     switch (phase) {
         case unitType::IDLE:
             //Looping idle animation
-            idle.render(x,y,renderer,scale,true,idle_frames,frame%idle_frames);
+            idle.render(x,y,renderer,scale,true,flip,idle_frames,frame%idle_frames);
             break;
         case unitType::MOVE:
             //Looping move animation
-            move.render(x,y,renderer,scale,true,move_frames,frame%move_frames);
+            move.render(x,y,renderer,scale,true,flip,move_frames,frame%move_frames);
             break;
         case unitType::PREPARE:
             //Shall freeze on the last frame
-            prepare.render(x,y,renderer,scale,true,prepare_frames,std::min(frame,prepare_frames-1));
+            prepare.render(x,y,renderer,scale,true,flip,prepare_frames,std::min(frame,prepare_frames-1));
             break;
         case unitType::READY:
             //Looping ready animation
-            ready.render(x,y,renderer,scale,true,ready_frames,frame%ready_frames);
+            ready.render(x,y,renderer,scale,true,flip,ready_frames,frame%ready_frames);
             break;
         case unitType::UNPREPARE:
             //Shall freeze on the last frame
-            unprepare.render(x,y,renderer,scale,true,unprepare_frames,std::min(frame,unprepare_frames-1));
+            unprepare.render(x,y,renderer,scale,true,flip,unprepare_frames,std::min(frame,unprepare_frames-1));
             break;
     }
 
@@ -54,7 +54,7 @@ bool unitType::isAnimationFinished(uint32_t millis, animationPhase phase) const 
     }
 }
 
-unitType::unitType(bool landUnit, fs::path unitPath, SDL_Renderer *renderer): landUnit(landUnit), texture(unitPath/"idle.png", renderer), idle(unitPath/"idle.png",renderer), move(unitPath/"move.png",renderer), prepare(unitPath/"prepare.png",renderer),ready(unitPath/"ready.png",renderer), unprepare(unitPath/"unprepare.png",renderer) {
+unitType::unitType(bool landUnit, const fs::path& unitPath, SDL_Renderer *renderer): landUnit(landUnit), texture((unitPath/"idle.png").string(), renderer), idle((unitPath/"idle.png").string(),renderer), move((unitPath/"move.png").string(),renderer), prepare((unitPath/"prepare.png").string(),renderer),ready((unitPath/"ready.png").string(),renderer), unprepare((unitPath/"unprepare.png").string(),renderer) {
     std::ifstream animationStats(unitPath/"animationstats.txt");
     std::string line;
 

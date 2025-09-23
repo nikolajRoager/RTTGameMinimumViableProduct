@@ -12,6 +12,7 @@ texwrap::~texwrap() {
         SDL_DestroyTexture(tex);
 }
 
+
 texwrap::texwrap(std::string path, SDL_Renderer* renderer) {
     SDL_Surface* surface = IMG_Load(path.c_str());
     if (surface == nullptr) {
@@ -28,17 +29,17 @@ texwrap::texwrap(std::string path, SDL_Renderer* renderer) {
     width = surface->w;
     height = surface->h;
 }
-void texwrap::render(double x, double y, SDL_Renderer *renderer, double scale,bool center, unsigned int frames,unsigned int frame) const {
-    render(x,y,255,255,255,255,renderer,scale,center,frames,frame);
+void texwrap::render(double x, double y, SDL_Renderer *renderer, double scale,bool center,bool flip, unsigned int frames,unsigned int frame) const {
+    render(x,y,255,255,255,255,renderer,scale,center,flip,frames,frame);
 }
 
-void texwrap::render(double x, double y, Uint8 r, Uint8 g, Uint8 b, SDL_Renderer *renderer, double scale, bool center, unsigned int frames,unsigned  int frame) const {
+void texwrap::render(double x, double y, Uint8 r, Uint8 g, Uint8 b, SDL_Renderer *renderer, double scale, bool center,bool flip, unsigned int frames,unsigned  int frame) const {
 
-    render(x,y,r,g,b,255,renderer,scale,center,frames,frame);
+    render(x,y,r,g,b,255,renderer,scale,center,flip,frames,frame);
 }
 
 
-void texwrap::render(double x, double y, Uint8 r, Uint8 g, Uint8 b, Uint8 a, SDL_Renderer *renderer, double scale, bool center,unsigned int frames,unsigned int frame) const {
+void texwrap::render(double x, double y, Uint8 r, Uint8 g, Uint8 b, Uint8 a, SDL_Renderer *renderer, double scale, bool center,bool flip,unsigned int frames,unsigned int frame) const {
     //Set rendering space and render to screen
     int w = (width)/frames;
 
@@ -57,7 +58,8 @@ void texwrap::render(double x, double y, Uint8 r, Uint8 g, Uint8 b, Uint8 a, SDL
     //Render to screen
     SDL_SetTextureColorMod(tex, r,g,b);
     SDL_SetTextureAlphaMod(tex,a);
-    SDL_RenderCopy( renderer, tex, &srect, &renderQuad );
+    SDL_Point centerPoint = {0, 0};
+    SDL_RenderCopyEx( renderer, tex, &srect, &renderQuad ,0,&centerPoint ,flip ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE);
 }
 
 

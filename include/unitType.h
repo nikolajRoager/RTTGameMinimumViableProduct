@@ -37,13 +37,13 @@ private:
     unsigned int unprepare_frames;
 
 public:
-    unitType(bool landUnit, fs::path unitPath, SDL_Renderer* renderer);
+    unitType(bool landUnit, const fs::path& unitPath, SDL_Renderer* renderer);
 
     [[nodiscard]] bool isLandUnit() const { return landUnit; }
 
     [[nodiscard]] unsigned int getMsPerFrame() const {return 100;}
 
-    void render(double x, double y,double scale,uint32_t millis, SDL_Renderer* renderer,animationPhase phase) const;
+    void render(double x, double y,double scale,uint32_t millis, SDL_Renderer* renderer,animationPhase phase, bool flip) const;
 
     [[nodiscard]] bool isAnimationFinished(uint32_t millis,animationPhase phase) const;
 };

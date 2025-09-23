@@ -34,6 +34,11 @@ private:
     bool leftMouseDown;
     bool prevLeftMouseDown;
 
+    bool executeDown;
+    bool prevExecuteDown;
+
+    SDL_KeyCode executekey = SDLK_RETURN;
+
 
     public:
     engine();

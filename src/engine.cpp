@@ -61,6 +61,8 @@ engine::engine() {
     prevRightMouseDown=false;
     leftMouseDown=false;
     prevLeftMouseDown=false;
+    executeDown=false;
+    prevExecuteDown=false;
 }
 
 engine::~engine() {
@@ -80,6 +82,8 @@ void engine::run() {
     prevRightMouseDown=false;
     leftMouseDown=false;
     prevLeftMouseDown=false;
+    executeDown=false;
+    prevExecuteDown=false;
 
     while (!quit) {
         prevRightMouseDown=rightMouseDown;
@@ -120,11 +124,21 @@ void engine::run() {
                     rightMouseDown=false;
                 }
             }
+            if (event.type == SDL_KEYDOWN) {
+                if (event.key.keysym.sym == executekey) {
+                    executeDown=true;
+                }
+            }
+            if (event.type == SDL_KEYUP) {
+                if (event.key.keysym.sym == executekey) {
+                    executeDown=false;
+                }
+            }
         }
         //Milli seconds since program start is preferred time measurement for animations
         unsigned int millis = SDL_GetTicks();
 
-        theScenario->update(windowWidthPx,windowHeightPx,mouseXPos,mouseYPos,(leftMouseDown && !prevLeftMouseDown),(rightMouseDown && !prevRightMouseDown),millis);
+        theScenario->update(windowWidthPx,windowHeightPx,mouseXPos,mouseYPos,(leftMouseDown && !prevLeftMouseDown),(rightMouseDown && !prevRightMouseDown),(executeDown && !prevExecuteDown),millis);
 
         //Black background, shouldn't be seen but won't hurt
         SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0x00);
