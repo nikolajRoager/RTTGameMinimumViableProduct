@@ -1,0 +1,7 @@
+idle 1
+move 3
+prepare 4
+ready 1
+unprepare 4
+landUnit true
+movementPoints 3

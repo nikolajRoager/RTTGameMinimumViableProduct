@@ -4,12 +4,32 @@
 
 #include "texwrap.h"
 
+#include <iostream>
+#include <ostream>
 #include <stdexcept>
 #include <SDL2/SDL_image.h>
 
 texwrap::~texwrap() {
-    if (tex!=nullptr)
+
+    if (tex!=nullptr) {
         SDL_DestroyTexture(tex);
+    }
+}
+
+texwrap::texwrap(texwrap&& other) noexcept {
+    tex=other.tex;
+    other.tex=nullptr;
+    width=other.width;
+    height=other.height;
+
+}
+
+texwrap&  texwrap::operator=(texwrap&& other)  noexcept {
+    tex=other.tex;
+    other.tex=nullptr;
+    width=other.width;
+    height=other.height;
+    return *this;
 }
 
 

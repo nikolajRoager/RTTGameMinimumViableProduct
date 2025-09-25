@@ -51,7 +51,6 @@ Types of units in minimal viable product
 * Cruise Missile Truck
 * Frigate
 * Destroyer?
-* Cruiser?
 * Submarine?
 * Brigade Headquarter (building)
 * ammo depot (building) ?

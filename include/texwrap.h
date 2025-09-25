@@ -20,7 +20,10 @@ private:
 
 public:
     texwrap(std::string path, SDL_Renderer* renderer);
+    texwrap(texwrap&& tex) noexcept ;
+    texwrap& operator=(texwrap&& other) noexcept ;
     ~texwrap();
+
 
     void render(double x, double y, SDL_Renderer* renderer,  double scale=1.0, bool center=false, bool flip=false, unsigned int frames=1, unsigned int frame=0) const;
 

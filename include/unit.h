@@ -32,9 +32,17 @@ private:
     double x,y;
     bool flip;
 public:
+
+    [[nodiscard]] int getMovementPoints() const { return myType.getMovementPoints(); }
+
+
     [[nodiscard]] uint32_t timeSinceAnimationStart(const uint32_t millis) const {return millis-animationStart;}
 
     unit(const unitType& type, bool _side, int _hexX, int _hexY);
+
+    void setHexX(int _hexX) {hexX = _hexX;}
+    void setHexY(int _hexY) {hexY = _hexY;}
+
 
     void setX (double _x) {x=_x;}
     void setY (double _y) {y=_y;}
@@ -42,6 +50,8 @@ public:
     void setFlip(bool _flip) {flip=_flip;}
 
     void startMovement(uint32_t millis) {myPhase = unitType::MOVE; animationStart=millis;}
+    ///Forcefully set the animation phase of this unit right now
+    void setAnimation(uint32_t millis, unitType::animationPhase phase) {myPhase=phase; animationStart=millis;}
     void doReadyAttack() {readyAttack = true;};
     void unreadyAttack() {readyAttack = false;};
 

@@ -71,15 +71,22 @@ public:
         return hexY*hexGridWidth+hexX;
     }
 
+    void getHexXYs(const int id, int& hexX, int& hexY) const {
+        //Get the x and y hex coordinates
+        hexX = id% hexGridWidth;
+        //Intentionally using Integer division
+        hexY = id/ hexGridWidth;
+    }
+
     [[nodiscard]] const hexTile& getHexTile (int hexId) const {
         return hexTiles[hexId];
     }
 
     ///Get the ID's of all neighbour a maximum number of steps from a hex
-    [[nodiscard]] std::set<int> getNeighbours(int hexId,int steps,const std::vector<unit>& obstructionsA,const std::vector<unit>& obstructionsB) const;
+    [[nodiscard]] std::set<int> getNeighbours(int hexId,int steps,const std::set<int>& obstructed) const;
 
     ///Get a list of the hexes we need to travel to, to get from start to stop
-    [[nodiscard]] std::vector<int> findPath(int startId, int stopId,const std::vector<unit>& obstructionsA,const std::vector<unit>& obstructionsB, bool ignoreObstructedGoal=false) const;
+    [[nodiscard]] std::vector<int> findPath(int startId, int stopId,const std::set<int>& obstructions, bool ignoreObstructedGoal=false) const;
 
 };
 

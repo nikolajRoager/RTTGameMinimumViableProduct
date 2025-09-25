@@ -137,3 +137,53 @@ Actually adding in an execution phase to the movement is really called for.
 Actually, I need a movement phase for the other player as well, followed by
 
 You know, now might be time to make the first video report, let us do that next day I have time to work.
+
+Day 7, tuesday 23/9/2025 CE
+====
+Background
+----------
+It amazes me how inefficient office work is, I spent the entire day working on this project, because I was waiting on a video-call
+
+Work
+----
+I added animated motion during the execution of the movement phase, I also started work on a Danish frigate as my next type of unit
+
+I believe the pre-minimum viable product might soon be finished
+
+Tomorrow, I am working from home, I will take that as a chance to record the first video update.
+
+
+
+Remaining problems/Todo
+------------
+I have decided that from now on, I will copy all remaining problems into the todo section, and keep copying them until they get solved, so here you go:
+
+Continue adding Danish frigates and American destroyers (maybe add LCS as a stand-in for frigates)
+
+add cruise missile launchers
+
+Pressing execute should clear selected tile and unit
+
+It is currently possible for different units to travel to the same tile, fix it 
+
+Make the button to move units right click, left click to cancel 
+
+Make propper arrow rendering
+
+Make enemy side take turn, just like the player (for now, to be replaced with ai later), make sure enemy can't be controlled when it is the player's turn
+
+Day 8, tuesday 25/9/2025 CE
+============
+background
+-----------
+I didn't have a lot of time to work this day, only around 3 hours. But yesterday I recorded the first weekly update
+
+Work
+----
+I didn't do a lot, I only tied up some loose ends without really starting anything new. I fixed the following
+
+* we now give movement orders with right-click
+* moving to the same position is now impossible
+* units no longer need to maneuver around each other
+* a marker for the friendly units during the movement planning phase
+* executing movement phase now clears selection

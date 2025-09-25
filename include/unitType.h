@@ -22,6 +22,9 @@ public:
 
 private:
     bool landUnit;
+    ///Number of moves possible per turn
+    int movementPoints;
+
     texwrap texture;
 
     texwrap idle;
@@ -30,14 +33,19 @@ private:
     texwrap ready;
     texwrap unprepare;
 
+    //Use unsigned int to avoid casting issues since millis is unsigned
     unsigned int idle_frames;
     unsigned int move_frames;
     unsigned int prepare_frames;
     unsigned int ready_frames;
     unsigned int unprepare_frames;
 
+
+
 public:
-    unitType(bool landUnit, const fs::path& unitPath, SDL_Renderer* renderer);
+    [[nodiscard]] int getMovementPoints() const { return movementPoints; }
+
+    unitType(const fs::path& unitPath, SDL_Renderer* renderer);
 
     [[nodiscard]] bool isLandUnit() const { return landUnit; }
 

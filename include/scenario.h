@@ -23,8 +23,6 @@ private:
 
     ///Units of the player side
     std::vector<unit> unitsFriend;
-    ///Units of the other side
-    std::vector<unit> unitsFoe;
 
     int scenarioWidthPx;
     int scenarioHeightPx;
@@ -49,8 +47,11 @@ private:
 
     ///The queued up movements for the good guys, indexed by unit id,
     std::map<int,std::vector<int> > friendMovementPlans;
-    ///Queued up movements for the bad guys
-    std::map<int,std::vector<int> > foeMovementPlans;
+
+    double scale;
+
+    int guiRightBarPixels=200;
+    int guiBottomBarPixels=150;
 
 public:
     explicit scenario(SDL_Renderer* renderer);

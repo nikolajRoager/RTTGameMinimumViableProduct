@@ -107,15 +107,8 @@ int hexGrid::getHexFromLocation(double x, double y, double scale) const {
     return foundTile;
 }
 
-std::set<int> hexGrid::getNeighbours(int hexId,int steps,const std::vector<unit>& obstructionsA,const std::vector<unit>& obstructionsB) const {
+std::set<int> hexGrid::getNeighbours(int hexId,int steps,const std::set<int>& obstructed) const {
     std::set<int> visited;
-    std::set<int> obstructed;
-    for (const auto& obs : obstructionsA) {
-        obstructed.insert(obs.getHexX()+obs.getHexY()*hexGridWidth);
-    }
-    for (const auto& obs : obstructionsB) {
-        obstructed.insert(obs.getHexX()+obs.getHexY()*hexGridWidth);
-    }
 
     //If the hex is out of bound, disregard it
     if (hexId<0 || hexId>=hexTiles.size())
@@ -138,9 +131,10 @@ std::set<int> hexGrid::getNeighbours(int hexId,int steps,const std::vector<unit>
         for (int i : oldQueue) {
             //All the checks whether to check this hex is done here,
             if (i!=hexId)//Skip all checks for the initial hex (there is likely a unit there, and that is ok, I bet it was they who asked for the pathfinding to start)
-                if (visited.contains(i) || startingStatus != hexTiles[i].getStatus() || obstructed.contains(i))
+                if (visited.contains(i) || startingStatus != hexTiles[i].getStatus())
                     continue;
-            visited.insert(i);
+            if (!obstructed.contains(i))
+                visited.insert(i);
 
 
             //Get the x and y hex coordinates
@@ -186,24 +180,15 @@ std::set<int> hexGrid::getNeighbours(int hexId,int steps,const std::vector<unit>
     return visited;
 }
 
-std::vector<int> hexGrid::findPath(int startId, int stopId, const std::vector<unit> &obstructionsA, const std::vector<unit> &obstructionsB, bool ignoreObstructedGoal) const {
+std::vector<int> hexGrid::findPath(int startId, int stopId, const std::set<int> &obstructed, bool ignoreObstructedGoal) const {
     //The hexagon pathfinding algorithm is largely based on the find-neighbours algorithm
     //We are going to be searching in layers of hexes
-
-
     std::map<int,int> visitedBacktrack;
-    std::set<int> obstructed;
-    for (const auto& obs : obstructionsA) {
-        obstructed.insert(obs.getHexX()+obs.getHexY()*hexGridWidth);
-    }
-    for (const auto& obs : obstructionsB) {
-        obstructed.insert(obs.getHexX()+obs.getHexY()*hexGridWidth);
-    }
 
     //If the start or stop hex is out of bound, disregard it
     if (startId<0 || startId>=hexTiles.size())
         return {};
-    if (stopId<0 || stopId>=hexTiles.size())
+    if (stopId<0 || stopId>=hexTiles.size() || obstructed.count(stopId))//Obstructions are not blocks for our movement, just places we can't stand
         return {};
 
     const auto startingStatus = hexTiles[startId].getStatus();
@@ -229,11 +214,11 @@ std::vector<int> hexGrid::findPath(int startId, int stopId, const std::vector<un
 
                 if (i!=stopId) {
                     if (!ignoreObstructedGoal)
-                        if (visitedBacktrack.contains(i) || startingStatus != hexTiles[i].getStatus() || obstructed.contains(i))
+                        if (visitedBacktrack.contains(i) || startingStatus != hexTiles[i].getStatus())
                             continue;
                 }
                 else
-                    if (visitedBacktrack.contains(i) || startingStatus != hexTiles[i].getStatus() || obstructed.contains(i))
+                    if (visitedBacktrack.contains(i) || startingStatus != hexTiles[i].getStatus())
                         continue;
             }
             else {
