@@ -187,3 +187,35 @@ I didn't do a lot, I only tied up some loose ends without really starting anythi
 * units no longer need to maneuver around each other
 * a marker for the friendly units during the movement planning phase
 * executing movement phase now clears selection
+
+Day 9, 26/9/2025 CE
+=======
+background
+-----------
+Today, I have once again finished my work assignment ahead of time, and I don't have anything other than this project to work on.
+
+Only problem is that I have no idea what I should work on now
+
+work
+----
+I think I should work on the GUI, really that is the final thing I need for the Minimal Viable Product. I haven't really done any thinking as to how.
+
+Should I make a specific GUI class, or should I just wing it, by putting it in the scenario class?
+
+well, I know the right answer is to give it its own class... so that is what I have done now
+
+I have successfully added the following to the UI:
+
+* A background tile 
+* A flashing light, flashing when we are in the execution phase
+* A marker of what phase we are in
+* An execute button
+
+Also, I believe I may have fixed a crash-bug
+
+I still need:
+
+* Map-modes
+* A screen displaying text info of units, text should use text wrapping, screen should be expandable
+* We need mouse-over text when hovering over gui elements, should activate after half a second of hovering
+* The above requires installation of the SDL2_TTF library

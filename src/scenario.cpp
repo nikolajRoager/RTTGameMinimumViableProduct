@@ -8,12 +8,13 @@
 #include <iostream>
 #include <ranges>
 
-scenario::scenario(SDL_Renderer* renderer) : background("assets/background.png",renderer), hexSelectionOutline("assets/hexoutline.png",renderer), grid("assets/",renderer) {
+scenario::scenario(SDL_Renderer* renderer) : background("assets/background.png",renderer), hexSelectionOutline("assets/hexoutline.png",renderer), grid("assets/",renderer), myGui(fs::path("assets")/"gui",renderer) {
 
 
     //Will instantly be overwritten
     mouseOverTile=0;
 
+    std::cout<<"Loading unit library"<<std::endl;
     //TODO: load from disk
     unitLibrary.clear();
     unitLibrary.emplace_back(fs::path("assets")/"units"/"SAMTruckDK",renderer);
@@ -21,6 +22,7 @@ scenario::scenario(SDL_Renderer* renderer) : background("assets/background.png",
     unitLibrary.emplace_back(fs::path("assets")/"units"/"NeptuneLauncherDK",renderer);
     unitLibrary.emplace_back(fs::path("assets")/"units"/"ArleighBurke",renderer);
 
+    std::cout<<"Loading units"<<std::endl;
     //TODO: load from disk, and allow spawning
     unitsFriend.clear();
     unitsFriend.emplace_back(unitLibrary[0],true,20,8);
@@ -33,12 +35,15 @@ scenario::scenario(SDL_Renderer* renderer) : background("assets/background.png",
 
 
 
+    std::cout<<"Verifying screen dimensions"<<std::endl;
     scenarioWidthPx=grid.getScenarioWidth();
     scenarioHeightPx=grid.getScenarioHeight();
 
     currentPhase=MOVEMENT_PLANNING_FRIEND;
 
     scale=1.0;
+
+    std::cout<< " constructor finished"<<std::endl;
 }
 
 scenario::~scenario() = default;
@@ -90,11 +95,13 @@ void scenario::render(SDL_Renderer* renderer, int screenWidth, int screenHeight,
             U.render(scale,millis,renderer);
         }
     }
+
+    myGui.render(scenarioWidthPx,scenarioHeightPx,renderer,scale,millis,currentPhase);
 }
 
 void scenario::update(int screenWidth, int screenHeight,  int mouseX, int mouseY, bool isLeftMouseClick, bool isRightMouseClick, bool executeClick,uint32_t millis) {
-    scale = std::min(static_cast<double>(screenWidth) / static_cast<double>(scenarioWidthPx+guiRightBarPixels),
-                     static_cast<double>(screenHeight) / static_cast<double>(scenarioHeightPx+guiBottomBarPixels));
+    scale = std::min(static_cast<double>(screenWidth) / static_cast<double>(scenarioWidthPx+myGui.getRightBarPixels()),
+                     static_cast<double>(screenHeight) / static_cast<double>(scenarioHeightPx+myGui.getBottomBarPixels()));
 
 
     mouseOverTile=grid.getHexFromLocation(mouseX,mouseY,scale);
@@ -194,7 +201,7 @@ void scenario::update(int screenWidth, int screenHeight,  int mouseX, int mouseY
         }
 
 
-        if (executeClick) {
+        if (executeClick || myGui.isExecuteButtonPressed()) {
             currentPhase=MOVEMENT_EXECUTION;
             selectedUnit=-1;
             selectedTile=-1;
@@ -297,4 +304,6 @@ void scenario::update(int screenWidth, int screenHeight,  int mouseX, int mouseY
     for (unit& U: unitsFriend) {
         U.updateAnimation(millis);
     }
+
+    myGui.update(mouseX,mouseY,isLeftMouseClick || isRightMouseClick,scenarioWidthPx,scenarioHeightPx,scale);
 }

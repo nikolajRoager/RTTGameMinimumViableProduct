@@ -83,16 +83,17 @@ void hexGrid::drawTile(SDL_Renderer *renderer, const int hexId, const double sca
 
 int hexGrid::getHexFromLocation(double x, double y, double scale) const {
 
+    if (x>scenarioWidthPx*scale || x<0 || y>scenarioHeightPx*scale || y<0)
+        return -1;
     int foundTile=-1;
     double dist=-1;
 
     //Get the hext nearest to the mouse coordinates and select it
     for (int hexX = 0; hexX < hexGridWidth; hexX++) {
         for (int hexY = 0; hexY < hexGridHeight; hexY++) {
-
             const hexTile& tile = hexTiles[hexX+hexY*hexGridWidth];
-            double hexCenterX =tile.getHexCenterX();// hexX * hexWidthPx+(hexY%2) * hexHalfWidthPx;
-            double hexCenterY =tile.getHexCenterY();// hexY * hex34HeightPx;
+            double hexCenterX =tile.getHexCenterX();
+            double hexCenterY =tile.getHexCenterY();
 
             hexCenterX *= scale;
             hexCenterY *= scale;

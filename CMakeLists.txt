@@ -34,6 +34,7 @@ if (WIN32)
     link_libraries(SDL2)
     link_libraries(SDL2main)
     link_libraries(SDL2_image)
+    link_libraries(SDL2_ttf)
 
 endif (WIN32)
 
@@ -44,4 +45,5 @@ add_executable(PreMVPMapGame main.cpp
         src/unitType.cpp
         src/unit.cpp
         src/hexGrid.cpp
+        src/gui.cpp
 )

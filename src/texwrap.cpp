@@ -34,10 +34,16 @@ texwrap&  texwrap::operator=(texwrap&& other)  noexcept {
 
 
 texwrap::texwrap(std::string path, SDL_Renderer* renderer) {
+
+    std::cout<<"Loading texture "<<path<<std::endl;
+
     SDL_Surface* surface = IMG_Load(path.c_str());
     if (surface == nullptr) {
         throw std::runtime_error("Unable to load image: " + std::string(SDL_GetError()));
     }
+
+    width = surface->w;
+    height = surface->h;
 
     tex= SDL_CreateTextureFromSurface(renderer, surface);
     SDL_FreeSurface(surface);
@@ -46,8 +52,6 @@ texwrap::texwrap(std::string path, SDL_Renderer* renderer) {
         throw std::runtime_error("Unable to create texture: " + std::string(SDL_GetError()));
     }
 
-    width = surface->w;
-    height = surface->h;
 }
 void texwrap::render(double x, double y, SDL_Renderer *renderer, double scale,bool center,bool flip, unsigned int frames,unsigned int frame) const {
     render(x,y,255,255,255,255,renderer,scale,center,flip,frames,frame);

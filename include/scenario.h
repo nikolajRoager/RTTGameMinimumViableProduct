@@ -8,8 +8,10 @@
 #include <vector>
 #include <SDL2/SDL_render.h>
 
+#include "gui.h"
 #include "hexGrid.h"
 #include "hexTile.h"
+#include "phase.h"
 #include "texwrap.h"
 #include "unit.h"
 #include "unitType.h"
@@ -36,10 +38,6 @@ private:
 
     hexGrid grid;
 
-    enum phase {
-        MOVEMENT_PLANNING_FRIEND,
-        MOVEMENT_EXECUTION,
-    };
 
     ///What phase of the game are we going through
     phase currentPhase=MOVEMENT_PLANNING_FRIEND;
@@ -50,8 +48,8 @@ private:
 
     double scale;
 
-    int guiRightBarPixels=200;
-    int guiBottomBarPixels=150;
+    gui myGui;
+
 
 public:
     explicit scenario(SDL_Renderer* renderer);

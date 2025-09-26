@@ -1,0 +1,12 @@
+//
+// Created by Nikolaj Christensen on 26/09/2025.
+//
+
+#ifndef PREMVPMAPGAME_PHASE_H
+#define PREMVPMAPGAME_PHASE_H
+
+enum phase {
+    MOVEMENT_PLANNING_FRIEND,
+    MOVEMENT_EXECUTION,
+};
+#endif //PREMVPMAPGAME_PHASE_H
