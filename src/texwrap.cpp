@@ -32,8 +32,11 @@ texwrap&  texwrap::operator=(texwrap&& other)  noexcept {
     return *this;
 }
 
+texwrap::texwrap(std::string words, SDL_Renderer* renderer) {
+    std::cout<<"Loading string "<<words<<std::endl;
+}
 
-texwrap::texwrap(std::string path, SDL_Renderer* renderer) {
+texwrap::texwrap(fs::path path, SDL_Renderer* renderer) {
 
     std::cout<<"Loading texture "<<path<<std::endl;
 
@@ -51,7 +54,6 @@ texwrap::texwrap(std::string path, SDL_Renderer* renderer) {
     if (tex == nullptr) {
         throw std::runtime_error("Unable to create texture: " + std::string(SDL_GetError()));
     }
-
 }
 void texwrap::render(double x, double y, SDL_Renderer *renderer, double scale,bool center,bool flip, unsigned int frames,unsigned int frame) const {
     render(x,y,255,255,255,255,renderer,scale,center,flip,frames,frame);

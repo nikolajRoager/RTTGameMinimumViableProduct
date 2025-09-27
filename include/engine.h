@@ -5,6 +5,7 @@
 #ifndef PREMVPMAPGAME_ENGINE_H
 #define PREMVPMAPGAME_ENGINE_H
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
 
 #include "scenario.h"
 
@@ -18,7 +19,10 @@ private:
     //The window renderer
     SDL_Renderer* renderer;
 
+    TTF_Font* gameFont;
+
     scenario* theScenario;
+
 
 
 

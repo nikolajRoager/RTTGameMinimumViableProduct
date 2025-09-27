@@ -9,7 +9,7 @@
 #include <map>
 #include <stdexcept>
 
-hexGrid::hexGrid(const std::string &path, SDL_Renderer* renderer):hexSelectionOutline("assets/hexoutline.png",renderer) {
+hexGrid::hexGrid(const std::string &path, SDL_Renderer* renderer):hexSelectionOutline(fs::path("assets")/"hexoutline.png",renderer) {
 
     //TODO, load from a file at path
     ///Width of the hexagons making up the game grid in pixels (can not be regular hexagons for rounding reasons)

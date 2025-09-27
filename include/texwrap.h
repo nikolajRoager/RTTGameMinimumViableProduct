@@ -4,10 +4,12 @@
 
 #ifndef PREMVPMAPGAME_TEXWRAP_H
 #define PREMVPMAPGAME_TEXWRAP_H
+#include <filesystem>
 #include <string>
 #include <SDL2/SDL_render.h>
 
 
+namespace fs = std::filesystem;
 
 ///Texture wrapper class
 class texwrap {
@@ -19,7 +21,8 @@ private:
     int height;
 
 public:
-    texwrap(std::string path, SDL_Renderer* renderer);
+    texwrap(fs::path path, SDL_Renderer* renderer);
+    texwrap(std::string words, SDL_Renderer* renderer);
     texwrap(texwrap&& tex) noexcept ;
     texwrap& operator=(texwrap&& other) noexcept ;
     ~texwrap();

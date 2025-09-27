@@ -14,6 +14,7 @@
 engine::engine() {
     window = nullptr;
     renderer = nullptr;
+    gameFont= nullptr;
 
     if( SDL_Init( SDL_INIT_VIDEO ) < 0 )
     {
@@ -50,6 +51,17 @@ engine::engine() {
     }
 
 
+    if (TTF_Init()==-1) {
+        throw std::runtime_error( "SDL_TTF could not initialize! SDL Error:" + std::string( SDL_GetError() ) );
+    }
+
+    //TODO, use filepath
+    gameFont=TTF_OpenFont( "assets/Atkinson-Hyperlegible-Regular-102.ttf", 24 );
+    if (gameFont==nullptr) {
+        throw std::runtime_error("Failed to load font Atkinson-Hyperlegible-Regular-102.ttf, error "+std::string(TTF_GetError())+"");
+    }
+
+
     SDL_GetMouseState( &mouseXPos, &mouseYPos );
 
     //Only load scenario AFTER SDL
@@ -72,6 +84,10 @@ engine::~engine() {
         SDL_DestroyRenderer(renderer);
     if (window!=nullptr)
         SDL_DestroyWindow(window);
+
+    if (gameFont!=nullptr)
+        TTF_CloseFont(gameFont);
+    TTF_Quit();
     IMG_Quit();
     SDL_Quit();
 }
@@ -84,6 +100,8 @@ void engine::run() {
     prevLeftMouseDown=false;
     executeDown=false;
     prevExecuteDown=false;
+
+    uint32_t pmillis=SDL_GetTicks();
 
     while (!quit) {
         prevRightMouseDown=rightMouseDown;
@@ -138,13 +156,14 @@ void engine::run() {
         //Milli seconds since program start is preferred time measurement for animations
         unsigned int millis = SDL_GetTicks();
 
-        theScenario->update(windowWidthPx,windowHeightPx,mouseXPos,mouseYPos,(leftMouseDown && !prevLeftMouseDown),(rightMouseDown && !prevRightMouseDown),(executeDown && !prevExecuteDown),millis);
+        theScenario->update(windowWidthPx,windowHeightPx,mouseXPos,mouseYPos,(leftMouseDown && !prevLeftMouseDown),(rightMouseDown && !prevRightMouseDown),(executeDown && !prevExecuteDown),millis,millis-pmillis);
 
         //Black background, shouldn't be seen but won't hurt
         SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0x00);
         SDL_RenderClear( renderer );
         theScenario->render(renderer,windowWidthPx,windowHeightPx,millis);
         SDL_RenderPresent( renderer );
+        pmillis=millis;
     }
 }
 

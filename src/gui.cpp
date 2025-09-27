@@ -8,20 +8,37 @@
 #include <iostream>
 #include <SDL2/SDL_render.h>
 
-gui::gui(const fs::path& guiFolder, SDL_Renderer *renderer): backgroundTile((guiFolder/"guiTile.png").string(),renderer),movementPhaseMarker((guiFolder/"movementPhase.png").string(),renderer),attackPhaseMarker((guiFolder/"attackPhase.png").string(),renderer),executeMarker((guiFolder/"execute.png").string(),renderer),infoScreen((guiFolder/"infoScreen.png").string(),renderer) {
+gui::gui(const fs::path& guiFolder, SDL_Renderer *renderer): backgroundTile((guiFolder/"guiTile.png"),renderer),movementPhaseMarker((guiFolder/"movementPhase.png"),renderer),attackPhaseMarker((guiFolder/"attackPhase.png"),renderer),executeMarker((guiFolder/"execute.png"),renderer),infoScreen((guiFolder/"infoScreen.png"),renderer) {
     std::cout<<"Loaded gui"<<std::endl;
     infoScreenMaxExpansion=infoScreen.getHeight();
 }
 
 
-void gui::update( int mouseX, int mouseY, bool mouseClicked, int scenarioWidth, int scenarioHeight, double scale) {
+void gui::update( int mouseX, int mouseY, bool mouseClicked, int scenarioWidth, int scenarioHeight, double scale, uint32_t dmillis) {
 
     double executeButtonX = (scenarioWidth+RIGHT_BAR_PIXELS/2)*scale;
     double executeButtonY = (scenarioHeight+BOTTOM_BAR_PIXELS/2)*scale;
 
 
     pressExecuteButton = (mouseClicked && mouseX>executeButtonX-executeMarker.getWidth()*scale*0.25 && mouseY>executeButtonY-executeMarker.getHeight()*scale*0.5 && mouseX<executeButtonX+executeMarker.getWidth()*scale*0.25 && mouseY<executeButtonY+executeMarker.getHeight()*scale*0.5);
+    expandInfoScreen  = mouseX>(scenarioWidth-RIGHT_BAR_PIXELS*6)*scale && mouseX<(scenarioWidth-RIGHT_BAR_PIXELS*2)*scale && mouseY>(scenarioHeight-infoScreenExpansion)*scale;
 
+    if (expandInfoScreen) {
+        if (infoScreenExpansion<infoScreenMaxExpansion) {
+            infoScreenExpansion+=dmillis;
+            if (infoScreenExpansion>infoScreenMaxExpansion) {
+                infoScreenExpansion=infoScreenMaxExpansion;
+            }
+        }
+    }
+    else{
+        if (infoScreenExpansion>0) {
+            infoScreenExpansion-=dmillis;
+            if (infoScreenExpansion<0) {
+                infoScreenExpansion=0;
+            }
+        }
+    }
 }
 
 void gui::render(int scenarioWidth, int scenarioHeight, SDL_Renderer *renderer, double scale,uint32_t millis, phase thePhase) const {
@@ -48,6 +65,6 @@ void gui::render(int scenarioWidth, int scenarioHeight, SDL_Renderer *renderer, 
 
     //The info screen is four tiles wide and just to the left of the phase markers
 
-    infoScreen.render((scenarioWidth-RIGHT_BAR_PIXELS*5)*scale,(scenarioHeight-infoScreenExpansion)*scale,renderer,scale);
+    infoScreen.render((scenarioWidth-RIGHT_BAR_PIXELS*6)*scale,(scenarioHeight-infoScreenExpansion)*scale,renderer,scale);
 
 }

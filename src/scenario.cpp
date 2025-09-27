@@ -8,7 +8,7 @@
 #include <iostream>
 #include <ranges>
 
-scenario::scenario(SDL_Renderer* renderer) : background("assets/background.png",renderer), hexSelectionOutline("assets/hexoutline.png",renderer), grid("assets/",renderer), myGui(fs::path("assets")/"gui",renderer) {
+scenario::scenario(SDL_Renderer* renderer) : background(fs::path("assets")/"background.png",renderer), hexSelectionOutline(fs::path("assets")/"hexoutline.png",renderer), grid(fs::path("assets"),renderer), myGui(fs::path("assets")/"gui",renderer) {
 
 
     //Will instantly be overwritten
@@ -99,7 +99,7 @@ void scenario::render(SDL_Renderer* renderer, int screenWidth, int screenHeight,
     myGui.render(scenarioWidthPx,scenarioHeightPx,renderer,scale,millis,currentPhase);
 }
 
-void scenario::update(int screenWidth, int screenHeight,  int mouseX, int mouseY, bool isLeftMouseClick, bool isRightMouseClick, bool executeClick,uint32_t millis) {
+void scenario::update(int screenWidth, int screenHeight,  int mouseX, int mouseY, bool isLeftMouseClick, bool isRightMouseClick, bool executeClick,uint32_t millis, uint32_t dmillis) {
     scale = std::min(static_cast<double>(screenWidth) / static_cast<double>(scenarioWidthPx+myGui.getRightBarPixels()),
                      static_cast<double>(screenHeight) / static_cast<double>(scenarioHeightPx+myGui.getBottomBarPixels()));
 
@@ -305,5 +305,5 @@ void scenario::update(int screenWidth, int screenHeight,  int mouseX, int mouseY
         U.updateAnimation(millis);
     }
 
-    myGui.update(mouseX,mouseY,isLeftMouseClick || isRightMouseClick,scenarioWidthPx,scenarioHeightPx,scale);
+    myGui.update(mouseX,mouseY,isLeftMouseClick || isRightMouseClick,scenarioWidthPx,scenarioHeightPx,scale,dmillis);
 }

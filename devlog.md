@@ -194,15 +194,11 @@ background
 -----------
 Today, I have once again finished my work assignment ahead of time, and I don't have anything other than this project to work on.
 
-Only problem is that I have no idea what I should work on now
+I will hopefully NOT work tomorrow, as I am preparing to finish another video
 
 work
 ----
-I think I should work on the GUI, really that is the final thing I need for the Minimal Viable Product. I haven't really done any thinking as to how.
-
-Should I make a specific GUI class, or should I just wing it, by putting it in the scenario class?
-
-well, I know the right answer is to give it its own class... so that is what I have done now
+Today has been extremely productive day, I focused on the GUI.
 
 I have successfully added the following to the UI:
 
@@ -210,12 +206,16 @@ I have successfully added the following to the UI:
 * A flashing light, flashing when we are in the execution phase
 * A marker of what phase we are in
 * An execute button
+* A screen for the display of text, which automatically expands and retracts
 
-Also, I believe I may have fixed a crash-bug
+Also, I believe I may have fixed a severe crash-bug in the texture class (w here I was adressing a freed pointer, this only rarely caused a crash, but it should be fixed now)
 
-I still need:
 
-* Map-modes
-* A screen displaying text info of units, text should use text wrapping, screen should be expandable
-* We need mouse-over text when hovering over gui elements, should activate after half a second of hovering
-* The above requires installation of the SDL2_TTF library
+todo
+----
+I still need the following GUI:
+
+* Map-modes: you should be able to toggle all hexes shown or hidden, a little like in paradox games
+* text for the info screen, describing units, text should use text wrapping. Text should dynamically update (i.e. show current health)
+
+Text seems to be a very big and complicated thing to work with.

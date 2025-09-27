@@ -38,7 +38,7 @@ public:
     static int getRightBarPixels() {return RIGHT_BAR_PIXELS;}
     static int getBottomBarPixels() {return BOTTOM_BAR_PIXELS;}
 
-    void update( int mouseX, int mouseY, bool mouseClicked, int scenarioWidth, int scenarioHeight, double scale);
+    void update( int mouseX, int mouseY, bool mouseClicked, int scenarioWidth, int scenarioHeight, double scale, uint32_t dmillis);
     void render(int scenarioWidth, int scenarioHeight, SDL_Renderer* renderer, double scale, uint32_t millis, phase thePhase) const;
 
     bool isExecuteButtonPressed() const {return pressExecuteButton;}

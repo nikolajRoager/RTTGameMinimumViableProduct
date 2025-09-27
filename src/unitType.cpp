@@ -54,7 +54,7 @@ bool unitType::isAnimationFinished(uint32_t millis, animationPhase phase) const 
     }
 }
 
-unitType::unitType(const fs::path& unitPath, SDL_Renderer *renderer): landUnit(landUnit), texture((unitPath/"idle.png").string(), renderer), idle((unitPath/"idle.png").string(),renderer), move((unitPath/"move.png").string(),renderer), prepare((unitPath/"prepare.png").string(),renderer),ready((unitPath/"ready.png").string(),renderer), unprepare((unitPath/"unprepare.png").string(),renderer) {
+unitType::unitType(const fs::path& unitPath, SDL_Renderer *renderer): landUnit(landUnit), texture((unitPath/"idle.png"), renderer), idle((unitPath/"idle.png"),renderer), move((unitPath/"move.png"),renderer), prepare((unitPath/"prepare.png"),renderer),ready((unitPath/"ready.png"),renderer), unprepare((unitPath/"unprepare.png"),renderer) {
     std::ifstream animationStats(unitPath/"unitStats.txt");
     std::string line;
 
