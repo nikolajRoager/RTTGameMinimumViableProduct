@@ -7,6 +7,7 @@
 #include <filesystem>
 #include <string>
 #include <SDL2/SDL_render.h>
+#include <SDL2/SDL_ttf.h>
 
 
 namespace fs = std::filesystem;
@@ -22,7 +23,7 @@ private:
 
 public:
     texwrap(fs::path path, SDL_Renderer* renderer);
-    texwrap(std::string words, SDL_Renderer* renderer);
+    texwrap(const std::string& words, SDL_Renderer* renderer, TTF_Font* _font);
     texwrap(texwrap&& tex) noexcept ;
     texwrap& operator=(texwrap&& other) noexcept ;
     ~texwrap();

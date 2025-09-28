@@ -8,6 +8,7 @@
 #include <ostream>
 #include <stdexcept>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
 
 texwrap::~texwrap() {
 
@@ -32,8 +33,25 @@ texwrap&  texwrap::operator=(texwrap&& other)  noexcept {
     return *this;
 }
 
-texwrap::texwrap(std::string words, SDL_Renderer* renderer) {
+texwrap::texwrap(const std::string& words, SDL_Renderer* renderer, TTF_Font* _font) {
     std::cout<<"Loading string "<<words<<std::endl;
+
+    const SDL_Color color = {255,255,255,255};
+    SDL_Surface* surface = TTF_RenderText_Solid( _font,!words.empty()? words.c_str() :" ", color);
+    if (surface == nullptr) {
+        throw std::runtime_error("Unable to create text texture: " + std::string(SDL_GetError()));
+    }
+
+    width = surface->w;
+    height = surface->h;
+
+    tex= SDL_CreateTextureFromSurface(renderer, surface);
+    SDL_FreeSurface(surface);
+
+    if (tex == nullptr) {
+        throw std::runtime_error("Unable to create texture: " + std::string(SDL_GetError()));
+    }
+
 }
 
 texwrap::texwrap(fs::path path, SDL_Renderer* renderer) {

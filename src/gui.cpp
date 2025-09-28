@@ -8,9 +8,11 @@
 #include <iostream>
 #include <SDL2/SDL_render.h>
 
-gui::gui(const fs::path& guiFolder, SDL_Renderer *renderer): backgroundTile((guiFolder/"guiTile.png"),renderer),movementPhaseMarker((guiFolder/"movementPhase.png"),renderer),attackPhaseMarker((guiFolder/"attackPhase.png"),renderer),executeMarker((guiFolder/"execute.png"),renderer),infoScreen((guiFolder/"infoScreen.png"),renderer) {
+gui::gui(const fs::path& guiFolder, SDL_Renderer *renderer, TTF_Font* font): backgroundTile((guiFolder/"guiTile.png"),renderer),movementPhaseMarker((guiFolder/"movementPhase.png"),renderer),attackPhaseMarker((guiFolder/"attackPhase.png"),renderer),executeMarker((guiFolder/"execute.png"),renderer),infoScreen((guiFolder/"infoScreen.png"),renderer) {
     std::cout<<"Loaded gui"<<std::endl;
+    infoScreenFont=font;
     infoScreenMaxExpansion=infoScreen.getHeight();
+
 }
 
 
@@ -66,5 +68,36 @@ void gui::render(int scenarioWidth, int scenarioHeight, SDL_Renderer *renderer, 
     //The info screen is four tiles wide and just to the left of the phase markers
 
     infoScreen.render((scenarioWidth-RIGHT_BAR_PIXELS*6)*scale,(scenarioHeight-infoScreenExpansion)*scale,renderer,scale);
+
+    double infoScreenLineX0 = (scenarioWidth-RIGHT_BAR_PIXELS*6+24)*scale;
+    double infoScreenLineY0 = (scenarioHeight-infoScreenExpansion+24)*scale;
+    //Render the text on the info-screen
+    for (const auto& line : infoScreenLines) {
+        line.first.render(infoScreenLineX0+line.second.first*scale,infoScreenLineY0+line.second.second*scale,renderer,scale);
+    }
+}
+
+void gui::setInfoScreenText(std::string text, SDL_Renderer* renderer) {
+    infoScreenLines.clear();
+
+    //Split the text by lines
+    std::stringstream textStream(text);
+    std::string line;
+    double y=0;
+    while (std::getline(textStream, line)) {
+
+        //Also split the text by & character
+        std::stringstream lineStream(line);
+        std::string lineSegment;
+        std::getline(lineStream, lineSegment,'&');
+        infoScreenLines.emplace_back(texwrap(lineSegment,renderer,infoScreenFont),std::make_pair(0,y));
+
+        if (std::getline(lineStream, lineSegment,'&')) {
+            infoScreenLines.emplace_back(texwrap(lineSegment,renderer,infoScreenFont),std::make_pair(0,y));
+            infoScreenLines.back().second.first=infoScreen.getWidth()-48-infoScreenLines.back().first.getWidth();
+        }
+
+        y+=infoScreenLines.back().first.getHeight();
+    }
 
 }

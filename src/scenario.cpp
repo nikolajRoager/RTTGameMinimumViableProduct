@@ -7,8 +7,9 @@
 #include <fstream>
 #include <iostream>
 #include <ranges>
+#include <SDL2/SDL_ttf.h>
 
-scenario::scenario(SDL_Renderer* renderer) : background(fs::path("assets")/"background.png",renderer), hexSelectionOutline(fs::path("assets")/"hexoutline.png",renderer), grid(fs::path("assets"),renderer), myGui(fs::path("assets")/"gui",renderer) {
+scenario::scenario(SDL_Renderer* renderer, TTF_Font* _font) : background(fs::path("assets")/"background.png",renderer), hexSelectionOutline(fs::path("assets")/"hexoutline.png",renderer), grid(fs::path("assets"),renderer), myGui(fs::path("assets")/"gui",renderer,_font) {
 
 
     //Will instantly be overwritten
@@ -42,6 +43,12 @@ scenario::scenario(SDL_Renderer* renderer) : background(fs::path("assets")/"back
     currentPhase=MOVEMENT_PLANNING_FRIEND;
 
     scale=1.0;
+
+
+    movementPlanningDescription="Right click to select units, then right click to move\nPress enter or \"execute\" to execute the plan\nRight click a friendly unit for more details\n\nFriendly units are highlighted with Green";
+    movementExecutionDescription="Executing movement plan&please wait";
+
+    myGui.setInfoScreenText(movementPlanningDescription,renderer);
 
     std::cout<< " constructor finished"<<std::endl;
 }
@@ -99,7 +106,7 @@ void scenario::render(SDL_Renderer* renderer, int screenWidth, int screenHeight,
     myGui.render(scenarioWidthPx,scenarioHeightPx,renderer,scale,millis,currentPhase);
 }
 
-void scenario::update(int screenWidth, int screenHeight,  int mouseX, int mouseY, bool isLeftMouseClick, bool isRightMouseClick, bool executeClick,uint32_t millis, uint32_t dmillis) {
+void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,  int mouseX, int mouseY, bool isLeftMouseClick, bool isRightMouseClick, bool executeClick,uint32_t millis, uint32_t dmillis) {
     scale = std::min(static_cast<double>(screenWidth) / static_cast<double>(scenarioWidthPx+myGui.getRightBarPixels()),
                      static_cast<double>(screenHeight) / static_cast<double>(scenarioHeightPx+myGui.getBottomBarPixels()));
 
@@ -134,6 +141,7 @@ void scenario::update(int screenWidth, int screenHeight,  int mouseX, int mouseY
                         if (friendMovementPlans.contains(selectedUnit))
                             friendMovementPlans.erase(selectedUnit);
                         selectedUnit = -1;
+                        myGui.setInfoScreenText(movementPlanningDescription,renderer);
                     }
                 }
                 else
@@ -173,6 +181,8 @@ void scenario::update(int screenWidth, int screenHeight,  int mouseX, int mouseY
                         friendMovementPlans.insert(std::make_pair(selectedUnit,limitedPath));
 
                     selectedUnit=-1;
+
+                    myGui.setInfoScreenText(movementPlanningDescription,renderer);
                 }
             }
         }
@@ -182,6 +192,7 @@ void scenario::update(int screenWidth, int screenHeight,  int mouseX, int mouseY
             if (selectedUnit != -1) {
                 unitsFriend[selectedUnit].unreadyAttack();
                 selectedUnit = -1;
+                myGui.setInfoScreenText(movementPlanningDescription,renderer);
             }
             selectedTile=-1;
         }
@@ -205,6 +216,7 @@ void scenario::update(int screenWidth, int screenHeight,  int mouseX, int mouseY
             currentPhase=MOVEMENT_EXECUTION;
             selectedUnit=-1;
             selectedTile=-1;
+            myGui.setInfoScreenText(movementExecutionDescription,renderer);
         }
     }
     else if (currentPhase == MOVEMENT_EXECUTION) {
@@ -296,6 +308,7 @@ void scenario::update(int screenWidth, int screenHeight,  int mouseX, int mouseY
 
         if (pendingUnits==0) {
             currentPhase=MOVEMENT_PLANNING_FRIEND;
+            myGui.setInfoScreenText(movementPlanningDescription,renderer);
             friendMovementPlans.clear();
         }
 

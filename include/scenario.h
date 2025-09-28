@@ -7,6 +7,7 @@
 #include <map>
 #include <vector>
 #include <SDL2/SDL_render.h>
+#include <SDL2/SDL_ttf.h>
 
 #include "gui.h"
 #include "hexGrid.h"
@@ -48,15 +49,17 @@ private:
 
     double scale;
 
+    std::string movementPlanningDescription;
+    std::string movementExecutionDescription;
+
     gui myGui;
 
-
 public:
-    explicit scenario(SDL_Renderer* renderer);
+    explicit scenario(SDL_Renderer* renderer, TTF_Font* _font);
     ~scenario();
 
     void render(SDL_Renderer* renderer, int screenWidth, int screenHeight, uint32_t millis) const;
-    void update(int screenWidth, int screenHeight, int mouseX, int mouseY, bool isLeftMouseClick, bool isRightMouseClick, bool executeClick, uint32_t millis, uint32_t dmillis);
+    void update(SDL_Renderer* renderer, int screenWidth, int screenHeight, int mouseX, int mouseY, bool isLeftMouseClick, bool isRightMouseClick, bool executeClick, uint32_t millis, uint32_t dmillis);
 };
 
 #endif //PREMVPMAPGAME_SCENARIO_H

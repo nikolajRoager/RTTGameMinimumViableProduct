@@ -208,7 +208,7 @@ I have successfully added the following to the UI:
 * An execute button
 * A screen for the display of text, which automatically expands and retracts
 
-Also, I believe I may have fixed a severe crash-bug in the texture class (w here I was adressing a freed pointer, this only rarely caused a crash, but it should be fixed now)
+Also, I believe I may have fixed a severe crash-bug in the texture class (where I was addressing a freed pointer, this only rarely caused a crash, but it should be fixed now)
 
 
 todo
@@ -219,3 +219,13 @@ I still need the following GUI:
 * text for the info screen, describing units, text should use text wrapping. Text should dynamically update (i.e. show current health)
 
 Text seems to be a very big and complicated thing to work with.
+
+
+Day 10 Saturday and Sunday 27/9/2025 CE and 28/9/2025
+=====
+background
+----------
+I have introduced the idea of a half-day, so I can get work done more days. If I work less than 4 hours, I count the day as a half-day.
+
+These two half-days are half because I uploaded another video, it was a lot of work but good to finally be done.
+
