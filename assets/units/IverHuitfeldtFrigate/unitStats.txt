@@ -5,3 +5,6 @@ ready 4
 unprepare 4
 landUnit false
 movementPoints 5
+name Iver Huitfeldt class Frigate
+SAMRange 4
+SSMRange 6

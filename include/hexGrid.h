@@ -11,6 +11,9 @@
 #include "texwrap.h"
 #include "unit.h"
 
+namespace fs = std::filesystem;
+
+
 class hexGrid {
 private:
     texwrap hexSelectionOutline;
@@ -44,7 +47,7 @@ public:
     };
 
 
-    explicit hexGrid(const std::string &path, SDL_Renderer* renderer);
+    explicit hexGrid(const fs::path &path, SDL_Renderer* renderer);
 
     [[nodiscard]] int getScenarioWidth() const { return scenarioWidthPx; }
     [[nodiscard]] int getScenarioHeight() const { return scenarioHeightPx; }

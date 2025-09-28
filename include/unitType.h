@@ -21,6 +21,8 @@ public:
     };
 
 private:
+    std::string name;
+
     bool landUnit;
     ///Number of moves possible per turn
     int movementPoints;
@@ -40,6 +42,16 @@ private:
     unsigned int ready_frames;
     unsigned int unprepare_frames;
 
+    ///Range of surface-to-air missiles aboard this thing
+    ///0 if has no SAM,
+    ///SAM will automatically engage all air threats in range
+    double SAMRange;
+
+    ///Range of surface-to-surface missiles aboard this thing
+    ///0 if has no SSM
+    double SSMRange;
+
+
 
 
 public:
@@ -54,6 +66,8 @@ public:
     void render(double x, double y,double scale,uint32_t millis, SDL_Renderer* renderer,animationPhase phase, bool flip) const;
 
     [[nodiscard]] bool isAnimationFinished(uint32_t millis,animationPhase phase) const;
+
+    [[nodiscard]] const std::string& getName() const { return name; }
 };
 
 #endif //PREMVPMAPGAME_UNITTYPE_H

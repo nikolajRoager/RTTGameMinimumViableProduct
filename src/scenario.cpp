@@ -134,6 +134,7 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
                     if (selectedUnit != newSelectedUnit) {
                         unitsFriend[selectedUnit].unreadyAttack();
                         selectedUnit=newSelectedUnit;
+                        myGui.setInfoScreenText(unitsFriend[selectedUnit].getDescription(),renderer);
                     }
                     else {
                         //Click the same unit to cancel movement order
@@ -144,8 +145,10 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
                         myGui.setInfoScreenText(movementPlanningDescription,renderer);
                     }
                 }
-                else
+                else {
                     selectedUnit=newSelectedUnit;
+                    myGui.setInfoScreenText(unitsFriend[selectedUnit].getDescription(),renderer);
+                }
             }
             else {
                 //You clicked somewhere else, while a unit was selected this is a movement command

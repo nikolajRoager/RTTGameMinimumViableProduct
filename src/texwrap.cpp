@@ -58,7 +58,7 @@ texwrap::texwrap(fs::path path, SDL_Renderer* renderer) {
 
     std::cout<<"Loading texture "<<path<<std::endl;
 
-    SDL_Surface* surface = IMG_Load(path.c_str());
+    SDL_Surface* surface = IMG_Load(path.string().c_str());
     if (surface == nullptr) {
         throw std::runtime_error("Unable to load image: " + std::string(SDL_GetError()));
     }

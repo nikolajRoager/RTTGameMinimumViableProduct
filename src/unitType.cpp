@@ -95,6 +95,15 @@ unitType::unitType(const fs::path& unitPath, SDL_Renderer *renderer): landUnit(l
             else
                 landUnit = false;
         }
+        if (tag=="name") {
+            //A little circus with strings to get the name (which is the rest of the line)
+            name="";
+            ss >> name;
+            std::string str;
+            while (ss >> str)
+                name += " "+str;
+            std::cout << name << std::endl;
+        }
     }
 
 }

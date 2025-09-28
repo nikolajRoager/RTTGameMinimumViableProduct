@@ -42,3 +42,9 @@ myType(type), myPhase(unitType::IDLE), side(_side), hexX(_hexX), hexY(_hexY), re
     //pseudo Random starting flip
     flip = hexX%2==hexY%2;
 }
+
+std::string unit::getDescription() const {
+    std::string out=myType.getName();
+    out+=std::string("&")+(side?"Friendly":"Hostile");
+    return out;
+}

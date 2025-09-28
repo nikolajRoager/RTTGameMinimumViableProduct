@@ -62,6 +62,8 @@ public:
 
     void render(double scale,uint32_t millis,SDL_Renderer *renderer) const;
     void updateAnimation(uint32_t millis);
+
+    [[nodiscard]] std::string getDescription() const;
 };
 
 #endif //PREMVPMAPGAME_UNIT_H

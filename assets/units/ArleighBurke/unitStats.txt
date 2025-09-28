@@ -5,3 +5,6 @@ ready 4
 unprepare 4
 landUnit false
 movementPoints 5
+name Arleigh Burke class Destroyer
+SAMRange 3
+SSMRange 6
