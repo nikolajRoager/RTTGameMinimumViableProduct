@@ -52,6 +52,7 @@ private:
 
     std::string movementPlanningDescription;
     std::string movementExecutionDescription;
+    std::string attackPlanningDescription;
 
     gui myGui;
 

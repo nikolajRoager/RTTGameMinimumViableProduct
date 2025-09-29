@@ -45,8 +45,9 @@ scenario::scenario(SDL_Renderer* renderer, TTF_Font* _font) : background(fs::pat
     scale=1.0;
 
 
-    movementPlanningDescription="Right click to select units, then right click to move\nPress enter or \"execute\" to execute the plan\nRight click a friendly unit for more details\n\nFriendly units are highlighted with Green";
+    movementPlanningDescription="Right click to select a unit, then right click to move\nPress enter or \"execute\" to execute the plan\nRight click a friendly unit for more details\n\nFriendly units are highlighted with Green";
     movementExecutionDescription="Executing movement plan&please wait";
+    attackPlanningDescription="Right click to select a unit, left click to give attack order\nPress enter or \"execute\" to execute the plans";
 
     myGui.setInfoScreenText(movementPlanningDescription,renderer);
 
@@ -60,6 +61,9 @@ void scenario::render(SDL_Renderer* renderer, int screenWidth, int screenHeight,
 
     background.render(0,0,renderer,scale);
 
+    if (myGui.doShowHexOutline())
+        grid.drawAllTiles(renderer,scale);
+
     if (currentPhase==MOVEMENT_PLANNING_FRIEND) {
         //Show the tile the mouse is over
         grid.drawTile(renderer,mouseOverTile,scale);
@@ -68,6 +72,7 @@ void scenario::render(SDL_Renderer* renderer, int screenWidth, int screenHeight,
         //Display how far we can move
         if (selectedUnit!=-1 && selectedTile!=-1) {
 
+            //TODO: DO NOT RECALCULATE THIS EVERY FRAME
             std::set<int> obstructed;
             //We get obstructed by the current position of units, and by their destinations
             for (const unit& u : unitsFriend) {
@@ -86,6 +91,7 @@ void scenario::render(SDL_Renderer* renderer, int screenWidth, int screenHeight,
             grid.drawPath(renderer,line,scale);
         }
 
+        //Draw all planned movement
         for (const auto &val: friendMovementPlans | std::views::values) {
             grid.drawPath(renderer,val,scale);
         }
@@ -111,6 +117,8 @@ void scenario::render(SDL_Renderer* renderer, int screenWidth, int screenHeight,
         }
     }
     else if (currentPhase==MOVEMENT_EXECUTION) {
+        //Show the tile the mouse is over
+        grid.drawTile(renderer,mouseOverTile,scale);
 
         for (const auto & U : unitsFriend) {
             U.render(scale,millis,renderer);
@@ -126,6 +134,28 @@ void scenario::render(SDL_Renderer* renderer, int screenWidth, int screenHeight,
                 double samRange = U.getSAMRange();
                 if (samRange>0)
                     circle10.render(U.getX(),U.getY(),255,255,0,64,renderer,scale*samRange*0.1,true);
+            }
+        }
+    }
+    else if (currentPhase==ATTACK_PLANNING) {
+
+        for (int i = 0; i < unitsFriend.size(); i++) {
+            const unit& U = unitsFriend[i];
+            if (i != selectedUnit || millis%500<250)
+                grid.drawTile(renderer,grid.getHexId(U.getHexX(),U.getHexY()),scale,hexGrid::COLOR,128,255,128,255);
+            U.render(scale,millis,renderer);
+
+            if (myGui.doShowSSMRange() || i == selectedUnit) {
+                //Show SSM range
+                double ssmRange = U.getSSMRange();
+                if (ssmRange>0)
+                    circle10.render(U.getX(),U.getY(),255,0,0,i == selectedUnit ?128:64,renderer,scale*ssmRange*0.1,true);
+            }
+            if (myGui.doShowSAMRange() || i == selectedUnit) {
+                //Show SAM range
+                double samRange = U.getSAMRange();
+                if (samRange>0)
+                    circle10.render(U.getX(),U.getY(),255,255,0,i == selectedUnit ?128:64,renderer,scale*samRange*0.1,true);
             }
         }
     }
@@ -212,7 +242,7 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
 
                     selectedUnit=-1;
 
-                    myGui.setInfoScreenText(movementPlanningDescription,renderer);
+                    myGui.setInfoScreenText(attackPlanningDescription,renderer);
                 }
             }
         }
@@ -337,11 +367,46 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
 
 
         if (pendingUnits==0) {
-            currentPhase=MOVEMENT_PLANNING_FRIEND;
+            currentPhase=ATTACK_PLANNING;
             myGui.setInfoScreenText(movementPlanningDescription,renderer);
             friendMovementPlans.clear();
         }
 
+    }
+    else if (currentPhase == ATTACK_PLANNING) {
+        //Right click to select units
+        if (isRightMouseClick) {
+            //See if there is a new unit to select
+            int newSelectedUnit=-1;
+
+            for (int i = 0; i < unitsFriend.size(); i++) {
+                if (grid.getHexId(unitsFriend[i].getHexX(),unitsFriend[i].getHexY())==mouseOverTile) {
+                    selectedTile = mouseOverTile;
+                    newSelectedUnit = i;
+                    unitsFriend[i].doReadyAttack();
+                }
+            }
+            if (newSelectedUnit != -1) {
+                //Deselect selected unit
+                if (selectedUnit!=-1) {
+                    if (selectedUnit != newSelectedUnit) {
+                        unitsFriend[selectedUnit].unreadyAttack();
+                        selectedUnit=newSelectedUnit;
+                        myGui.setInfoScreenText(unitsFriend[selectedUnit].getDescription(),renderer);
+                    }
+                }
+                else {
+                    selectedUnit=newSelectedUnit;
+                    myGui.setInfoScreenText(unitsFriend[selectedUnit].getDescription(),renderer);
+                }
+            }
+            else {
+                if (selectedUnit!=-1)
+                    unitsFriend[selectedUnit].unreadyAttack();
+                selectedUnit=-1;
+                myGui.setInfoScreenText(attackPlanningDescription,renderer);
+            }
+        }
     }
 
     for (unit& U: unitsFriend) {

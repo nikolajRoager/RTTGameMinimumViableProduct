@@ -61,6 +61,12 @@ public:
         }
     }
 
+    void drawAllTiles(SDL_Renderer *renderer, double scale,  tileDisplayMode display_mode=STATUS, Uint8 r=255, Uint8 g=125, Uint8 b=125, Uint8 a=125) const {
+        for (int i = 0; i < hexTiles.size(); i++) {
+            drawTile(renderer,i,scale,display_mode,r,g,b,a);
+        }
+    }
+
     void drawPath(SDL_Renderer *renderer,const std::vector<int>& pathToDraw, double scale) const;
 
 

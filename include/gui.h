@@ -50,6 +50,7 @@ private:
 public:
     [[nodiscard]] bool doShowSAMRange () const {return showSAMRange;}
     [[nodiscard]] bool doShowSSMRange () const {return showSSMRange;}
+    [[nodiscard]] bool doShowHexOutline () const {return showHexOutline;}
 
 
     gui(const fs::path& guiFolder, SDL_Renderer* renderer, TTF_Font* font);

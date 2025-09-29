@@ -93,7 +93,9 @@ void gui::render(int scenarioWidth, int scenarioHeight, SDL_Renderer *renderer, 
         (thePhase == MOVEMENT_EXECUTION) ?  (millis%1000<500 ? 2 : 1) : 0
             )
         );
-    attackPhaseMarker.render((scenarioWidth-RIGHT_BAR_PIXELS)*scale,(scenarioHeight+movementPhaseMarker.getHeight())*scale,renderer,scale,false,false,3,0);
+    attackPhaseMarker.render((scenarioWidth-RIGHT_BAR_PIXELS)*scale,(scenarioHeight+movementPhaseMarker.getHeight())*scale,renderer,scale,false,false,3,
+        thePhase == ATTACK_PLANNING ?  (millis%1000<500 ? 1 : 0) :  0
+        );
 
     //The execute button is in the bottom right tile
     executeMarker.render((scenarioWidth+RIGHT_BAR_PIXELS/2)*scale,(scenarioHeight+BOTTOM_BAR_PIXELS/2)*scale,renderer,scale,true,false,2,thePhase==MOVEMENT_EXECUTION? 1 : 0);

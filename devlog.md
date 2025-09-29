@@ -254,4 +254,59 @@ I finally got the map-modes to work, now you can toggle hexagon outlines, sam, a
 
 Now the time has come to add the attack phase. I will be a lot of days work, but it is time, and I think it would be cool if I could start the next weekly update with a re-enactment of the "russian warship go fuck yourself" incident.
 
-what do I even need for that, let's make a list!
+what do I even need for that, truth be told, I haven't even thought this through, this has always been some thing I will figure out later
+
+So let us make a list of what we need, for the full game version, then we will cut it down later
+
+* The game need to go into `ATTACK_PLANNING` mode
+    * In attack planning mode, you select units with right click, give attack orders with left click
+    * In attack planning mode, you can click units to set up an `attackOrder` which include
+      * Who attacks
+      * Launch time
+        * The time is arbitrarily measured in seconds into execution phase (masquerading as minutes)
+        * It is possible to set launch time anywhere inside 60 seconds
+        * We need a display in the left sidebar, where the user can modify 
+        * I am not good at writing this, but I have a pretty clear idea inside my head
+      * Projectile speed
+      * Attack vectors: i.e. the waypoints the projectile follows
+        * Some missiles allow multiple waypoints, i.e. you can circumvent defences by changing path
+      * There should be an option (i.d.k. about the UI for it) of setting the weapon "free" to use its own seeker
+      * Display vector as a thick line or with arrow rendering, display waypoints with arrival times
+* After `ATTACK_PLANNING` mode, you go to `ATTACK_EXECUTION`
+  * In execution mode, SSMs are launched when the launch time arrives (as long as the unit has not been destroyed)
+  * Units have an "attack" animation they play
+  * We need particle rendering of smoke particles, and textures for the missiles.
+  * SSMs strictly follow the attack plan until the last waypoint, where they either explode or activate their seeker (let's experiment with what makes most sense)
+  * Maybe add chaff clouds and CIWS with a random chance of destroying the missile
+  * Each SSM do 1 hp damage to the unit if it detonates on the same hex
+  * When units run out of hp they play their death animation, and disappear at the end of the phase
+  * SAMs automatically launch if the calculated interception point is in range
+  * SAMs should check if another SAM has been targeted at the same missile first
+* I also want a Slava class cruiser to shoot at
+
+Ok, that is a lot of stuff, a first, minimum viable product build must be a lot simpler, let us try for a simplified list
+
+* The game need to go into `ATTACK_PLANNING` mode
+    * In attack planning mode, you select units with right click, give attack orders with left click
+    * In attack planning mode, you can click units to set up an `attackOrder` which include
+        * Who attacks
+        * Launch time
+            * is always 0, instant launch
+        * Projectile speed
+        * Attack vectors: i.e. the waypoints the projectile follows
+            * single waypoint only
+        * no weapon seekers
+        * simple display
+* After `ATTACK_PLANNING` mode, you go to `ATTACK_EXECUTION`
+    * In execution mode, SSMs are launched at the start
+    * Just render the missile textures
+    * SSMs strictly follow the attack plan until the last waypoint, where they either explode 
+    * Units don't take damage
+    * SAMs are not considered
+* I also want a Slava class cruiser to shoot at
+
+it seriously took about 3 hours to compile these lists, with a lot of thinking inbetween, I might not have time to implement it today
+
+I only managed to do the basics: adding the `ATTACK_PLANNING` phase, and setting up some display of it.
+
+I think I still have done a lot of work today, and I should certainly not work tomorrow
