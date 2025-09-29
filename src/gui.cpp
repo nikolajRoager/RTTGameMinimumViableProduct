@@ -8,7 +8,7 @@
 #include <iostream>
 #include <SDL2/SDL_render.h>
 
-gui::gui(const fs::path& guiFolder, SDL_Renderer *renderer, TTF_Font* font): backgroundTile((guiFolder/"guiTile.png"),renderer),movementPhaseMarker((guiFolder/"movementPhase.png"),renderer),attackPhaseMarker((guiFolder/"attackPhase.png"),renderer),executeMarker((guiFolder/"execute.png"),renderer),infoScreen((guiFolder/"infoScreen.png"),renderer) {
+gui::gui(const fs::path& guiFolder, SDL_Renderer *renderer, TTF_Font* font): backgroundTile((guiFolder/"guiTile.png"),renderer),movementPhaseMarker((guiFolder/"movementPhase.png"),renderer),attackPhaseMarker((guiFolder/"attackPhase.png"),renderer),executeMarker((guiFolder/"execute.png"),renderer),infoScreen((guiFolder/"infoScreen.png"),renderer), flipButton((guiFolder/"flipButton.png"),renderer),mapModeHexOutline("Hex outlines",renderer,font),samRangeHexOutline("SAM range",renderer,font),ssmRangeHexOutline("SSM range",renderer,font) {
     std::cout<<"Loaded gui"<<std::endl;
     infoScreenFont=font;
     infoScreenMaxExpansion=infoScreen.getHeight();
@@ -41,6 +41,28 @@ void gui::update( int mouseX, int mouseY, bool mouseClicked, int scenarioWidth, 
             }
         }
     }
+
+    if (mouseX>(scenarioWidth-2*RIGHT_BAR_PIXELS+10)*scale &&
+        mouseY>(scenarioHeight+10)*scale &&
+        mouseX<(scenarioWidth-2*RIGHT_BAR_PIXELS+10+flipButton.getWidth()*0.5)*scale &&
+        mouseY<(scenarioHeight+10+flipButton.getHeight())*scale &&
+        mouseClicked)
+        showHexOutline=!showHexOutline;
+
+    if (mouseX>(scenarioWidth-2*RIGHT_BAR_PIXELS+10)*scale &&
+        mouseY>(scenarioHeight+20+flipButton.getHeight())*scale &&
+        mouseX<(scenarioWidth-2*RIGHT_BAR_PIXELS+10+flipButton.getWidth()*0.5)*scale &&
+        mouseY<(scenarioHeight+20+2*flipButton.getHeight())*scale &&
+        mouseClicked)
+        showSAMRange =!showSAMRange;
+
+    if (mouseX>(scenarioWidth-2*RIGHT_BAR_PIXELS+10)*scale &&
+        mouseY>(scenarioHeight+30+2*flipButton.getHeight())*scale &&
+        mouseX<(scenarioWidth-2*RIGHT_BAR_PIXELS+10+flipButton.getWidth()*0.5)*scale &&
+        mouseY<(scenarioHeight+30+3*flipButton.getHeight())*scale &&
+        mouseClicked)
+        showSSMRange =!showSSMRange;
+
 }
 
 void gui::render(int scenarioWidth, int scenarioHeight, SDL_Renderer *renderer, double scale,uint32_t millis, phase thePhase) const {
@@ -53,6 +75,17 @@ void gui::render(int scenarioWidth, int scenarioHeight, SDL_Renderer *renderer, 
         backgroundTile.render(scenarioWidth*scale,y*scale,renderer,scale);
         backgroundTile.render((scenarioWidth+RIGHT_BAR_PIXELS-1)*scale,y*scale,renderer,scale);
     }
+
+    //Flip button for hexagon tiles
+    flipButton.render((scenarioWidth-2*RIGHT_BAR_PIXELS+10)*scale,(scenarioHeight+10)*scale,renderer,scale,false,false,2,showHexOutline?1:0);
+    mapModeHexOutline.render((scenarioWidth-2*RIGHT_BAR_PIXELS+flipButton.getWidth()*0.5+10)*scale,(scenarioHeight+10)*scale,renderer,scale);
+    //button for SAM range
+    flipButton.render((scenarioWidth-2*RIGHT_BAR_PIXELS+10)*scale,(scenarioHeight+20+flipButton.getHeight())*scale,renderer,scale,false,false,2,showSAMRange?1:0);
+    samRangeHexOutline.render((scenarioWidth-2*RIGHT_BAR_PIXELS+flipButton.getWidth()*0.5+10)*scale,(scenarioHeight+20+flipButton.getHeight())*scale,renderer,scale);
+    //button for SSM range
+    flipButton.render((scenarioWidth-2*RIGHT_BAR_PIXELS+10)*scale,(scenarioHeight+30+flipButton.getHeight()*2)*scale,renderer,scale,false,false,2,showSSMRange?1:0);
+    ssmRangeHexOutline.render((scenarioWidth-2*RIGHT_BAR_PIXELS+flipButton.getWidth()*0.5+10)*scale,(scenarioHeight+30+2*flipButton.getHeight())*scale,renderer,scale);
+
 
     //The flashing buttons are drawn atop each other, on the 2nd tile from the right
     movementPhaseMarker.render((scenarioWidth-RIGHT_BAR_PIXELS)*scale,scenarioHeight*scale,renderer,scale,false,false,3,

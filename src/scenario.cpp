@@ -9,7 +9,7 @@
 #include <ranges>
 #include <SDL2/SDL_ttf.h>
 
-scenario::scenario(SDL_Renderer* renderer, TTF_Font* _font) : background(fs::path("assets")/"background.png",renderer), hexSelectionOutline(fs::path("assets")/"hexoutline.png",renderer), grid(fs::path("assets"),renderer), myGui(fs::path("assets")/"gui",renderer,_font) {
+scenario::scenario(SDL_Renderer* renderer, TTF_Font* _font) : background(fs::path("assets")/"background.png",renderer), hexSelectionOutline(fs::path("assets")/"hexoutline.png",renderer),circle10(fs::path("assets")/"circle10.png",renderer), grid(fs::path("assets"),renderer), myGui(fs::path("assets")/"gui",renderer,_font) {
 
 
     //Will instantly be overwritten
@@ -73,9 +73,9 @@ void scenario::render(SDL_Renderer* renderer, int screenWidth, int screenHeight,
             for (const unit& u : unitsFriend) {
                 obstructed.insert(grid.getHexId(u.getHexX(),u.getHexY()));
             }
-            for (const auto &plans: friendMovementPlans ) {
-                if (!plans.second.empty() && plans.first!=selectedUnit) {
-                    obstructed.insert(plans.second.back());
+            for (const auto &[fst, snd]: friendMovementPlans ) {
+                if (!snd.empty() && fst!=selectedUnit) {
+                    obstructed.insert(snd.back());
                 }
             }
 
@@ -91,15 +91,42 @@ void scenario::render(SDL_Renderer* renderer, int screenWidth, int screenHeight,
         }
 
 
-        for (const unit& U: unitsFriend) {
+        for (int i = 0; i < unitsFriend.size(); i++) {
+            const unit& U = unitsFriend[i];
             grid.drawTile(renderer,grid.getHexId(U.getHexX(),U.getHexY()),scale,hexGrid::COLOR,128,255,128,255);
             U.render(scale,millis,renderer);
+
+            if (myGui.doShowSSMRange() || i == selectedUnit) {
+                //Show SSM range
+                double ssmRange = U.getSSMRange();
+                if (ssmRange>0)
+                    circle10.render(U.getX(),U.getY(),255,0,0,i == selectedUnit ?128:64,renderer,scale*ssmRange*0.1,true);
+            }
+            if (myGui.doShowSAMRange() || i == selectedUnit) {
+                //Show SAM range
+                double samRange = U.getSAMRange();
+                if (samRange>0)
+                    circle10.render(U.getX(),U.getY(),255,255,0,i == selectedUnit ?128:64,renderer,scale*samRange*0.1,true);
+            }
         }
     }
     else if (currentPhase==MOVEMENT_EXECUTION) {
 
         for (const auto & U : unitsFriend) {
             U.render(scale,millis,renderer);
+
+            if (myGui.doShowSSMRange()) {
+                //Show SSM range
+                double ssmRange = U.getSSMRange();
+                if (ssmRange>0)
+                    circle10.render(U.getX(),U.getY(),255,0,0,64,renderer,scale*ssmRange*0.1,true);
+            }
+            if (myGui.doShowSAMRange()) {
+                //Show SAM range
+                double samRange = U.getSAMRange();
+                if (samRange>0)
+                    circle10.render(U.getX(),U.getY(),255,255,0,64,renderer,scale*samRange*0.1,true);
+            }
         }
     }
 
@@ -107,8 +134,8 @@ void scenario::render(SDL_Renderer* renderer, int screenWidth, int screenHeight,
 }
 
 void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,  int mouseX, int mouseY, bool isLeftMouseClick, bool isRightMouseClick, bool executeClick,uint32_t millis, uint32_t dmillis) {
-    scale = std::min(static_cast<double>(screenWidth) / static_cast<double>(scenarioWidthPx+myGui.getRightBarPixels()),
-                     static_cast<double>(screenHeight) / static_cast<double>(scenarioHeightPx+myGui.getBottomBarPixels()));
+    scale = std::min(static_cast<double>(screenWidth) / static_cast<double>(scenarioWidthPx+gui::getRightBarPixels()),
+                     static_cast<double>(screenHeight) / static_cast<double>(scenarioHeightPx+gui::getBottomBarPixels()));
 
 
     mouseOverTile=grid.getHexFromLocation(mouseX,mouseY,scale);

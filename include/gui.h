@@ -26,6 +26,12 @@ private:
 
     texwrap infoScreen;
 
+    texwrap flipButton;
+
+    texwrap mapModeHexOutline;
+    texwrap samRangeHexOutline;
+    texwrap ssmRangeHexOutline;
+
     TTF_Font *infoScreenFont;
 
     std::vector<std::pair<texwrap,std::pair<int,int> > > infoScreenLines;
@@ -37,7 +43,15 @@ private:
     double infoScreenExpansion=0;
     double infoScreenMaxExpansion;
 
+    bool showHexOutline=false;
+    bool showSAMRange = false;
+    bool showSSMRange = false;
+
 public:
+    [[nodiscard]] bool doShowSAMRange () const {return showSAMRange;}
+    [[nodiscard]] bool doShowSSMRange () const {return showSSMRange;}
+
+
     gui(const fs::path& guiFolder, SDL_Renderer* renderer, TTF_Font* font);
 
     static int getRightBarPixels() {return RIGHT_BAR_PIXELS;}

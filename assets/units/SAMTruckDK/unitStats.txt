@@ -6,4 +6,4 @@ unprepare 4
 landUnit true
 movementPoints 3
 name Danish SAM Launcher
-SAMRange 4
+SAMRange 10

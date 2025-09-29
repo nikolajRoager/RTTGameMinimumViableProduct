@@ -21,6 +21,8 @@ class scenario {
 private:
     texwrap background;
     texwrap hexSelectionOutline;
+    ///A white circle with a radius of 10 hex sizes
+    texwrap circle10;
 
     std::vector<unitType> unitLibrary;
 
@@ -38,7 +40,6 @@ private:
     int selectedUnit=-1;
 
     hexGrid grid;
-
 
     ///What phase of the game are we going through
     phase currentPhase=MOVEMENT_PLANNING_FRIEND;

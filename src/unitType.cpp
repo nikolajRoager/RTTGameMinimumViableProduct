@@ -54,7 +54,7 @@ bool unitType::isAnimationFinished(uint32_t millis, animationPhase phase) const 
     }
 }
 
-unitType::unitType(const fs::path& unitPath, SDL_Renderer *renderer): landUnit(landUnit), texture((unitPath/"idle.png"), renderer), idle((unitPath/"idle.png"),renderer), move((unitPath/"move.png"),renderer), prepare((unitPath/"prepare.png"),renderer),ready((unitPath/"ready.png"),renderer), unprepare((unitPath/"unprepare.png"),renderer) {
+unitType::unitType(const fs::path& unitPath, SDL_Renderer *renderer): texture((unitPath/"idle.png"), renderer), idle((unitPath/"idle.png"),renderer), move((unitPath/"move.png"),renderer), prepare((unitPath/"prepare.png"),renderer),ready((unitPath/"ready.png"),renderer), unprepare((unitPath/"unprepare.png"),renderer) {
     std::ifstream animationStats(unitPath/"unitStats.txt");
     std::string line;
 
@@ -65,6 +65,10 @@ unitType::unitType(const fs::path& unitPath, SDL_Renderer *renderer): landUnit(l
     unprepare_frames=1;
     landUnit=true;
     movementPoints=3;
+
+    SAMRange=0;
+    SSMRange=0;
+
     while (std::getline(animationStats, line)) {
         std::stringstream ss(line);
         std::string tag;
@@ -103,6 +107,12 @@ unitType::unitType(const fs::path& unitPath, SDL_Renderer *renderer): landUnit(l
             while (ss >> str)
                 name += " "+str;
             std::cout << name << std::endl;
+        }
+        if (tag=="SAMRange") {
+            ss >> SAMRange;
+        }
+        if (tag=="SSMRange") {
+            ss >> SSMRange;
         }
     }
 

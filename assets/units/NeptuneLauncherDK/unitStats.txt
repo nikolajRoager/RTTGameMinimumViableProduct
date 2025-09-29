@@ -6,4 +6,4 @@ unprepare 3
 landUnit true
 movementPoints 3
 name Danish cruise-missile Launcher
-SSMRange 6
+SSMRange 16

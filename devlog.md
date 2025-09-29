@@ -221,7 +221,7 @@ I still need the following GUI:
 Text seems to be a very big and complicated thing to work with.
 
 
-Day 10 Saturday and Sunday 27/9/2025 CE and 28/9/2025
+Day 10 Saturday and Sunday 27/9/2025 CE and 28/9/2025 CE
 =====
 background
 ----------
@@ -229,3 +229,29 @@ I have introduced the idea of a half-day, so I can get work done more days. If I
 
 These two half-days are half because I uploaded another video, it was a lot of work but good to finally be done.
 
+work
+----
+I did not do much today, I only got the info screen to work.
+
+todo
+----
+
+* Map-modes: you should be able to toggle all hexes shown or hidden, and show/hide missile ranges, a little like in paradox games
+* Display missile ranges as circles
+* Info screen should print stats for units
+
+Day 11, monday 29/9/2025 CE
+=========================
+background
+----------
+Office work is insanely inefficient! I just waited 4 hours for a meeting, and the meeting was basically: we agree to have a meeting next wednesday.
+
+At least that gave me some time to work on this project.
+
+work
+----
+I finally got the map-modes to work, now you can toggle hexagon outlines, sam, and ssm ranges.
+
+Now the time has come to add the attack phase. I will be a lot of days work, but it is time, and I think it would be cool if I could start the next weekly update with a re-enactment of the "russian warship go fuck yourself" incident.
+
+what do I even need for that, let's make a list!

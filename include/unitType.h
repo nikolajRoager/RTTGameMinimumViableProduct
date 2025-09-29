@@ -51,10 +51,11 @@ private:
     ///0 if has no SSM
     double SSMRange;
 
-
-
-
 public:
+
+    [[nodiscard]] double getSAMRange() const {return SAMRange;};
+    [[nodiscard]] double getSSMRange() const {return SSMRange;};
+
     [[nodiscard]] int getMovementPoints() const { return movementPoints; }
 
     unitType(const fs::path& unitPath, SDL_Renderer* renderer);

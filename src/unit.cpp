@@ -4,6 +4,8 @@
 
 #include "unit.h"
 
+#include <format>
+
 
 void unit::render(double scale,uint32_t millis, SDL_Renderer *renderer) const {
     myType.render(x, y, scale,millis-animationStart, renderer,myPhase,flip);
@@ -45,6 +47,23 @@ myType(type), myPhase(unitType::IDLE), side(_side), hexX(_hexX), hexY(_hexY), re
 
 std::string unit::getDescription() const {
     std::string out=myType.getName();
-    out+=std::string("&")+(side?"Friendly":"Hostile");
+    out+=std::string("&")+(side?"Friendly\n\n":"Hostile\n\n");
+
+    int movementPoints=getMovementPoints();
+    out+="Movement points: &"+std::to_string(movementPoints)+"\n\n";
+
+
+    double samRange =myType.getSAMRange();
+    if (samRange>0) {
+        const std::string samRangeStr = std::format("{:.3f}", samRange);
+        out+="Surface to Air Missile range = &"+samRangeStr+"\n";
+        out+="&Will auto-attack air targets in range\n";
+    }
+    double ssmRange =myType.getSSMRange();
+    if (ssmRange>0) {
+        const std::string ssmRangeStr = std::format("{:.3f}", ssmRange);
+        out+="Surface to Surface Missile range = &"+ssmRangeStr+"\n";
+        out+="&Can attack land/sea targets in range during attack phase\n";
+    }
     return out;
 }
