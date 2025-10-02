@@ -8,7 +8,7 @@
 
 
 void unit::render(double scale,uint32_t millis, SDL_Renderer *renderer) const {
-    myType.render(x, y, scale,millis-animationStart, renderer,myPhase,flip);
+    myType.render(x*scale, y*scale, scale,millis-animationStart, renderer,myPhase,flip);
 }
 
 void unit::updateAnimation(uint32_t millis) {

@@ -23,6 +23,8 @@ private:
     ///height of the hexagons making up the game grid in pixels (can not be regular hexagons for rounding reasons)
     int hexHeightPx;
 
+    double hexRadiusPx;
+
     ///half the width of the hexagons making up the game grid in pixels (can not be regular hexagons for rounding reasons)
     int hexHalfWidthPx;
     ///three quarters of the height of the hexagons making up the game grid in pixels (can not be regular hexagons for rounding reasons)
@@ -45,6 +47,8 @@ public:
         STATUS,
         COLOR,
     };
+
+    double getHexRadius() const {return hexRadiusPx;}
 
 
     explicit hexGrid(const fs::path &path, SDL_Renderer* renderer);

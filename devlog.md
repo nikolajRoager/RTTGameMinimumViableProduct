@@ -248,7 +248,7 @@ Office work is insanely inefficient! I just waited 4 hours for a meeting, and th
 
 At least that gave me some time to work on this project.
 
-work
+work and todo
 ----
 I finally got the map-modes to work, now you can toggle hexagon outlines, sam, and ssm ranges.
 
@@ -310,3 +310,42 @@ it seriously took about 3 hours to compile these lists, with a lot of thinking i
 I only managed to do the basics: adding the `ATTACK_PLANNING` phase, and setting up some display of it.
 
 I think I still have done a lot of work today, and I should certainly not work tomorrow
+
+
+Day 12.5 (yep the half-day rule came back to bite me) 30/9/2025 CE and 1/10/2025 CE
+=========
+background
+--------
+So yeah, when I introduced the half-day rule I assumed half days would come in pairs, I guess they do not, I had a half-day then a full day.
+
+work
+-------
+I worked on the attack planning and execution phases. Now I can display attack plans, and I can press the execute button and ... nothing happens, but behind the scenes I am working on making a physics engine which can actually calculate the missiles flying
+
+I have decided that I will "bake" the physics calculations before playing back the baked calculations, this should allow the user to re-play the attack animations however many times they like.
+
+It is conceptually very complicated and my work.
+
+I have bodged a solution, such that I can actually throw missiles and watch them fly, they don't do any damage yet, and I really think I need to replace the current system, which uses the attackPlan class with one where the attackPlans gets turned into bakedAttackPlans with more info.
+
+Next time I work though, I will add a Slava class cruiser and I will add damage and sinking animations, because Russian warship go fuck yourself 
+
+todo
+---
+A bunch of things I need to do for the attack planning
+
+* Use drawCircle method instead of manually drawing circle
+* Display radius centered on end of path, for doglegging
+* Dogleg missiles
+* show arrival and launch times in game ./
+* show arrival time only for SELECTED order 
+* sidebar view attack orders on a per-unit basis
+* allow modification of arrival time with scroll wheel
+* add salvo size to file
+* add salvo delay
+
+And for the attack execution
+
+* Bake physics to baked missile path class
+* Have some kind of stored memory of which animations should get activated when, most notably the DIE animation
+* All this should be in a physicsCake

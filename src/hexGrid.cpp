@@ -23,6 +23,8 @@ hexGrid::hexGrid(const fs::path&path, SDL_Renderer* renderer):hexSelectionOutlin
     ///Height of the hexagonal grid this game is being played on, in hexagons
     hexHeightPx=hexSelectionOutline.getHeight();
 
+    hexRadiusPx=hexHeightPx*0.5;
+
     //Divisions are evil and should be kept out of the loop
     hexHalfWidthPx=hexSelectionOutline.getWidth()/2;
     hex34HeightPx=(hexSelectionOutline.getHeight()*3)/4;

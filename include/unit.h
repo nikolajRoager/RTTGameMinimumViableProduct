@@ -36,6 +36,7 @@ public:
     [[nodiscard]] int getMovementPoints() const { return myType.getMovementPoints(); }
     [[nodiscard]] double getSAMRange() const { return myType.getSAMRange(); }
     [[nodiscard]] double getSSMRange() const { return myType.getSSMRange(); }
+    [[nodiscard]] int getSSMSalvoSize() const { return myType.getSSMSalvoSize(); }
 
     [[nodiscard]] uint32_t timeSinceAnimationStart(const uint32_t millis) const {return millis-animationStart;}
 
@@ -44,8 +45,8 @@ public:
     void setHexX(int _hexX) {hexX = _hexX;}
     void setHexY(int _hexY) {hexY = _hexY;}
 
-    double getX() const { return x; }
-    double getY() const { return y; }
+    [[nodiscard]] double getX() const { return x; }
+    [[nodiscard]] double getY() const { return y; }
 
     void setX (double _x) {x=_x;}
     void setY (double _y) {y=_y;}

@@ -106,6 +106,7 @@ void engine::run() {
     while (!quit) {
         prevRightMouseDown=rightMouseDown;
         prevLeftMouseDown=leftMouseDown;
+        prevExecuteDown=executeDown;
         SDL_Event event;
         //First handle events
         while (SDL_PollEvent(&event)) {
@@ -164,6 +165,7 @@ void engine::run() {
         theScenario->render(renderer,windowWidthPx,windowHeightPx,millis);
         SDL_RenderPresent( renderer );
         pmillis=millis;
+
     }
 }
 

@@ -34,7 +34,6 @@ texwrap&  texwrap::operator=(texwrap&& other)  noexcept {
 }
 
 texwrap::texwrap(const std::string& words, SDL_Renderer* renderer, TTF_Font* _font) {
-    std::cout<<"Loading string "<<words<<std::endl;
 
     const SDL_Color color = {255,255,255,255};
     SDL_Surface* surface = TTF_RenderText_Solid( _font,!words.empty()? words.c_str() :" ", color);

@@ -9,6 +9,7 @@
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_ttf.h>
 
+#include "attackPlan.h"
 #include "gui.h"
 #include "hexGrid.h"
 #include "hexTile.h"
@@ -48,13 +49,35 @@ private:
     ///The queued up movements for the good guys, indexed by unit id,
     std::map<int,std::vector<int> > friendMovementPlans;
 
+    ///The queued up attack plans for each unit, again index by unit id
+    std::map<int,std::vector<attackPlan> > attackPlans;
+
+
     double scale;
 
     std::string movementPlanningDescription;
     std::string movementExecutionDescription;
     std::string attackPlanningDescription;
+    std::string attackExecutionDescription;
 
     gui myGui;
+
+    TTF_Font* inGameFont;
+
+    ///Timer for the physics playback of the attack execution phase
+    double attackExecutionPlaybackTimer=0.0;
+    ///How long physics playback have we backed in
+    double attackExecutionPlaybackMaxTime = 0.0;
+    ///How far are we
+    enum attackExecutionPlaybackPlayingState {
+        UNSTARTED,
+        PLAYING,
+        FINISHED
+    };
+    attackExecutionPlaybackPlayingState attackExecutionState=UNSTARTED;
+
+    ///A surface-to-surface missile in flight
+    texwrap flyingSSM;
 
 public:
     explicit scenario(SDL_Renderer* renderer, TTF_Font* _font);

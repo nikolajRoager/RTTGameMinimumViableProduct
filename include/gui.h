@@ -61,6 +61,8 @@ public:
     void update( int mouseX, int mouseY, bool mouseClicked, int scenarioWidth, int scenarioHeight, double scale, uint32_t dmillis);
     void render(int scenarioWidth, int scenarioHeight, SDL_Renderer* renderer, double scale, uint32_t millis, phase thePhase) const;
 
+    ///Render the GUI specifically for the playback of the attack animation
+    void renderAttackExecution(int scenarioWidth, int scenarioHeight, SDL_Renderer* renderer, double scale, double playbackTime, double maxPlaybackTime) const;
 
     [[nodiscard]] bool isExecuteButtonPressed() const {return pressExecuteButton;}
 

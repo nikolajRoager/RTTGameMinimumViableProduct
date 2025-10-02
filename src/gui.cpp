@@ -5,6 +5,7 @@
 
 #include "gui.h"
 
+#include <format>
 #include <iostream>
 #include <SDL2/SDL_render.h>
 
@@ -111,6 +112,16 @@ void gui::render(int scenarioWidth, int scenarioHeight, SDL_Renderer *renderer, 
         line.first.render(infoScreenLineX0+line.second.first*scale,infoScreenLineY0+line.second.second*scale,renderer,scale);
     }
 }
+
+void gui::renderAttackExecution(int scenarioWidth, int scenarioHeight, SDL_Renderer *renderer, double scale, double playbackTime, double maxPlaybackTime) const {
+
+    //Yes, creating a temporary texture class with a string every frame is bad practice
+    //But this thing ACTUALLY changes every single frame so we NEED a new texture every frame
+    texwrap currentTimeCounter (std::format("{:.3f}", playbackTime),renderer,infoScreenFont);
+
+    currentTimeCounter.render((scenarioWidth+RIGHT_BAR_PIXELS/2)*scale,(BOTTOM_BAR_PIXELS/2)*scale,renderer,scale);
+}
+
 
 void gui::setInfoScreenText(std::string text, SDL_Renderer* renderer) {
     infoScreenLines.clear();

@@ -43,18 +43,26 @@ private:
     unsigned int unprepare_frames;
 
     ///Range of surface-to-air missiles aboard this thing
-    ///0 if has no SAM,
+    ///is 0 if it has no SAM,
     ///SAM will automatically engage all air threats in range
     double SAMRange;
 
     ///Range of surface-to-surface missiles aboard this thing
-    ///0 if has no SSM
+    ///is 0 if it has no SSM
     double SSMRange;
+
+    ///TODO, load this from file
+    ///How many SSMs we can fire in one turn
+    int SSMSalvoSize=4;
+
 
 public:
 
     [[nodiscard]] double getSAMRange() const {return SAMRange;};
     [[nodiscard]] double getSSMRange() const {return SSMRange;};
+
+    [[nodiscard]] int getSSMSalvoSize() const {return SSMSalvoSize;};
+
 
     [[nodiscard]] int getMovementPoints() const { return movementPoints; }
 

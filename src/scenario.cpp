@@ -9,9 +9,10 @@
 #include <ranges>
 #include <SDL2/SDL_ttf.h>
 
-scenario::scenario(SDL_Renderer* renderer, TTF_Font* _font) : background(fs::path("assets")/"background.png",renderer), hexSelectionOutline(fs::path("assets")/"hexoutline.png",renderer),circle10(fs::path("assets")/"circle10.png",renderer), grid(fs::path("assets"),renderer), myGui(fs::path("assets")/"gui",renderer,_font) {
+scenario::scenario(SDL_Renderer* renderer, TTF_Font* _font) : background(fs::path("assets")/"background.png",renderer), hexSelectionOutline(fs::path("assets")/"hexoutline.png",renderer),circle10(fs::path("assets")/"circle10.png",renderer), grid(fs::path("assets"),renderer), myGui(fs::path("assets")/"gui",renderer,_font), flyingSSM(fs::path("assets")/"physicsGraphics"/"SSM.png",renderer) {
 
 
+    inGameFont = _font;
     //Will instantly be overwritten
     mouseOverTile=0;
 
@@ -46,8 +47,9 @@ scenario::scenario(SDL_Renderer* renderer, TTF_Font* _font) : background(fs::pat
 
 
     movementPlanningDescription="Right click to select a unit, then right click to move\nPress enter or \"execute\" to execute the plan\nRight click a friendly unit for more details\n\nFriendly units are highlighted with Green";
-    movementExecutionDescription="Executing movement plan&please wait";
+    movementExecutionDescription="Executing movement plans&please wait";
     attackPlanningDescription="Right click to select a unit, left click to give attack order\nPress enter or \"execute\" to execute the plans";
+    attackExecutionDescription="Executing attack plans&please wait";
 
     myGui.setInfoScreenText(movementPlanningDescription,renderer);
 
@@ -106,13 +108,13 @@ void scenario::render(SDL_Renderer* renderer, int screenWidth, int screenHeight,
                 //Show SSM range
                 double ssmRange = U.getSSMRange();
                 if (ssmRange>0)
-                    circle10.render(U.getX(),U.getY(),255,0,0,i == selectedUnit ?128:64,renderer,scale*ssmRange*0.1,true);
+                    circle10.render(U.getX()*scale,U.getY()*scale,255,0,0,i == selectedUnit ?128:64,renderer,scale*ssmRange*0.2,true);
             }
             if (myGui.doShowSAMRange() || i == selectedUnit) {
                 //Show SAM range
                 double samRange = U.getSAMRange();
                 if (samRange>0)
-                    circle10.render(U.getX(),U.getY(),255,255,0,i == selectedUnit ?128:64,renderer,scale*samRange*0.1,true);
+                    circle10.render(U.getX()*scale,U.getY()*scale,255,255,0,i == selectedUnit ?128:64,renderer,scale*samRange*0.2,true);
             }
         }
     }
@@ -127,18 +129,18 @@ void scenario::render(SDL_Renderer* renderer, int screenWidth, int screenHeight,
                 //Show SSM range
                 double ssmRange = U.getSSMRange();
                 if (ssmRange>0)
-                    circle10.render(U.getX(),U.getY(),255,0,0,64,renderer,scale*ssmRange*0.1,true);
+                    circle10.render(U.getX()*scale,U.getY()*scale,255,0,0,64,renderer,scale*ssmRange*0.2,true);
             }
             if (myGui.doShowSAMRange()) {
                 //Show SAM range
                 double samRange = U.getSAMRange();
                 if (samRange>0)
-                    circle10.render(U.getX(),U.getY(),255,255,0,64,renderer,scale*samRange*0.1,true);
+                    circle10.render(U.getX()*scale,U.getY()*scale,255,255,0,64,renderer,scale*samRange*0.2,true);
             }
         }
     }
     else if (currentPhase==ATTACK_PLANNING) {
-
+        grid.drawTile(renderer,mouseOverTile,scale);
         for (int i = 0; i < unitsFriend.size(); i++) {
             const unit& U = unitsFriend[i];
             if (i != selectedUnit || millis%500<250)
@@ -149,18 +151,65 @@ void scenario::render(SDL_Renderer* renderer, int screenWidth, int screenHeight,
                 //Show SSM range
                 double ssmRange = U.getSSMRange();
                 if (ssmRange>0)
-                    circle10.render(U.getX(),U.getY(),255,0,0,i == selectedUnit ?128:64,renderer,scale*ssmRange*0.1,true);
+                    circle10.render(U.getX()*scale,U.getY()*scale,255,0,0,i == selectedUnit ?128:64,renderer,scale*ssmRange*0.2,true);
             }
             if (myGui.doShowSAMRange() || i == selectedUnit) {
                 //Show SAM range
                 double samRange = U.getSAMRange();
                 if (samRange>0)
-                    circle10.render(U.getX(),U.getY(),255,255,0,i == selectedUnit ?128:64,renderer,scale*samRange*0.1,true);
+                    circle10.render(U.getX()*scale,U.getY()*scale,255,255,0,i == selectedUnit ?128:64,renderer,scale*samRange*0.2,true);
+            }
+        }
+
+        for (const auto& unitAttackPlan : attackPlans | std::views::values) {
+            for (const auto& attackPlan : unitAttackPlan) {
+                //attackPlan.attackVectors[0];
+                attackPlan.render(renderer,scale);
             }
         }
     }
+    else if (currentPhase==ATTACK_EXECUTION) {
+        for (int i = 0; i < unitsFriend.size(); i++) {
+            const unit& U = unitsFriend[i];
+            if (i != selectedUnit || millis%500<250)
+                grid.drawTile(renderer,grid.getHexId(U.getHexX(),U.getHexY()),scale,hexGrid::COLOR,128,255,128,255);
+            U.render(scale,millis,renderer);
+
+            if (myGui.doShowSSMRange() || i == selectedUnit) {
+                //Show SSM range
+                double ssmRange = U.getSSMRange();
+                if (ssmRange>0)
+                    circle10.render(U.getX()*scale,U.getY()*scale,255,0,0,i == selectedUnit ?128:64,renderer,scale*ssmRange*0.2,true);
+            }
+            if (myGui.doShowSAMRange() || i == selectedUnit) {
+                //Show SAM range
+                double samRange = U.getSAMRange();
+                if (samRange>0)
+                    circle10.render(U.getX()*scale,U.getY()*scale,255,255,0,i == selectedUnit ?128:64,renderer,scale*samRange*0.2,true);
+            }
+        }
+
+        if (attackExecutionState==PLAYING) {
+            //Loop through all attack plans and display them
+            //TODO: use a bakedPhysicsPlan instead
+
+            for (const auto& plans : attackPlans | std::views::values) {
+                for (const auto& plan : plans) {
+                    if (plan.isActive(attackExecutionPlaybackTimer)) {
+                        auto xy = plan.getLocation(attackExecutionPlaybackTimer);
+
+                        flyingSSM.render(xy.first*scale,xy.second*scale,renderer,scale,true,false,4,(millis/(100))%4);
+                    }
+                }
+            }
+        }
+
+    }
 
     myGui.render(scenarioWidthPx,scenarioHeightPx,renderer,scale,millis,currentPhase);
+
+    if (currentPhase==ATTACK_EXECUTION)
+        myGui.renderAttackExecution(scenarioWidthPx,scenarioHeightPx,renderer,scale,attackExecutionPlaybackTimer,attackExecutionPlaybackMaxTime);
 }
 
 void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,  int mouseX, int mouseY, bool isLeftMouseClick, bool isRightMouseClick, bool executeClick,uint32_t millis, uint32_t dmillis) {
@@ -266,8 +315,8 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
 
             const hexTile& unitTile = grid.getHexTile(hexX, hexY);
 
-            U.setX(unitTile.getHexCenterX()*scale);
-            U.setY(unitTile.getHexCenterY()*scale);
+            U.setX(unitTile.getHexCenterX());
+            U.setY(unitTile.getHexCenterY());
 
         }
 
@@ -295,8 +344,8 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
                     const int hexY = U.getHexY();
                     const hexTile& unitTile = grid.getHexTile(hexX, hexY);
 
-                    U.setX(unitTile.getHexCenterX()*scale);
-                    U.setY(unitTile.getHexCenterY()*scale);
+                    U.setX(unitTile.getHexCenterX());
+                    U.setY(unitTile.getHexCenterY());
 
                     if (friendMovementPlans.contains(i)) {
                         ++pendingUnits;
@@ -323,8 +372,8 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
 
                         const hexTile& unitTile = grid.getHexTile(hexX, hexY);
 
-                        U.setX(unitTile.getHexCenterX()*scale);
-                        U.setY(unitTile.getHexCenterY()*scale);
+                        U.setX(unitTile.getHexCenterX());
+                        U.setY(unitTile.getHexCenterY());
 
                         friendMovementPlans.erase(i);
                         U.setAnimation(millis,unitType::IDLE);
@@ -354,10 +403,10 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
                         const hexTile& hexBeforeTile = grid.getHexTile(hexBeforeId);
                         const hexTile& hexAfterTile = grid.getHexTile(hexAfterId);
 
-                        double xbefore=hexBeforeTile.getHexCenterX()*scale;
-                        double xafter=hexAfterTile.getHexCenterX()*scale;
+                        double xbefore=hexBeforeTile.getHexCenterX();
+                        double xafter=hexAfterTile.getHexCenterX();
                         U.setX(xbefore*(1-fac)+xafter*fac);
-                        U.setY(hexBeforeTile.getHexCenterY()*scale*(1-fac)+hexAfterTile.getHexCenterY()*scale*fac);
+                        U.setY(hexBeforeTile.getHexCenterY()*(1-fac)+hexAfterTile.getHexCenterY()*fac);
                         if (hexAfterId!=hexBeforeId)
                             U.setFlip(xbefore<xafter);
                     }
@@ -368,7 +417,7 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
 
         if (pendingUnits==0) {
             currentPhase=ATTACK_PLANNING;
-            myGui.setInfoScreenText(movementPlanningDescription,renderer);
+            myGui.setInfoScreenText(attackPlanningDescription,renderer);
             friendMovementPlans.clear();
         }
 
@@ -405,6 +454,80 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
                     unitsFriend[selectedUnit].unreadyAttack();
                 selectedUnit=-1;
                 myGui.setInfoScreenText(attackPlanningDescription,renderer);
+            }
+        }
+
+        //Left click to add new attack plan, or modify existing
+        if (isLeftMouseClick) {
+            //Obviously only possible if somebody is selected
+            if (selectedUnit!=-1) {
+                //TODO, add option to modify existing attack plan
+
+                double destinationX = mouseX/scale;
+                double destinationY = mouseY/scale;
+
+                //Add a new attack plan from this unit
+                double sourceX = unitsFriend[selectedUnit].getX();
+                double sourceY = unitsFriend[selectedUnit].getY();
+
+                //Check if the new distance is outside range
+                double range = sqrt(pow(destinationX-sourceX,2)+pow(destinationY-sourceY,2));
+
+                std::cout<<" "<<range<<" : "<<unitsFriend[selectedUnit].getSSMRange()*grid.getHexRadius()<<std::endl;
+                if (range<unitsFriend[selectedUnit].getSSMRange()*grid.getHexRadius()) {
+                    if (!attackPlans.contains(selectedUnit))
+                        attackPlans.emplace(selectedUnit,std::vector<attackPlan>());
+                    if (attackPlans[selectedUnit].size()<unitsFriend[selectedUnit].getSSMSalvoSize())
+                        attackPlans[selectedUnit].emplace_back(selectedUnit,sourceX,sourceY,destinationX,destinationY,renderer,inGameFont);
+                }
+            }
+        }
+
+        if (executeClick || myGui.isExecuteButtonPressed()) {
+            currentPhase=ATTACK_EXECUTION;
+            selectedUnit=-1;
+            selectedTile=-1;
+            myGui.setInfoScreenText(attackExecutionDescription,renderer);
+            attackExecutionPlaybackTimer=0.0;
+            attackExecutionPlaybackMaxTime=0.0;
+            attackExecutionState=UNSTARTED;
+
+        }
+    }
+    else if (currentPhase == ATTACK_EXECUTION) {
+
+        if (attackExecutionState==UNSTARTED) {
+            //Before we do anything, we need all units, which need to make an attack, to ready for attack
+            int unreadyUnits=0;
+
+            for (const auto &unitWithPlan: attackPlans | std::views::keys) {
+                if (unitsFriend[unitWithPlan].getAnimationPhase()!=unitType::READY) {
+                    unreadyUnits++;
+                    unitsFriend[unitWithPlan].doReadyAttack();
+                }
+            }
+            if (unreadyUnits==0) {
+                //TODO, bake in physics data in a separate thread
+                attackExecutionState=PLAYING;
+                attackExecutionPlaybackTimer=0.0;
+                attackExecutionPlaybackMaxTime=0.0;
+                //TODO TEMP, we should actually play the entire thing
+                //Loop through all attack plans and find the longest
+                for (const auto& unitPlans : attackPlans | std::views::values) {
+                    for (const auto& plan : unitPlans) {
+                        attackExecutionPlaybackMaxTime=std::max(attackExecutionPlaybackMaxTime,plan.getEndTime());
+                    }
+                }
+                //TODO add time for the particles to dissipate, and death animations to play
+
+            }
+        }
+        if (attackExecutionState==PLAYING) {
+            attackExecutionPlaybackTimer+=dmillis*0.001;
+
+            if (attackExecutionPlaybackTimer>attackExecutionPlaybackMaxTime) {
+                //wait for the player to end this state, or re-play or whatever they feel like
+                attackExecutionState=FINISHED;
             }
         }
     }
