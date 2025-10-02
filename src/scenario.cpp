@@ -4,6 +4,7 @@
 
 #include "scenario.h"
 
+#include <cmath>
 #include <fstream>
 #include <iostream>
 #include <ranges>

@@ -4,6 +4,7 @@
 
 #include "attackPlan.h"
 
+#include <cmath>
 #include <format>
 #include <iostream>
 #include <SDL2/SDL_render.h>
