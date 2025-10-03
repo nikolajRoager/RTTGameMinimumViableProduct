@@ -14,9 +14,9 @@ attackPlan::attackPlan(int _launcherId, double x0, double y0, double x1, double 
     attackVectors.reserve(2);
 
     //TODO, dynamic launch time
-    attackVectors.emplace_back(x0,y0,0,renderer,font);
+    attackVectors.emplace_back(x0,y0,0,0,renderer,font);
     double dist = sqrt(pow(x0-x1,2)+pow(y0-y1,2));
-    attackVectors.emplace_back(x1,y1,dist/projectileSpeed,renderer,font);
+    attackVectors.emplace_back(x1,y1,dist/projectileSpeed,dist,renderer,font);
 }
 
 
@@ -51,8 +51,15 @@ std::pair<double, double> attackPlan::getLocation(double time) const {
             }
         }
     }
-    std::cout<<"HERE ESSE"<<std::endl;
     //Keeps the compiler from throwing warnings, but never actually happens
     return std::make_pair(attackVectors.back().x,attackVectors.back().y);
 }
 
+void attackPlan::addNode(double x, double y, SDL_Renderer* renderer, TTF_Font* font) {
+    //TODO TEMP
+    double prev_dist = attackVectors.back().distance;
+    double x0 = attackVectors.back().x;
+    double y0 = attackVectors.back().y;
+    double dist = sqrt(pow(x-x0,2)+pow(y-y0,2))+prev_dist;
+    attackVectors.emplace_back(x,y,dist/projectileSpeed,dist,renderer,font);
+}

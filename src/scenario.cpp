@@ -151,8 +151,9 @@ void scenario::render(SDL_Renderer* renderer, int screenWidth, int screenHeight,
             if (myGui.doShowSSMRange() || i == selectedUnit) {
                 //Show SSM range
                 double ssmRange = U.getSSMRange();
-                if (ssmRange>0)
+                if (ssmRange>0) {
                     circle10.render(U.getX()*scale,U.getY()*scale,255,0,0,i == selectedUnit ?128:64,renderer,scale*ssmRange*0.2,true);
+                }
             }
             if (myGui.doShowSAMRange() || i == selectedUnit) {
                 //Show SAM range
@@ -162,11 +163,25 @@ void scenario::render(SDL_Renderer* renderer, int screenWidth, int screenHeight,
             }
         }
 
+
         for (const auto& unitAttackPlan : attackPlans | std::views::values) {
             for (const auto& attackPlan : unitAttackPlan) {
                 //attackPlan.attackVectors[0];
                 attackPlan.render(renderer,scale);
             }
+        }
+
+
+        //Show the range of the currently active attack plan, centered on said plan
+        if (selectedAttackPlan!=-1 && attackPlans.contains(selectedUnit) && attackPlans.at(selectedUnit).size()>selectedAttackPlan)
+        {
+            const auto& selectedPlan = attackPlans.at(selectedUnit)[selectedAttackPlan];
+            const auto plan_end = selectedPlan.getEndNode();
+
+            //TODO: We really should find a better way of doing the ranges
+            double range = unitsFriend[selectedUnit].getSSMRange()*grid.getHexRadius()-selectedPlan.getLength();
+
+            circle10.render(plan_end.first*scale,plan_end.second*scale,255,0,0,128,renderer,scale*range*0.2/grid.getHexRadius(),true);
         }
     }
     else if (currentPhase==ATTACK_EXECUTION) {
@@ -418,6 +433,9 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
 
         if (pendingUnits==0) {
             currentPhase=ATTACK_PLANNING;
+            selectedAttackPlan=-1;
+            selectedUnit=-1;
+            selectedTile=-1;
             myGui.setInfoScreenText(attackPlanningDescription,renderer);
             friendMovementPlans.clear();
         }
@@ -442,11 +460,13 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
                     if (selectedUnit != newSelectedUnit) {
                         unitsFriend[selectedUnit].unreadyAttack();
                         selectedUnit=newSelectedUnit;
+                        selectedAttackPlan=-1;
                         myGui.setInfoScreenText(unitsFriend[selectedUnit].getDescription(),renderer);
                     }
                 }
                 else {
                     selectedUnit=newSelectedUnit;
+                    selectedAttackPlan=-1;
                     myGui.setInfoScreenText(unitsFriend[selectedUnit].getDescription(),renderer);
                 }
             }
@@ -454,6 +474,7 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
                 if (selectedUnit!=-1)
                     unitsFriend[selectedUnit].unreadyAttack();
                 selectedUnit=-1;
+                selectedAttackPlan=-1;
                 myGui.setInfoScreenText(attackPlanningDescription,renderer);
             }
         }
@@ -462,24 +483,34 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
         if (isLeftMouseClick) {
             //Obviously only possible if somebody is selected
             if (selectedUnit!=-1) {
-                //TODO, add option to modify existing attack plan
+                //We will add a new plan, if no plan is currently selected, or the selected plan has max number of nodes
+                if (selectedAttackPlan==-1 || !attackPlans.contains(selectedUnit) || attackPlans[selectedUnit].size()<selectedAttackPlan || attackPlans[selectedUnit][selectedAttackPlan].getNodes()>=unitsFriend[selectedUnit].getSSMNodes()) {
 
-                double destinationX = mouseX/scale;
-                double destinationY = mouseY/scale;
+                    //TODO, add option to modify existing attack plan
+                    double destinationX = mouseX/scale;
+                    double destinationY = mouseY/scale;
 
-                //Add a new attack plan from this unit
-                double sourceX = unitsFriend[selectedUnit].getX();
-                double sourceY = unitsFriend[selectedUnit].getY();
+                    //Add a new attack plan from this unit
+                    double sourceX = unitsFriend[selectedUnit].getX();
+                    double sourceY = unitsFriend[selectedUnit].getY();
 
-                //Check if the new distance is outside range
-                double range = sqrt(pow(destinationX-sourceX,2)+pow(destinationY-sourceY,2));
+                    //Check if the new distance is outside range
+                    const double range = sqrt(pow(destinationX-sourceX,2)+pow(destinationY-sourceY,2));
+                    if (range<unitsFriend[selectedUnit].getSSMRange()*grid.getHexRadius()) {
+                        if (!attackPlans.contains(selectedUnit))
+                            attackPlans.emplace(selectedUnit,std::vector<attackPlan>());
 
-                std::cout<<" "<<range<<" : "<<unitsFriend[selectedUnit].getSSMRange()*grid.getHexRadius()<<std::endl;
-                if (range<unitsFriend[selectedUnit].getSSMRange()*grid.getHexRadius()) {
-                    if (!attackPlans.contains(selectedUnit))
-                        attackPlans.emplace(selectedUnit,std::vector<attackPlan>());
-                    if (attackPlans[selectedUnit].size()<unitsFriend[selectedUnit].getSSMSalvoSize())
-                        attackPlans[selectedUnit].emplace_back(selectedUnit,sourceX,sourceY,destinationX,destinationY,renderer,inGameFont);
+                        //Check that we are not above the salvo size
+                        if (attackPlans[selectedUnit].size()<unitsFriend[selectedUnit].getSSMSalvoSize()) {
+                            attackPlans[selectedUnit].emplace_back(selectedUnit,sourceX,sourceY,destinationX,destinationY,renderer,inGameFont);
+                            selectedAttackPlan=attackPlans[selectedUnit].size()-1;
+                        }
+                    }
+                }
+                else {
+                    double destinationX = mouseX/scale;
+                    double destinationY = mouseY/scale;
+                    attackPlans[selectedUnit][selectedAttackPlan].addNode(destinationX,destinationY,renderer,inGameFont);
                 }
             }
         }
@@ -488,6 +519,7 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
             currentPhase=ATTACK_EXECUTION;
             selectedUnit=-1;
             selectedTile=-1;
+            selectedAttackPlan=-1;
             myGui.setInfoScreenText(attackExecutionDescription,renderer);
             attackExecutionPlaybackTimer=0.0;
             attackExecutionPlaybackMaxTime=0.0;

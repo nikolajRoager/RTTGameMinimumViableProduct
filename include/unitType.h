@@ -55,6 +55,11 @@ private:
     ///How many SSMs we can fire in one turn
     int SSMSalvoSize=4;
 
+    ///TODO, load this from file
+    ///How many attack vector nodes can surface to surface missiles fired from this thing have
+    ///should be at least 2 (has no effect below 2)
+    int SSMNodes=3;
+
 
 public:
 
@@ -77,6 +82,8 @@ public:
     [[nodiscard]] bool isAnimationFinished(uint32_t millis,animationPhase phase) const;
 
     [[nodiscard]] const std::string& getName() const { return name; }
+
+    [[nodiscard]] int getSSMNodes() const { return SSMNodes; }
 };
 
 #endif //PREMVPMAPGAME_UNITTYPE_H

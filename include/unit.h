@@ -68,6 +68,8 @@ public:
     void updateAnimation(uint32_t millis);
 
     [[nodiscard]] std::string getDescription() const;
+
+    [[nodiscard]] int getSSMNodes() const {return myType.getSSMNodes();}
 };
 
 #endif //PREMVPMAPGAME_UNIT_H

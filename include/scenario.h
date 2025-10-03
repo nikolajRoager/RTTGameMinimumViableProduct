@@ -40,6 +40,8 @@ private:
     ///What friendly unit is currently selected (-1 if none)
     int selectedUnit=-1;
 
+    int selectedAttackPlan =-1;
+
     hexGrid grid;
 
     ///What phase of the game are we going through

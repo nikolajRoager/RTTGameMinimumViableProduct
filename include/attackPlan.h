@@ -22,8 +22,9 @@ private:
         double x;
         double y;
         double time;
+        double distance;
         texwrap timeMarker;
-        attackVectorPoint(double _x, double _y, double _time,SDL_Renderer* renderer, TTF_Font* font): x(_x),y(_y),time(_time),timeMarker(std::format("{:.3f}", _time),renderer,font)  {
+        attackVectorPoint(double _x, double _y, double _time,double _distance,SDL_Renderer* renderer, TTF_Font* font): x(_x),y(_y),time(_time),distance(_distance),timeMarker(std::format("{:.3f}", _time),renderer,font)  {
         }
     };
     std::vector<attackVectorPoint> attackVectors;
@@ -34,11 +35,20 @@ public:
 
     void render(SDL_Renderer *renderer, double scale) const;
     [[nodiscard]] double getEndTime() const {return attackVectors.back().time;}
+    [[nodiscard]] std::pair<double,double> getEndNode() const {return {attackVectors.back().x,attackVectors.back().y};}
 
     [[nodiscard]] bool isActive(double time) const {
         return time>launchTime && time<getEndTime();
     }
     [[nodiscard]] std::pair<double,double> getLocation(double time) const;
+
+    [[nodiscard]] size_t getNodes () const {return attackVectors.size();}
+
+    [[nodiscard]] double getLength () const {return attackVectors.back().distance;}
+
+    [[nodiscard]] double getProjectileSpeed () const {return projectileSpeed;}
+
+    [[nodiscard]] void addNode(double x, double y,SDL_Renderer* renderer, TTF_Font* font);
 };
 
 #endif //PREMVPMAPGAME_ATTACKPLAN_H
