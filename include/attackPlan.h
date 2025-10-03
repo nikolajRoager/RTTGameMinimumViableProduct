@@ -34,6 +34,7 @@ public:
     attackPlan(int _launcherId,double x0,double y0, double x1,double y1, SDL_Renderer* renderer,  TTF_Font* font);
 
     void render(SDL_Renderer *renderer, double scale) const;
+    [[nodiscard]] double getLaunchTime() const {return launchTime;}
     [[nodiscard]] double getEndTime() const {return attackVectors.back().time;}
     [[nodiscard]] std::pair<double,double> getEndNode() const {return {attackVectors.back().x,attackVectors.back().y};}
 

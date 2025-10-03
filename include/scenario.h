@@ -15,6 +15,7 @@
 #include "hexGrid.h"
 #include "particle.h"
 #include "phase.h"
+#include "physicsCake.h"
 #include "texwrap.h"
 #include "unit.h"
 #include "unitType.h"
@@ -92,6 +93,8 @@ private:
 
     ///average number of smoke particles spawned per second by missiles
     double missileSmokeSpawnRate = 10;
+
+    physicsCake myCake;
 
     ///Helper function, tells us whether or not to spawn a particle this frame, given the time interval and the average spawn rate
     static bool shouldSpawnParticle(double spawnRate, uint32_t dmillis) {

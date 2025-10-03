@@ -220,6 +220,9 @@ void scenario::render(SDL_Renderer* renderer, int screenWidth, int screenHeight,
                     }
                 }
             }
+
+            //TODO: remove this temporary thing
+            myCake.debugRender(renderer,scale);
         }
 
     }
@@ -548,16 +551,10 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
             if (unreadyUnits==0) {
                 //TODO, bake in physics data in a separate thread
                 attackExecutionState=PLAYING;
+
+                myCake.bake(unitsFriend,attackPlans);
                 attackExecutionPlaybackTimer=0.0;
-                attackExecutionPlaybackMaxTime=0.0;
-                //TODO TEMP, we should actually play the entire thing
-                //Loop through all attack plans and find the longest
-                for (const auto& unitPlans : attackPlans | std::views::values) {
-                    for (const auto& plan : unitPlans) {
-                        attackExecutionPlaybackMaxTime=std::max(attackExecutionPlaybackMaxTime,plan.getEndTime());
-                    }
-                }
-                //TODO add time for the particles to dissipate, and death animations to play
+                attackExecutionPlaybackMaxTime=myCake.getEndTime();
 
             }
         }
