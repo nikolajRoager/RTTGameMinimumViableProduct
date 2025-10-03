@@ -48,7 +48,7 @@ public:
 
     [[nodiscard]] double getProjectileSpeed () const {return projectileSpeed;}
 
-    [[nodiscard]] void addNode(double x, double y,SDL_Renderer* renderer, TTF_Font* font);
+    void addNode(double x, double y,SDL_Renderer* renderer, TTF_Font* font);
 };
 
 #endif //PREMVPMAPGAME_ATTACKPLAN_H

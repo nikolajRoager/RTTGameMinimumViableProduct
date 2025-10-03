@@ -154,10 +154,16 @@ void engine::run() {
                 }
             }
         }
-        //Milli seconds since program start is preferred time measurement for animations
+        SDL_Keymod modState = SDL_GetModState();
+        if (modState & KMOD_SHIFT)
+            shiftDown=true;
+        else
+            shiftDown=false;
+
+        //Milliseconds since program start is preferred time measurement for animations
         unsigned int millis = SDL_GetTicks();
 
-        theScenario->update(renderer, windowWidthPx,windowHeightPx,mouseXPos,mouseYPos,(leftMouseDown && !prevLeftMouseDown),(rightMouseDown && !prevRightMouseDown),(executeDown && !prevExecuteDown),millis,millis-pmillis);
+        theScenario->update(renderer, windowWidthPx,windowHeightPx,mouseXPos,mouseYPos,(leftMouseDown && !prevLeftMouseDown),(rightMouseDown && !prevRightMouseDown),(executeDown && !prevExecuteDown),shiftDown,millis,millis-pmillis);
 
         //Black background, shouldn't be seen but won't hurt
         SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0x00);

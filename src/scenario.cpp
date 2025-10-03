@@ -10,7 +10,7 @@
 #include <ranges>
 #include <SDL2/SDL_ttf.h>
 
-scenario::scenario(SDL_Renderer* renderer, TTF_Font* _font) : background(fs::path("assets")/"background.png",renderer), hexSelectionOutline(fs::path("assets")/"hexoutline.png",renderer),circle10(fs::path("assets")/"circle10.png",renderer), grid(fs::path("assets"),renderer), myGui(fs::path("assets")/"gui",renderer,_font), flyingSSM(fs::path("assets")/"physicsGraphics"/"SSM.png",renderer) {
+scenario::scenario(SDL_Renderer* renderer, TTF_Font* _font) : background(fs::path("assets")/"background.png",renderer), hexSelectionOutline(fs::path("assets")/"hexoutline.png",renderer),circle10(fs::path("assets")/"circle10.png",renderer), grid(fs::path("assets"),renderer), myGui(fs::path("assets")/"gui",renderer,_font), flyingSSM(fs::path("assets")/"physicsGraphics"/"SSM.png",renderer), smokeParticleTexture(fs::path("assets")/"physicsGraphics"/"smoke.png",renderer) {
 
 
     inGameFont = _font;
@@ -53,6 +53,9 @@ scenario::scenario(SDL_Renderer* renderer, TTF_Font* _font) : background(fs::pat
     attackExecutionDescription="Executing attack plans&please wait";
 
     myGui.setInfoScreenText(movementPlanningDescription,renderer);
+
+
+    smokeParticles.emplace_back(200,200,0,0,0);
 
     std::cout<< " constructor finished"<<std::endl;
 }
@@ -207,8 +210,7 @@ void scenario::render(SDL_Renderer* renderer, int screenWidth, int screenHeight,
 
         if (attackExecutionState==PLAYING) {
             //Loop through all attack plans and display them
-            //TODO: use a bakedPhysicsPlan instead
-
+            //TODO: use a physicsCake instead
             for (const auto& plans : attackPlans | std::views::values) {
                 for (const auto& plan : plans) {
                     if (plan.isActive(attackExecutionPlaybackTimer)) {
@@ -222,13 +224,20 @@ void scenario::render(SDL_Renderer* renderer, int screenWidth, int screenHeight,
 
     }
 
+    //Particles render regardless of the phase, and render above units
+    for (const auto& particle : smokeParticles) {
+        smokeParticleTexture.render(particle.x*scale,particle.y*scale,renderer,scale,false,false,4,std::min(3,(4*particle.ageMs)/smokeParticleLifetimeMs));
+    }
+
+
+
     myGui.render(scenarioWidthPx,scenarioHeightPx,renderer,scale,millis,currentPhase);
 
     if (currentPhase==ATTACK_EXECUTION)
         myGui.renderAttackExecution(scenarioWidthPx,scenarioHeightPx,renderer,scale,attackExecutionPlaybackTimer,attackExecutionPlaybackMaxTime);
 }
 
-void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,  int mouseX, int mouseY, bool isLeftMouseClick, bool isRightMouseClick, bool executeClick,uint32_t millis, uint32_t dmillis) {
+void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,  int mouseX, int mouseY, bool isLeftMouseClick, bool isRightMouseClick, bool executeClick, bool shiftKey, uint32_t millis, uint32_t dmillis) {
     scale = std::min(static_cast<double>(screenWidth) / static_cast<double>(scenarioWidthPx+gui::getRightBarPixels()),
                      static_cast<double>(screenHeight) / static_cast<double>(scenarioHeightPx+gui::getBottomBarPixels()));
 
@@ -429,8 +438,6 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
                 }
             }
         }
-
-
         if (pendingUnits==0) {
             currentPhase=ATTACK_PLANNING;
             selectedAttackPlan=-1;
@@ -439,7 +446,6 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
             myGui.setInfoScreenText(attackPlanningDescription,renderer);
             friendMovementPlans.clear();
         }
-
     }
     else if (currentPhase == ATTACK_PLANNING) {
         //Right click to select units
@@ -483,10 +489,10 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
         if (isLeftMouseClick) {
             //Obviously only possible if somebody is selected
             if (selectedUnit!=-1) {
+                //TODO use shift to modify existing path
                 //We will add a new plan, if no plan is currently selected, or the selected plan has max number of nodes
-                if (selectedAttackPlan==-1 || !attackPlans.contains(selectedUnit) || attackPlans[selectedUnit].size()<selectedAttackPlan || attackPlans[selectedUnit][selectedAttackPlan].getNodes()>=unitsFriend[selectedUnit].getSSMNodes()) {
+                if (!shiftKey || selectedAttackPlan==-1 || !attackPlans.contains(selectedUnit) || attackPlans[selectedUnit].size()<selectedAttackPlan || attackPlans[selectedUnit][selectedAttackPlan].getNodes()>=unitsFriend[selectedUnit].getSSMNodes()) {
 
-                    //TODO, add option to modify existing attack plan
                     double destinationX = mouseX/scale;
                     double destinationY = mouseY/scale;
 
@@ -563,6 +569,23 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
                 attackExecutionState=FINISHED;
             }
         }
+    }
+
+
+    //Some updates happen regardless of the phase
+    for (auto& particle : smokeParticles) {
+        particle.x+=particle.vx*dmillis*0.001;
+        particle.y+=particle.vy*dmillis*0.001;
+        particle.ageMs+=dmillis;
+    }
+
+    //TODO: instead of spawning on the mouse, spawn particles on active missiles
+    //if (shouldSpawnParticle(missileSmokeSpawnRate,dmillis)) {
+    //    smokeParticles.emplace_back(mouseX/scale,mouseY/scale,0,0,0);
+    //}
+
+    while (smokeParticles.front().ageMs>smokeParticleLifetimeMs) {
+        smokeParticles.pop_front();
     }
 
     for (unit& U: unitsFriend) {

@@ -41,6 +41,9 @@ private:
     bool executeDown;
     bool prevExecuteDown;
 
+    bool shiftDown=false;
+    bool prevShiftDown=false;
+
     SDL_KeyCode executekey = SDLK_RETURN;
 
 
