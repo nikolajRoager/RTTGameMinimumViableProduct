@@ -2,8 +2,12 @@ idle 1
 move 3
 prepare 4
 ready 1
+die 1
 unprepare 4
 landUnit true
 movementPoints 3
 name Danish SAM Launcher
 SAMRange 5
+SSMSalvoSize 0
+SSMNodes 2
+maxHp 2

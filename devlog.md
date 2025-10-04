@@ -337,6 +337,7 @@ A bunch of things I need to do for the attack planning
 * Use drawCircle method instead of manually drawing circle
 * Display radius centered on end of path, for doglegging./
 * Dogleg missiles./
+* Dogleg missiles should obey range
 * show arrival and launch times in game ./
 * consider adding a keyboard shortcut to dogleg, for example shift
 * We need some kind of on-screen gui elements, at the mouse location, indicating that we are about to add a new path or modify existing, maybe a green line indicating the possible path
@@ -352,3 +353,87 @@ And for the attack execution
 * Bake physics to baked missile path class
 * Have some kind of stored memory of which animations should get activated when, most notably the DIE animation
 * All this should be in a physicsCake
+
+day 14, 1/10/2025 CE and 2/10/2025 CE
+========
+
+background
+-------
+I forgot to write an entry for the first half-day
+
+Anyway, I got some time to work, and ... it doesn't feel like I have done a lot, the spaghetti code is starting to get out of control (no doubt a result of me trying to rush the project)
+
+work
+====
+I have gotten the missiles to fly curved paths now, but the (I have heard the term dog-legging used for that, I don't actually know if that is an English word, no wait looked it up, it IS a word, but not a very common one)
+
+Also, I have gotten the physics engine to now bake the physics calculations into a cake.
+
+It was very difficult to get that bit to work, but hopefully it should allow me to do some more calculations in the future
+
+
+todo
+----
+I copied over the previous todo list, it sounds like a good idea.
+
+I need to seriously work through this list of requirements before I add new features.
+
+Except, the next  thing I need to do is add a Slava class cruiser I can shoot add, and then I should record the next weekly update
+
+* Use drawCircle method instead of manually drawing circle
+* Display radius centered on end of path, for doglegging./
+* Dogleg missiles./
+* Dogleg missiles should obey range
+* show arrival and launch times in game ./
+* consider adding a keyboard shortcut to dogleg, for example shift
+* We need some kind of on-screen gui elements, at the mouse location, indicating that we are about to add a new path or modify existing, maybe a green line indicating the possible path
+* show arrival time only for SELECTED order
+* sidebar view attack orders on a per-unit basis
+* allow modification of arrival time with scroll wheel
+* add salvo size to file
+* add salvo delay
+* use pixels instead of hex for radius
+
+And for the attack execution
+
+* Bake physics to baked missile path class ./
+* Health system for units
+* Physics cake should be able to tell units how much damage they have taken
+* Missile shall make explosion when they hit
+* Death animation for all unit
+* Have some kind of stored memory of which animations should get activated when, most notably the DIE animation
+* All this should be in a physicsCake ./
+
+
+Day 15 Saturday 4/10/2025 CE
+======
+background
+---------
+Russian Warship, go fuck yourself!
+
+work
+------
+by bringing together everything I have done so far, I managed to sink a Slava class cruiser
+
+The hitpoint system was a lot of work to get working, and creating death animations for everyone took a long time, but it is actually working! Unlike the Slava class cruiser, which now sits at the bottom of the Demnark straight
+
+Right, now I think it is time to return to that big long list of todos and actually do those
+
+
+todo
+----
+The big long list is still there
+
+* Use drawCircle method instead of manually drawing circle
+* Display radius centered on end of path, for doglegging, but only when doglegging is active
+* Dogleg missiles should obey range
+* We need some kind of on-screen gui elements, at the mouse location, indicating that we are about to add a new path or modify existing, maybe a green line indicating the possible path
+* show arrival time only for SELECTED order
+* sidebar view attack orders on a per-unit basis
+* allow modification of arrival time with scroll wheel
+* add salvo delay
+* use pixels instead of hex for radius
+
+And for the attack execution
+
+* Missile shall make explosion when they hit (explosion particle effect)

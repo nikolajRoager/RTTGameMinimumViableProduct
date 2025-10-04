@@ -3,8 +3,12 @@ move 4
 prepare 4
 ready 4
 unprepare 4
+die 6
 landUnit false
 movementPoints 5
 name Arleigh Burke class Destroyer
 SAMRange 4
 SSMRange 6
+SSMSalvoSize 4
+SSMNodes 2
+maxHp 4

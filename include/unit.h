@@ -4,6 +4,7 @@
 
 #ifndef PREMVPMAPGAME_UNIT_H
 #define PREMVPMAPGAME_UNIT_H
+#include <iostream>
 #include <set>
 
 #include "unitType.h"
@@ -18,7 +19,7 @@ private:
     unitType::animationPhase myPhase;
 
     ///What side is this on? true is obviously the good guys
-    bool side;
+    bool isFriend;
 
     int hexX;
     int hexY;
@@ -31,12 +32,25 @@ private:
     ///X and Y location of the unit, set by the scenario based on our hexagon location
     double x,y;
     bool flip;
+
+    int hp;
 public:
+    [[nodiscard]] int getHp() const {return hp;};
+
+    void setHp(int _hp,uint32_t millis) {
+        if (hp!=0 && _hp==0) {
+            setAnimation(millis,unitType::DIE);
+        }
+        hp=_hp;
+    }
+
+    [[nodiscard]] const std::string& getName() const {return myType.getName();}
 
     [[nodiscard]] int getMovementPoints() const { return myType.getMovementPoints(); }
     [[nodiscard]] double getSAMRange() const { return myType.getSAMRange(); }
     [[nodiscard]] double getSSMRange() const { return myType.getSSMRange(); }
     [[nodiscard]] int getSSMSalvoSize() const { return myType.getSSMSalvoSize(); }
+    [[nodiscard]] bool isFriendly() const {return isFriend;}
 
     [[nodiscard]] uint32_t timeSinceAnimationStart(const uint32_t millis) const {return millis-animationStart;}
 
@@ -64,8 +78,10 @@ public:
 
     [[nodiscard]] unitType::animationPhase getAnimationPhase() const { return myPhase; }
 
-    void render(double scale,uint32_t millis,SDL_Renderer *renderer) const;
+    void render(double scale,uint32_t millis,SDL_Renderer *renderer, const texwrap& hpMarker) const;
     void updateAnimation(uint32_t millis);
+
+
 
     [[nodiscard]] std::string getDescription() const;
 

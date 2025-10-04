@@ -10,7 +10,7 @@
 #include <ranges>
 #include <SDL2/SDL_ttf.h>
 
-scenario::scenario(SDL_Renderer* renderer, TTF_Font* _font) : background(fs::path("assets")/"background.png",renderer), hexSelectionOutline(fs::path("assets")/"hexoutline.png",renderer),circle10(fs::path("assets")/"circle10.png",renderer), grid(fs::path("assets"),renderer), myGui(fs::path("assets")/"gui",renderer,_font), flyingSSM(fs::path("assets")/"physicsGraphics"/"SSM.png",renderer), smokeParticleTexture(fs::path("assets")/"physicsGraphics"/"smoke.png",renderer) {
+scenario::scenario(SDL_Renderer* renderer, TTF_Font* _font) : background(fs::path("assets")/"background.png",renderer), hexSelectionOutline(fs::path("assets")/"hexoutline.png",renderer),circle10(fs::path("assets")/"circle10.png",renderer), grid(fs::path("assets"),renderer), myGui(fs::path("assets")/"gui",renderer,_font), flyingSSM(fs::path("assets")/"physicsGraphics"/"SSM.png",renderer), smokeParticleTexture(fs::path("assets")/"physicsGraphics"/"smoke.png",renderer), myCake(time(NULL)),hpMarker(fs::path("assets")/"hitpoint.png",renderer){
 
 
     inGameFont = _font;
@@ -24,17 +24,19 @@ scenario::scenario(SDL_Renderer* renderer, TTF_Font* _font) : background(fs::pat
     unitLibrary.emplace_back(fs::path("assets")/"units"/"IverHuitfeldtFrigate",renderer);
     unitLibrary.emplace_back(fs::path("assets")/"units"/"NeptuneLauncherDK",renderer);
     unitLibrary.emplace_back(fs::path("assets")/"units"/"ArleighBurke",renderer);
+    unitLibrary.emplace_back(fs::path("assets")/"units"/"SlavaCruiser",renderer);
 
     std::cout<<"Loading units"<<std::endl;
     //TODO: load from disk, and allow spawning
-    unitsFriend.clear();
-    unitsFriend.emplace_back(unitLibrary[0],true,20,8);
-    unitsFriend.emplace_back(unitLibrary[2],true,18,12);
-    unitsFriend.emplace_back(unitLibrary[1],true,25,20);
-    unitsFriend.emplace_back(unitLibrary[1],true,32,15);
-    unitsFriend.emplace_back(unitLibrary[1],true,31,14);
-    unitsFriend.emplace_back(unitLibrary[3],true,10,23);
-    unitsFriend.emplace_back(unitLibrary[3],true,8,23);
+    units.clear();
+    units.emplace_back(unitLibrary[0],true,20,8);
+    units.emplace_back(unitLibrary[2],true,18,12);
+    units.emplace_back(unitLibrary[4],false,20,16);
+    units.emplace_back(unitLibrary[1],true,25,20);
+    units.emplace_back(unitLibrary[1],true,32,15);
+    units.emplace_back(unitLibrary[1],true,31,14);
+    units.emplace_back(unitLibrary[3],true,10,23);
+    units.emplace_back(unitLibrary[3],true,8,23);
 
 
 
@@ -65,6 +67,8 @@ scenario::~scenario() = default;
 
 void scenario::render(SDL_Renderer* renderer, int screenWidth, int screenHeight, uint32_t millis) const {
 
+    //TODO, this is for debugging an unidentified crash bug, remove when the bug is found
+ //   std::cout<<"render"<<std::endl;
     background.render(0,0,renderer,scale);
 
     if (myGui.doShowHexOutline())
@@ -81,7 +85,7 @@ void scenario::render(SDL_Renderer* renderer, int screenWidth, int screenHeight,
             //TODO: DO NOT RECALCULATE THIS EVERY FRAME
             std::set<int> obstructed;
             //We get obstructed by the current position of units, and by their destinations
-            for (const unit& u : unitsFriend) {
+            for (const unit& u : units) {
                 obstructed.insert(grid.getHexId(u.getHexX(),u.getHexY()));
             }
             for (const auto &[fst, snd]: friendMovementPlans ) {
@@ -90,7 +94,7 @@ void scenario::render(SDL_Renderer* renderer, int screenWidth, int screenHeight,
                 }
             }
 
-            const std::set<int> tilesNearSelection=grid.getNeighbours(selectedTile,unitsFriend[selectedUnit].getMovementPoints(),obstructed);
+            const std::set<int> tilesNearSelection=grid.getNeighbours(selectedTile,units[selectedUnit].getMovementPoints(),obstructed);
             grid.drawTiles(renderer,tilesNearSelection,scale,hexGrid::COLOR);
 
             const std::vector<int> line = grid.findPath(selectedTile,mouseOverTile,obstructed);
@@ -103,10 +107,10 @@ void scenario::render(SDL_Renderer* renderer, int screenWidth, int screenHeight,
         }
 
 
-        for (int i = 0; i < unitsFriend.size(); i++) {
-            const unit& U = unitsFriend[i];
-            grid.drawTile(renderer,grid.getHexId(U.getHexX(),U.getHexY()),scale,hexGrid::COLOR,128,255,128,255);
-            U.render(scale,millis,renderer);
+        for (int i = 0; i < units.size(); i++) {
+            const unit& U = units[i];
+            grid.drawTile(renderer,grid.getHexId(U.getHexX(),U.getHexY()),scale,hexGrid::COLOR,U.isFriendly()?128:255,U.isFriendly()? 255:128,128,255);
+            U.render(scale,millis,renderer,hpMarker);
 
             if (myGui.doShowSSMRange() || i == selectedUnit) {
                 //Show SSM range
@@ -126,8 +130,8 @@ void scenario::render(SDL_Renderer* renderer, int screenWidth, int screenHeight,
         //Show the tile the mouse is over
         grid.drawTile(renderer,mouseOverTile,scale);
 
-        for (const auto & U : unitsFriend) {
-            U.render(scale,millis,renderer);
+        for (const auto & U : units) {
+            U.render(scale,millis,renderer,hpMarker);
 
             if (myGui.doShowSSMRange()) {
                 //Show SSM range
@@ -145,11 +149,11 @@ void scenario::render(SDL_Renderer* renderer, int screenWidth, int screenHeight,
     }
     else if (currentPhase==ATTACK_PLANNING) {
         grid.drawTile(renderer,mouseOverTile,scale);
-        for (int i = 0; i < unitsFriend.size(); i++) {
-            const unit& U = unitsFriend[i];
+        for (int i = 0; i < units.size(); i++) {
+            const unit& U = units[i];
             if (i != selectedUnit || millis%500<250)
-                grid.drawTile(renderer,grid.getHexId(U.getHexX(),U.getHexY()),scale,hexGrid::COLOR,128,255,128,255);
-            U.render(scale,millis,renderer);
+                grid.drawTile(renderer,grid.getHexId(U.getHexX(),U.getHexY()),scale,hexGrid::COLOR,U.isFriendly()?128:255,U.isFriendly()? 255:128,128,255);
+            U.render(scale,millis,renderer,hpMarker);
 
             if (myGui.doShowSSMRange() || i == selectedUnit) {
                 //Show SSM range
@@ -182,17 +186,15 @@ void scenario::render(SDL_Renderer* renderer, int screenWidth, int screenHeight,
             const auto plan_end = selectedPlan.getEndNode();
 
             //TODO: We really should find a better way of doing the ranges
-            double range = unitsFriend[selectedUnit].getSSMRange()*grid.getHexRadius()-selectedPlan.getLength();
+            double range = units[selectedUnit].getSSMRange()*grid.getHexRadius()-selectedPlan.getLength();
 
             circle10.render(plan_end.first*scale,plan_end.second*scale,255,0,0,128,renderer,scale*range*0.2/grid.getHexRadius(),true);
         }
     }
     else if (currentPhase==ATTACK_EXECUTION) {
-        for (int i = 0; i < unitsFriend.size(); i++) {
-            const unit& U = unitsFriend[i];
-            if (i != selectedUnit || millis%500<250)
-                grid.drawTile(renderer,grid.getHexId(U.getHexX(),U.getHexY()),scale,hexGrid::COLOR,128,255,128,255);
-            U.render(scale,millis,renderer);
+        for (int i = 0; i < units.size(); i++) {
+            const unit& U = units[i];
+            U.render(scale,millis,renderer,hpMarker);
 
             if (myGui.doShowSSMRange() || i == selectedUnit) {
                 //Show SSM range
@@ -210,26 +212,14 @@ void scenario::render(SDL_Renderer* renderer, int screenWidth, int screenHeight,
 
         if (attackExecutionState==PLAYING) {
             //Loop through all attack plans and display them
-            //TODO: use a physicsCake instead
-            for (const auto& plans : attackPlans | std::views::values) {
-                for (const auto& plan : plans) {
-                    if (plan.isActive(attackExecutionPlaybackTimer)) {
-                        auto xy = plan.getLocation(attackExecutionPlaybackTimer);
-
-                        flyingSSM.render(xy.first*scale,xy.second*scale,renderer,scale,true,false,4,(millis/(100))%4);
-                    }
-                }
-            }
-
-            //TODO: remove this temporary thing
-            myCake.debugRender(renderer,scale);
+            myCake.render(attackExecutionPlaybackTimer,flyingSSM,renderer,scale,millis);
         }
 
     }
 
     //Particles render regardless of the phase, and render above units
     for (const auto& particle : smokeParticles) {
-        smokeParticleTexture.render(particle.x*scale,particle.y*scale,renderer,scale,false,false,4,std::min(3,(4*particle.ageMs)/smokeParticleLifetimeMs));
+        smokeParticleTexture.render(particle.x*scale,particle.y*scale,renderer,scale,true,false,4,std::min(3,(4*particle.ageMs)/smokeParticleLifetimeMs));
     }
 
 
@@ -244,6 +234,8 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
     scale = std::min(static_cast<double>(screenWidth) / static_cast<double>(scenarioWidthPx+gui::getRightBarPixels()),
                      static_cast<double>(screenHeight) / static_cast<double>(scenarioHeightPx+gui::getBottomBarPixels()));
 
+    //TODO, this is for debugging an unidentified crash bug, remove when the bug is found
+  //  std::cout<<"update"<<std::endl;
 
     mouseOverTile=grid.getHexFromLocation(mouseX,mouseY,scale);
 
@@ -255,24 +247,24 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
             //See if there is a new unit to select
             int newSelectedUnit=-1;
 
-            for (int i = 0; i < unitsFriend.size(); i++) {
-                if (grid.getHexId(unitsFriend[i].getHexX(),unitsFriend[i].getHexY())==mouseOverTile) {
+            for (int i = 0; i < units.size(); i++) {
+                if (grid.getHexId(units[i].getHexX(),units[i].getHexY())==mouseOverTile) {
                     selectedTile = mouseOverTile;
                     newSelectedUnit = i;
-                    unitsFriend[i].doReadyAttack();
+                    units[i].doReadyAttack();
                 }
             }
             if (newSelectedUnit != -1) {
                 //Deselect selected unit
                 if (selectedUnit!=-1) {
                     if (selectedUnit != newSelectedUnit) {
-                        unitsFriend[selectedUnit].unreadyAttack();
+                        units[selectedUnit].unreadyAttack();
                         selectedUnit=newSelectedUnit;
-                        myGui.setInfoScreenText(unitsFriend[selectedUnit].getDescription(),renderer);
+                        myGui.setInfoScreenText(units[selectedUnit].getDescription(),renderer);
                     }
                     else {
                         //Click the same unit to cancel movement order
-                        unitsFriend[selectedUnit].unreadyAttack();
+                        units[selectedUnit].unreadyAttack();
                         if (friendMovementPlans.contains(selectedUnit))
                             friendMovementPlans.erase(selectedUnit);
                         selectedUnit = -1;
@@ -281,22 +273,22 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
                 }
                 else {
                     selectedUnit=newSelectedUnit;
-                    myGui.setInfoScreenText(unitsFriend[selectedUnit].getDescription(),renderer);
+                    myGui.setInfoScreenText(units[selectedUnit].getDescription(),renderer);
                 }
             }
             else {
                 //You clicked somewhere else, while a unit was selected this is a movement command
                 if (selectedUnit!=-1) {
-                    unitsFriend[selectedUnit].unreadyAttack();
+                    units[selectedUnit].unreadyAttack();
 
                     //I am pretty sure this has already been set
                     if (selectedTile == -1) {
-                        selectedUnit = grid.getHexId(unitsFriend[selectedUnit].getHexX(),unitsFriend[selectedUnit].getHexY());
+                        selectedUnit = grid.getHexId(units[selectedUnit].getHexX(),units[selectedUnit].getHexY());
                     }
 
                     std::set<int> obstructed;
                     //We get obstructed by the current position of units, and by their destinations
-                    for (const unit& u : unitsFriend) {
+                    for (const unit& u : units) {
                         obstructed.insert(grid.getHexId(u.getHexX(),u.getHexY()));
                     }
                     for (const auto &plans: friendMovementPlans ) {
@@ -308,7 +300,7 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
 
                     auto fullPath =grid.findPath(selectedTile,mouseOverTile,obstructed);
                     auto limitedPath =std::vector<int>();
-                    for (int i = 0; i < fullPath.size() && i<unitsFriend[selectedUnit].getMovementPoints()+1; i++)
+                    for (int i = 0; i < fullPath.size() && i<units[selectedUnit].getMovementPoints()+1; i++)
                         limitedPath.push_back(fullPath[i]);
 
                     if (friendMovementPlans.contains(selectedUnit)) {
@@ -327,7 +319,7 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
         //Left click cancels selection
         if (isLeftMouseClick) {
             if (selectedUnit != -1) {
-                unitsFriend[selectedUnit].unreadyAttack();
+                units[selectedUnit].unreadyAttack();
                 selectedUnit = -1;
                 myGui.setInfoScreenText(movementPlanningDescription,renderer);
             }
@@ -336,7 +328,7 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
 
 
         //Update animation of friendly and todo hostile units
-        for (auto & U : unitsFriend) {
+        for (auto & U : units) {
             //It is the scenario which is responsible for the grid, so we are responsible for getting the coordinates
             const int hexX = U.getHexX();
             const int hexY = U.getHexY();
@@ -362,8 +354,8 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
         int pendingUnits=0;
 
         //Update animation of units, friends as well as todo foes
-        for (int i = 0; i < unitsFriend.size(); i++) {
-            auto& U = unitsFriend[i];
+        for (int i = 0; i < units.size(); i++) {
+            auto& U = units[i];
             U.unreadyAttack();
             {
                 if (U.getAnimationPhase()!=unitType::MOVE || !friendMovementPlans.contains(i)) {
@@ -456,32 +448,32 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
             //See if there is a new unit to select
             int newSelectedUnit=-1;
 
-            for (int i = 0; i < unitsFriend.size(); i++) {
-                if (grid.getHexId(unitsFriend[i].getHexX(),unitsFriend[i].getHexY())==mouseOverTile) {
+            for (int i = 0; i < units.size(); i++) {
+                if (grid.getHexId(units[i].getHexX(),units[i].getHexY())==mouseOverTile) {
                     selectedTile = mouseOverTile;
                     newSelectedUnit = i;
-                    unitsFriend[i].doReadyAttack();
+                    units[i].doReadyAttack();
                 }
             }
             if (newSelectedUnit != -1) {
                 //Deselect selected unit
                 if (selectedUnit!=-1) {
                     if (selectedUnit != newSelectedUnit) {
-                        unitsFriend[selectedUnit].unreadyAttack();
+                        units[selectedUnit].unreadyAttack();
                         selectedUnit=newSelectedUnit;
                         selectedAttackPlan=-1;
-                        myGui.setInfoScreenText(unitsFriend[selectedUnit].getDescription(),renderer);
+                        myGui.setInfoScreenText(units[selectedUnit].getDescription(),renderer);
                     }
                 }
                 else {
                     selectedUnit=newSelectedUnit;
                     selectedAttackPlan=-1;
-                    myGui.setInfoScreenText(unitsFriend[selectedUnit].getDescription(),renderer);
+                    myGui.setInfoScreenText(units[selectedUnit].getDescription(),renderer);
                 }
             }
             else {
                 if (selectedUnit!=-1)
-                    unitsFriend[selectedUnit].unreadyAttack();
+                    units[selectedUnit].unreadyAttack();
                 selectedUnit=-1;
                 selectedAttackPlan=-1;
                 myGui.setInfoScreenText(attackPlanningDescription,renderer);
@@ -492,25 +484,24 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
         if (isLeftMouseClick) {
             //Obviously only possible if somebody is selected
             if (selectedUnit!=-1) {
-                //TODO use shift to modify existing path
                 //We will add a new plan, if no plan is currently selected, or the selected plan has max number of nodes
-                if (!shiftKey || selectedAttackPlan==-1 || !attackPlans.contains(selectedUnit) || attackPlans[selectedUnit].size()<selectedAttackPlan || attackPlans[selectedUnit][selectedAttackPlan].getNodes()>=unitsFriend[selectedUnit].getSSMNodes()) {
+                if (!shiftKey || selectedAttackPlan==-1 || !attackPlans.contains(selectedUnit) || attackPlans[selectedUnit].size()<selectedAttackPlan || attackPlans[selectedUnit][selectedAttackPlan].getNodes()>=units[selectedUnit].getSSMNodes()) {
 
                     double destinationX = mouseX/scale;
                     double destinationY = mouseY/scale;
 
                     //Add a new attack plan from this unit
-                    double sourceX = unitsFriend[selectedUnit].getX();
-                    double sourceY = unitsFriend[selectedUnit].getY();
+                    double sourceX = units[selectedUnit].getX();
+                    double sourceY = units[selectedUnit].getY();
 
                     //Check if the new distance is outside range
                     const double range = sqrt(pow(destinationX-sourceX,2)+pow(destinationY-sourceY,2));
-                    if (range<unitsFriend[selectedUnit].getSSMRange()*grid.getHexRadius()) {
+                    if (range<units[selectedUnit].getSSMRange()*grid.getHexRadius()) {
                         if (!attackPlans.contains(selectedUnit))
                             attackPlans.emplace(selectedUnit,std::vector<attackPlan>());
 
                         //Check that we are not above the salvo size
-                        if (attackPlans[selectedUnit].size()<unitsFriend[selectedUnit].getSSMSalvoSize()) {
+                        if (attackPlans[selectedUnit].size()<units[selectedUnit].getSSMSalvoSize()) {
                             attackPlans[selectedUnit].emplace_back(selectedUnit,sourceX,sourceY,destinationX,destinationY,renderer,inGameFont);
                             selectedAttackPlan=attackPlans[selectedUnit].size()-1;
                         }
@@ -543,16 +534,15 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
             int unreadyUnits=0;
 
             for (const auto &unitWithPlan: attackPlans | std::views::keys) {
-                if (unitsFriend[unitWithPlan].getAnimationPhase()!=unitType::READY) {
+                if (units[unitWithPlan].getAnimationPhase()!=unitType::READY) {
                     unreadyUnits++;
-                    unitsFriend[unitWithPlan].doReadyAttack();
+                    units[unitWithPlan].doReadyAttack();
                 }
             }
             if (unreadyUnits==0) {
-                //TODO, bake in physics data in a separate thread
                 attackExecutionState=PLAYING;
 
-                myCake.bake(unitsFriend,attackPlans);
+                myCake.bake(grid,units,attackPlans);
                 attackExecutionPlaybackTimer=0.0;
                 attackExecutionPlaybackMaxTime=myCake.getEndTime();
 
@@ -560,6 +550,9 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
         }
         if (attackExecutionState==PLAYING) {
             attackExecutionPlaybackTimer+=dmillis*0.001;
+
+            myCake.spawnParticles(smokeParticles,attackExecutionPlaybackTimer,missileSmokeSpawnRate,dmillis);
+            myCake.updateUnits(units,attackExecutionPlaybackTimer,millis);
 
             if (attackExecutionPlaybackTimer>attackExecutionPlaybackMaxTime) {
                 //wait for the player to end this state, or re-play or whatever they feel like
@@ -576,16 +569,11 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
         particle.ageMs+=dmillis;
     }
 
-    //TODO: instead of spawning on the mouse, spawn particles on active missiles
-    //if (shouldSpawnParticle(missileSmokeSpawnRate,dmillis)) {
-    //    smokeParticles.emplace_back(mouseX/scale,mouseY/scale,0,0,0);
-    //}
-
-    while (smokeParticles.front().ageMs>smokeParticleLifetimeMs) {
+    while (!smokeParticles.empty() && smokeParticles.front().ageMs>smokeParticleLifetimeMs) {
         smokeParticles.pop_front();
     }
 
-    for (unit& U: unitsFriend) {
+    for (unit& U: units) {
         U.updateAnimation(millis);
     }
 

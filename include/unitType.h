@@ -18,6 +18,7 @@ public:
         PREPARE = 2,
         READY=3,
         UNPREPARE=4,
+        DIE=5,
     };
 
 private:
@@ -34,6 +35,7 @@ private:
     texwrap prepare;
     texwrap ready;
     texwrap unprepare;
+    texwrap die;
 
     //Use unsigned int to avoid casting issues since millis is unsigned
     unsigned int idle_frames;
@@ -41,6 +43,7 @@ private:
     unsigned int prepare_frames;
     unsigned int ready_frames;
     unsigned int unprepare_frames;
+    unsigned int die_frames;
 
     ///Range of surface-to-air missiles aboard this thing
     ///is 0 if it has no SAM,
@@ -51,15 +54,14 @@ private:
     ///is 0 if it has no SSM
     double SSMRange;
 
-    ///TODO, load this from file
     ///How many SSMs we can fire in one turn
     int SSMSalvoSize=4;
 
-    ///TODO, load this from file
     ///How many attack vector nodes can surface to surface missiles fired from this thing have
     ///should be at least 2 (has no effect below 2)
     int SSMNodes=3;
 
+    int maxHp=2;
 
 public:
 
@@ -67,6 +69,9 @@ public:
     [[nodiscard]] double getSSMRange() const {return SSMRange;};
 
     [[nodiscard]] int getSSMSalvoSize() const {return SSMSalvoSize;};
+
+    [[nodiscard]] int getSSMNodes() const {return SSMNodes;};
+    [[nodiscard]] int getMaxHp() const {return maxHp;};
 
 
     [[nodiscard]] int getMovementPoints() const { return movementPoints; }
@@ -83,7 +88,6 @@ public:
 
     [[nodiscard]] const std::string& getName() const { return name; }
 
-    [[nodiscard]] int getSSMNodes() const { return SSMNodes; }
 };
 
 #endif //PREMVPMAPGAME_UNITTYPE_H

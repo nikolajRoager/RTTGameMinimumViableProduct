@@ -27,10 +27,12 @@ private:
     ///A white circle with a radius of 10 hex sizes
     texwrap circle10;
 
+    texwrap hpMarker;
+
     std::vector<unitType> unitLibrary;
 
     ///Units of the player side
-    std::vector<unit> unitsFriend;
+    std::vector<unit> units;
 
     int scenarioWidthPx;
     int scenarioHeightPx;

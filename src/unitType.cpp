@@ -32,6 +32,10 @@ void unitType::render(double x, double y, double scale,uint32_t millis,SDL_Rende
             //Shall freeze on the last frame
             unprepare.render(x,y,renderer,scale,true,flip,unprepare_frames,std::min(frame,unprepare_frames-1));
             break;
+        case unitType::DIE:
+            //Shall freeze on the last frame
+            die.render(x,y,renderer,scale,true,flip,die_frames,std::min(frame,die_frames-1));
+            break;
     }
 
 }
@@ -51,10 +55,12 @@ bool unitType::isAnimationFinished(uint32_t millis, animationPhase phase) const 
             return frame>=ready_frames;
         case unitType::UNPREPARE:
             return frame>=unprepare_frames;
+        case unitType::DIE:
+            return frame>=die_frames;
     }
 }
 
-unitType::unitType(const fs::path& unitPath, SDL_Renderer *renderer): texture((unitPath/"idle.png"), renderer), idle((unitPath/"idle.png"),renderer), move((unitPath/"move.png"),renderer), prepare((unitPath/"prepare.png"),renderer),ready((unitPath/"ready.png"),renderer), unprepare((unitPath/"unprepare.png"),renderer) {
+unitType::unitType(const fs::path& unitPath, SDL_Renderer *renderer): texture((unitPath/"idle.png"), renderer), idle((unitPath/"idle.png"),renderer), move((unitPath/"move.png"),renderer), prepare((unitPath/"prepare.png"),renderer),ready((unitPath/"ready.png"),renderer), unprepare((unitPath/"unprepare.png"),renderer), die((unitPath/"die.png"),renderer) {
     std::ifstream animationStats(unitPath/"unitStats.txt");
     std::string line;
 
@@ -63,6 +69,7 @@ unitType::unitType(const fs::path& unitPath, SDL_Renderer *renderer): texture((u
     prepare_frames=1;
     ready_frames=1;
     unprepare_frames=1;
+    die_frames=1;
     landUnit=true;
     movementPoints=3;
 
@@ -87,6 +94,9 @@ unitType::unitType(const fs::path& unitPath, SDL_Renderer *renderer): texture((u
         }
         if (tag=="unprepare") {
             ss >> unprepare_frames;
+        }
+        if (tag=="die") {
+            ss >> die_frames;
         }
         if (tag=="movementPoints") {
             ss >> movementPoints;
@@ -113,6 +123,15 @@ unitType::unitType(const fs::path& unitPath, SDL_Renderer *renderer): texture((u
         }
         if (tag=="SSMRange") {
             ss >> SSMRange;
+        }
+        if (tag=="SSMSalvoSize") {
+            ss >> SSMSalvoSize;
+        }
+        if (tag=="SSMNodes") {
+            ss >> SSMNodes;
+        }
+        if (tag=="maxHp") {
+            ss >> maxHp;
         }
     }
 

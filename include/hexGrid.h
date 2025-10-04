@@ -48,7 +48,7 @@ public:
         COLOR,
     };
 
-    double getHexRadius() const {return hexRadiusPx;}
+    [[nodiscard]] double getHexRadius() const {return hexRadiusPx;}
 
 
     explicit hexGrid(const fs::path &path, SDL_Renderer* renderer);

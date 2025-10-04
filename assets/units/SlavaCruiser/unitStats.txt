@@ -1,14 +1,14 @@
 idle 4
-move 2
+move 4
 prepare 4
 ready 4
-die 5
 unprepare 4
+die 7
 landUnit false
 movementPoints 5
-name Iver Huitfeldt class Frigate
+name Slava class cruiser
 SAMRange 4
-SSMRange 6
+SSMRange 8
 SSMSalvoSize 4
 SSMNodes 3
-maxHp 2
+maxHp 4
