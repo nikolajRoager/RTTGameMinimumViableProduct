@@ -155,16 +155,12 @@ void physicsCake::spawnParticles(std::deque<particle> &smokeParticles, double ti
 }
 
 void physicsCake::updateUnits(std::vector<unit> &units, double time, uint32_t millis) const {
-    std::cout<<"updateUnits\n";
     for (int i = 0; i < units.size(); ++i) {
-        std::cout<<units[i].getName()<<":";
         for (int j = 0; j < unitHealthEvents[i].size(); ++j) {
-            std::cout<<unitHealthEvents[i][j].time<<'-'<<unitHealthEvents[i][j].health<<' ';
             if (unitHealthEvents[i][j].time<time) {
                 units[i].setHp(unitHealthEvents[i][j].health,millis);
             }
             else break;
         }
-        std::cout<<"\n";
     }
 }

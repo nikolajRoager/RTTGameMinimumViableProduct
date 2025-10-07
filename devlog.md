@@ -426,10 +426,10 @@ The big long list is still there
 
 * Use drawCircle method instead of manually drawing circle ./
 * use pixels instead of hex for radius ./
-* show arrival time only for SELECTED order
-* We need some kind of on-screen gui elements, at the mouse location, indicating that we are about to add a new path or modify existing, maybe a green line indicating the possible path
-* Display radius centered on end of path, for doglegging, but only when doglegging is active
-* Dogleg missiles should obey range
+* show arrival time only for SELECTED order ./
+* Dogleg missiles should obey range ./
+* We need some kind of on-screen gui elements, at the mouse location, indicating that we are about to add a new path or modify existing, maybe a green line indicating the possible path ./
+* maybe a marker on the mouse, telling us that we can use shift ./
 * sidebar view attack orders on a per-unit basis
 * allow modification of arrival time with scroll wheel
 * add salvo delay
@@ -437,3 +437,41 @@ The big long list is still there
 And for the attack execution
 
 * Missile shall make explosion or splash when they hit (particle effect)
+
+Day 15.5 Tuesday 7/10/2025 CE
+=============================
+background
+-----
+I had a few moments to work in-between my work tasks, and while waiting for email replies
+
+work
+----
+I went through the big long list of todo items and solved a few.
+
+Honestly, I am going through somewhat of a writers block when it comes to this game, I struggle to focus, and I struggle to make big changes
+
+todo
+----
+Remaining items in the big long list of minor issues
+
+* sidebar view attack orders on a per-unit basis
+* allow modification of arrival time with scroll wheel
+* add salvo delay
+
+And for the attack execution
+
+* Missile shall make explosion or splash when they hit (particle effect)
+* Consider ripping out the physics code and remaking it from scratch because it sucks (pardon my language, but it does)
+* consider if it makes sense to add weapon seekers
+
+
+Longer term items
+
+* Finish off the minimum viable product, and create a new project
+* Sounds
+* AI Movement
+* AI Attack
+* What Air-defence doing?
+* Building/Lend Lease phase
+* Airplanes with many waypoints
+* Radar

@@ -28,6 +28,7 @@ private:
     texwrap circle10;
 
     texwrap hpMarker;
+    texwrap shiftMarker;
 
     std::vector<unitType> unitLibrary;
 
@@ -103,7 +104,7 @@ public:
     explicit scenario(SDL_Renderer* renderer, TTF_Font* _font);
     ~scenario();
 
-    void render(SDL_Renderer* renderer, int screenWidth, int screenHeight, uint32_t millis) const;
+    void render(SDL_Renderer* renderer, int mouseX, int mouseY, bool shiftKey, uint32_t millis) const;
     void update(SDL_Renderer* renderer, int screenWidth, int screenHeight, int mouseX, int mouseY, bool isLeftMouseClick, bool isRightMouseClick, bool executeClick, bool shiftKey, uint32_t millis, uint32_t dmillis);
 };
 

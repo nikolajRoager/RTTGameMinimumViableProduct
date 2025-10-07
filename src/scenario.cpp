@@ -16,7 +16,7 @@ void scenario::drawCircle(double x, double y, double radius, double scale, Uint8
     circle10.render(x*scale,y*scale,r,g,b,a,renderer,scale*2*radius/circle10.getWidth(),true);
 }
 
-scenario::scenario(SDL_Renderer* renderer, TTF_Font* _font) : background(fs::path("assets")/"background.png",renderer), hexSelectionOutline(fs::path("assets")/"hexoutline.png",renderer),circle10(fs::path("assets")/"circle10.png",renderer), grid(fs::path("assets"),renderer), myGui(fs::path("assets")/"gui",renderer,_font), flyingSSM(fs::path("assets")/"physicsGraphics"/"SSM.png",renderer), smokeParticleTexture(fs::path("assets")/"physicsGraphics"/"smoke.png",renderer), myCake(time(NULL)),hpMarker(fs::path("assets")/"hitpoint.png",renderer){
+scenario::scenario(SDL_Renderer* renderer, TTF_Font* _font) : background(fs::path("assets")/"background.png",renderer), hexSelectionOutline(fs::path("assets")/"hexoutline.png",renderer),circle10(fs::path("assets")/"circle10.png",renderer), grid(fs::path("assets"),renderer), myGui(fs::path("assets")/"gui",renderer,_font), flyingSSM(fs::path("assets")/"physicsGraphics"/"SSM.png",renderer), smokeParticleTexture(fs::path("assets")/"physicsGraphics"/"smoke.png",renderer), myCake(time(nullptr)),hpMarker(fs::path("assets")/"hitpoint.png",renderer),shiftMarker(fs::path("assets")/"shift.png",renderer){
 
 
     inGameFont = _font;
@@ -71,7 +71,7 @@ scenario::scenario(SDL_Renderer* renderer, TTF_Font* _font) : background(fs::pat
 scenario::~scenario() = default;
 
 
-void scenario::render(SDL_Renderer* renderer, int screenWidth, int screenHeight, uint32_t millis) const {
+void scenario::render(SDL_Renderer* renderer, int mouseX, int mouseY, bool shiftKey, uint32_t millis) const {
 
     //TODO, this is for debugging an unidentified crash bug, remove when the bug is found
  //   std::cout<<"render"<<std::endl;
@@ -177,14 +177,15 @@ void scenario::render(SDL_Renderer* renderer, int screenWidth, int screenHeight,
         }
 
 
-        for (const auto& unitAttackPlan : attackPlans | std::views::values) {
-            for (const auto& attackPlan : unitAttackPlan) {
-                //attackPlan.attackVectors[0];
-                attackPlan.render(renderer,scale);
+        for (const auto& unitAttackPlan : attackPlans) {
+            for (int i = 0; i < unitAttackPlan.second.size(); i++ ) {
+                const auto& attackPlan = unitAttackPlan.second[i];
+                attackPlan.render(renderer,scale,i==selectedAttackPlan && unitAttackPlan.first==selectedUnit);
             }
         }
 
 
+        bool hasShownGreenLine=false;
         //Show the range of the currently active attack plan, centered on said plan
         if (selectedAttackPlan!=-1 && attackPlans.contains(selectedUnit) && attackPlans.at(selectedUnit).size()>selectedAttackPlan)
         {
@@ -194,6 +195,27 @@ void scenario::render(SDL_Renderer* renderer, int screenWidth, int screenHeight,
             double range = units[selectedUnit].getSSMRange()-selectedPlan.getLength();
 
             drawCircle(plan_end.first, plan_end.second, range, scale,255,0,0,128, renderer);
+
+
+            SDL_SetRenderDrawColor(renderer,0,255,0,255);
+            double dist = sqrt(pow(plan_end.first-mouseX/scale,2)+pow(plan_end.second-mouseY/scale,2));
+            if (dist<range) {
+                shiftMarker.render(mouseX,mouseY,renderer,scale,false,false,2,shiftKey?1:0);
+                //Draw a little green line, showing us where a potential attack plan may go
+                if (shiftKey) {
+                    hasShownGreenLine=true;
+                    SDL_RenderDrawLine(renderer, scale*plan_end.first,scale*plan_end.second,mouseX,mouseY);
+                }
+            }
+        }
+
+        //Draw a little green line, showing us where a potential attack plan may go, from the unit itself
+        if (selectedUnit!=-1 && !hasShownGreenLine) {
+
+            SDL_SetRenderDrawColor(renderer,0,255,0,255);
+            double dist = sqrt(pow(units[selectedUnit].getX()-mouseX/scale,2)+pow(units[selectedUnit].getY()-mouseY/scale,2));
+            if (dist<units[selectedUnit].getSSMRange())
+                SDL_RenderDrawLine(renderer, scale*units[selectedUnit].getX(),scale*units[selectedUnit].getY(),mouseX,mouseY);
         }
     }
     else if (currentPhase==ATTACK_EXECUTION) {
@@ -501,7 +523,7 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
 
                     //Check if the new distance is outside range
                     const double range = sqrt(pow(destinationX-sourceX,2)+pow(destinationY-sourceY,2));
-                    if (range<units[selectedUnit].getSSMRange()*grid.getHexRadius()) {
+                    if (range<units[selectedUnit].getSSMRange()) {
                         if (!attackPlans.contains(selectedUnit))
                             attackPlans.emplace(selectedUnit,std::vector<attackPlan>());
 
@@ -515,7 +537,7 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
                 else {
                     double destinationX = mouseX/scale;
                     double destinationY = mouseY/scale;
-                    attackPlans[selectedUnit][selectedAttackPlan].addNode(destinationX,destinationY,renderer,inGameFont);
+                    attackPlans[selectedUnit][selectedAttackPlan].addNode(destinationX,destinationY,units[selectedUnit].getSSMRange(),renderer,inGameFont);
                 }
             }
         }

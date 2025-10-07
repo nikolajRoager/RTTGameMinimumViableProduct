@@ -168,7 +168,7 @@ void engine::run() {
         //Black background, shouldn't be seen but won't hurt
         SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0x00);
         SDL_RenderClear( renderer );
-        theScenario->render(renderer,windowWidthPx,windowHeightPx,millis);
+        theScenario->render(renderer,mouseXPos,mouseYPos,shiftDown,millis);
         SDL_RenderPresent( renderer );
         pmillis=millis;
 

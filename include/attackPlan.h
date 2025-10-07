@@ -33,7 +33,7 @@ public:
 
     attackPlan(int _launcherId,double x0,double y0, double x1,double y1, SDL_Renderer* renderer,  TTF_Font* font);
 
-    void render(SDL_Renderer *renderer, double scale) const;
+    void render(SDL_Renderer *renderer, double scale, bool isSelected=false) const;
     [[nodiscard]] double getLaunchTime() const {return launchTime;}
     [[nodiscard]] double getEndTime() const {return attackVectors.back().time;}
     [[nodiscard]] std::pair<double,double> getEndNode() const {return {attackVectors.back().x,attackVectors.back().y};}
@@ -49,7 +49,7 @@ public:
 
     [[nodiscard]] double getProjectileSpeed () const {return projectileSpeed;}
 
-    void addNode(double x, double y,SDL_Renderer* renderer, TTF_Font* font);
+    void addNode(double x, double y,double maxRange,SDL_Renderer* renderer, TTF_Font* font);
 };
 
 #endif //PREMVPMAPGAME_ATTACKPLAN_H

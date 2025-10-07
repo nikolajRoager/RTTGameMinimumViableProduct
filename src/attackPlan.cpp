@@ -20,7 +20,7 @@ attackPlan::attackPlan(int _launcherId, double x0, double y0, double x1, double 
 }
 
 
-void attackPlan::render(SDL_Renderer *renderer, double scale) const {
+void attackPlan::render(SDL_Renderer *renderer, double scale, bool isSelected) const {
 
     SDL_SetRenderDrawColor(renderer,255,0,0,255);
 
@@ -28,7 +28,8 @@ void attackPlan::render(SDL_Renderer *renderer, double scale) const {
         if (i!=0)
             SDL_RenderDrawLine(renderer, scale*attackVectors[i].x,scale*attackVectors[i].y,scale*attackVectors[i-1].x,scale*attackVectors[i-1].y);
 
-        attackVectors[i].timeMarker.render(scale*attackVectors[i].x,scale*attackVectors[i].y,renderer,scale);
+        if (isSelected)
+            attackVectors[i].timeMarker.render(scale*attackVectors[i].x,scale*attackVectors[i].y,renderer,scale);
     }
 }
 
@@ -55,11 +56,12 @@ std::pair<double, double> attackPlan::getLocation(double time) const {
     return std::make_pair(attackVectors.back().x,attackVectors.back().y);
 }
 
-void attackPlan::addNode(double x, double y, SDL_Renderer* renderer, TTF_Font* font) {
+void attackPlan::addNode(double x, double y, double maxRange, SDL_Renderer* renderer, TTF_Font* font) {
     //TODO TEMP
     double prev_dist = attackVectors.back().distance;
     double x0 = attackVectors.back().x;
     double y0 = attackVectors.back().y;
     double dist = sqrt(pow(x-x0,2)+pow(y-y0,2))+prev_dist;
-    attackVectors.emplace_back(x,y,dist/projectileSpeed,dist,renderer,font);
+    if (dist<=maxRange)
+        attackVectors.emplace_back(x,y,dist/projectileSpeed,dist,renderer,font);
 }
