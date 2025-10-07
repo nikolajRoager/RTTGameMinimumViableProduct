@@ -7,7 +7,7 @@ unprepare 4
 landUnit true
 movementPoints 3
 name Danish SAM Launcher
-SAMRange 5
+SAMRange 125
 SSMSalvoSize 0
 SSMNodes 2
 maxHp 2

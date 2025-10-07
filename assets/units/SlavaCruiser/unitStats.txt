@@ -7,8 +7,8 @@ die 7
 landUnit false
 movementPoints 5
 name Slava class cruiser
-SAMRange 4
-SSMRange 8
+SAMRange 100
+SSMRange 200
 SSMSalvoSize 4
 SSMNodes 3
 maxHp 4

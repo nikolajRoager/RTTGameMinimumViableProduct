@@ -7,8 +7,8 @@ unprepare 4
 landUnit false
 movementPoints 5
 name Iver Huitfeldt class Frigate
-SAMRange 4
-SSMRange 6
+SAMRange 100
+SSMRange 150
 SSMSalvoSize 4
 SSMNodes 3
 maxHp 2

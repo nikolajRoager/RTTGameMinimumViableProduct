@@ -7,7 +7,7 @@ unprepare 3
 landUnit true
 movementPoints 3
 name Danish cruise-missile Launcher
-SSMRange 8
+SSMRange 200
 SSMSalvoSize 4
 SSMNodes 3
 maxHp 2

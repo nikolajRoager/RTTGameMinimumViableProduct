@@ -98,12 +98,7 @@ private:
 
     physicsCake myCake;
 
-    ///Helper function, tells us whether or not to spawn a particle this frame, given the time interval and the average spawn rate
-    static bool shouldSpawnParticle(double spawnRate, uint32_t dmillis) {
-        return true;//TODO, replace with poisson distribution
-    }
-
-
+    void drawCircle(double x, double y, double radius, double scale, Uint8 r, Uint8 g, Uint8 b, Uint8 a, SDL_Renderer* renderer) const;
 public:
     explicit scenario(SDL_Renderer* renderer, TTF_Font* _font);
     ~scenario();

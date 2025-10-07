@@ -424,16 +424,16 @@ todo
 ----
 The big long list is still there
 
-* Use drawCircle method instead of manually drawing circle
+* Use drawCircle method instead of manually drawing circle ./
+* use pixels instead of hex for radius ./
+* show arrival time only for SELECTED order
+* We need some kind of on-screen gui elements, at the mouse location, indicating that we are about to add a new path or modify existing, maybe a green line indicating the possible path
 * Display radius centered on end of path, for doglegging, but only when doglegging is active
 * Dogleg missiles should obey range
-* We need some kind of on-screen gui elements, at the mouse location, indicating that we are about to add a new path or modify existing, maybe a green line indicating the possible path
-* show arrival time only for SELECTED order
 * sidebar view attack orders on a per-unit basis
 * allow modification of arrival time with scroll wheel
 * add salvo delay
-* use pixels instead of hex for radius
 
 And for the attack execution
 
-* Missile shall make explosion when they hit (explosion particle effect)
+* Missile shall make explosion or splash when they hit (particle effect)
