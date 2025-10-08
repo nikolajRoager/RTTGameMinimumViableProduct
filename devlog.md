@@ -455,6 +455,7 @@ todo
 Remaining items in the big long list of minor issues
 
 * sidebar view attack orders on a per-unit basis
+* allow deletion of attack orders from gui or with back-space
 * allow modification of arrival time with scroll wheel
 * add salvo delay
 
@@ -465,13 +466,33 @@ And for the attack execution
 * consider if it makes sense to add weapon seekers
 
 
-Longer term items
+Day 16.5, Wednesday 8/10/2025 CE
+===================
 
-* Finish off the minimum viable product, and create a new project
+background
+-----
+Once again, I am waiting for a meeting before I can advance at work, so I have another day for this game
+
+work
+---------
+I added the attack plans sidebar, which shows the queue of planned attacks in the sidebar, and I added the option to modify launch time and delete attack plans
+
+
+todo
+----
+The time has come to create the actual project, now that the minimum viable product is done.
+
+At the same time, here is a list of super-long term features, in no particular order
+
+* create a new project
 * Sounds
 * AI Movement
 * AI Attack
-* What Air-defence doing?
-* Building/Lend Lease phase
-* Airplanes with many waypoints
-* Radar
+* What Air-defence doing? SAM should automatically get tasked against vampires
+* static buildings
+* ammunition management
+* transport submarine (to move ground units across the sea)
+* Building/Lend Lease/recruitment phase
+* Airplanes which can accept many waypoints, and which return to base
+* submarines and ASW
+* Radar and hidden units

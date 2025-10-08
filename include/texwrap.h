@@ -23,7 +23,7 @@ private:
 
 public:
     texwrap(fs::path path, SDL_Renderer* renderer);
-    texwrap(const std::string& words, SDL_Renderer* renderer, TTF_Font* _font);
+    texwrap(const std::string& words, SDL_Renderer* renderer, TTF_Font* _font, Uint8 r=255, Uint8 g=255, Uint8 b=255);
     texwrap(texwrap&& tex) noexcept ;
     texwrap& operator=(texwrap&& other) noexcept ;
     ~texwrap();

@@ -9,7 +9,7 @@
 #include <iostream>
 #include <SDL2/SDL_render.h>
 
-gui::gui(const fs::path& guiFolder, SDL_Renderer *renderer, TTF_Font* font): backgroundTile((guiFolder/"guiTile.png"),renderer),movementPhaseMarker((guiFolder/"movementPhase.png"),renderer),attackPhaseMarker((guiFolder/"attackPhase.png"),renderer),executeMarker((guiFolder/"execute.png"),renderer),infoScreen((guiFolder/"infoScreen.png"),renderer), flipButton((guiFolder/"flipButton.png"),renderer),mapModeHexOutline("Hex outlines",renderer,font),samRangeHexOutline("SAM range",renderer,font),ssmRangeHexOutline("SSM range",renderer,font) {
+gui::gui(const fs::path& guiFolder, SDL_Renderer *renderer, TTF_Font* font): backgroundTile((guiFolder/"guiTile.png"),renderer),movementPhaseMarker((guiFolder/"movementPhase.png"),renderer),attackPhaseMarker((guiFolder/"attackPhase.png"),renderer),executeMarker((guiFolder/"execute.png"),renderer),infoScreen((guiFolder/"infoScreen.png"),renderer), flipButton((guiFolder/"flipButton.png"),renderer),sidebarLaunch(guiFolder/"sidebarLaunch.png",renderer),sidebarNode(guiFolder/"sidebarNode.png",renderer),sidebarTarget(guiFolder/"sidebarTarget.png",renderer),sidebarSelection(guiFolder/"sidebarSelection.png",renderer),sidebarTrash(guiFolder/"sidebarTrash.png",renderer),mapModeHexOutline("Hex outlines",renderer,font),mapModeSamRange("SAM range",renderer,font),mapModeSsmRange("SSM range",renderer,font) {
     std::cout<<"Loaded gui"<<std::endl;
     infoScreenFont=font;
     infoScreenMaxExpansion=infoScreen.getHeight();
@@ -82,10 +82,10 @@ void gui::render(int scenarioWidth, int scenarioHeight, SDL_Renderer *renderer, 
     mapModeHexOutline.render((scenarioWidth-2*RIGHT_BAR_PIXELS+flipButton.getWidth()*0.5+10)*scale,(scenarioHeight+10)*scale,renderer,scale);
     //button for SAM range
     flipButton.render((scenarioWidth-2*RIGHT_BAR_PIXELS+10)*scale,(scenarioHeight+20+flipButton.getHeight())*scale,renderer,scale,false,false,2,showSAMRange?1:0);
-    samRangeHexOutline.render((scenarioWidth-2*RIGHT_BAR_PIXELS+flipButton.getWidth()*0.5+10)*scale,(scenarioHeight+20+flipButton.getHeight())*scale,renderer,scale);
+    mapModeSamRange.render((scenarioWidth-2*RIGHT_BAR_PIXELS+flipButton.getWidth()*0.5+10)*scale,(scenarioHeight+20+flipButton.getHeight())*scale,renderer,scale);
     //button for SSM range
     flipButton.render((scenarioWidth-2*RIGHT_BAR_PIXELS+10)*scale,(scenarioHeight+30+flipButton.getHeight()*2)*scale,renderer,scale,false,false,2,showSSMRange?1:0);
-    ssmRangeHexOutline.render((scenarioWidth-2*RIGHT_BAR_PIXELS+flipButton.getWidth()*0.5+10)*scale,(scenarioHeight+30+2*flipButton.getHeight())*scale,renderer,scale);
+    mapModeSsmRange.render((scenarioWidth-2*RIGHT_BAR_PIXELS+flipButton.getWidth()*0.5+10)*scale,(scenarioHeight+30+2*flipButton.getHeight())*scale,renderer,scale);
 
 
     //The flashing buttons are drawn atop each other, on the 2nd tile from the right
@@ -117,7 +117,7 @@ void gui::renderAttackExecution(int scenarioWidth, int scenarioHeight, SDL_Rende
 
     //Yes, creating a temporary texture class with a string every frame is bad practice
     //But this thing ACTUALLY changes every single frame so we NEED a new texture every frame
-    texwrap currentTimeCounter (std::format("{:.3f}", playbackTime),renderer,infoScreenFont);
+    texwrap currentTimeCounter (std::format("{:.3f}", playbackTime)+"/"+std::format("{:.3f}", maxPlaybackTime),renderer,infoScreenFont);
 
     currentTimeCounter.render((scenarioWidth+RIGHT_BAR_PIXELS/2)*scale,(BOTTOM_BAR_PIXELS/2)*scale,renderer,scale);
 }
@@ -146,4 +146,71 @@ void gui::setInfoScreenText(std::string text, SDL_Renderer* renderer) {
         y+=infoScreenLines.back().first.getHeight();
     }
 
+}
+
+
+
+void gui::renderAttackPlanning(int scenarioWidth, int scenarioHeight, int mouseX, int mouseY, SDL_Renderer *renderer, double scale, const std::map<int, std::vector<attackPlan> > &attackPlans, int selectedUnit, int selectedPlan) const {
+    double mouseX_scaled = mouseX/scale;
+    double mouseY_scaled = mouseY/scale;
+    //Loop through the attack plans for this unit, and display them
+    int sidebarTopY = BOTTOM_BAR_PIXELS;
+    if (selectedUnit!=-1 && attackPlans.contains(selectedUnit)) {
+        for (int i = 0; i < attackPlans.at(selectedUnit).size(); i++) {
+            int sidebarCurrentHeight = sidebarTopY;
+            sidebarLaunch.render(scenarioWidth*scale,sidebarCurrentHeight*scale,renderer,scale);
+            if (i==selectedPlan)
+                sidebarSelection.render((scenarioWidth-sidebarSelection.getWidth())*scale,sidebarCurrentHeight*scale,renderer,scale);
+            attackPlans.at(selectedUnit)[i].getTimeMarker(0).render((scenarioWidth+50)*scale,sidebarCurrentHeight*scale,renderer,scale);
+            sidebarCurrentHeight+=sidebarLaunch.getHeight();
+
+            for (int j = 1; j+1<attackPlans.at(selectedUnit)[i].getNodes(); ++j) {
+                sidebarNode.render(scenarioWidth*scale,sidebarCurrentHeight*scale,renderer,scale);
+                attackPlans.at(selectedUnit)[i].getTimeMarker(j).render((scenarioWidth+50)*scale,sidebarCurrentHeight*scale,renderer,scale);
+                sidebarCurrentHeight+=sidebarNode.getHeight();
+            }
+            sidebarTarget.render(scenarioWidth*scale,sidebarCurrentHeight*scale,renderer,scale);
+            attackPlans.at(selectedUnit)[i].getTimeMarker(attackPlans.at(selectedUnit)[i].getNodes()-1).render((scenarioWidth+50)*scale,sidebarCurrentHeight*scale,renderer,scale);
+            sidebarCurrentHeight+=sidebarTarget.getHeight();
+
+            bool isSelected = mouseX_scaled>scenarioWidth&& mouseY_scaled>sidebarTopY && mouseY_scaled<sidebarCurrentHeight;
+            sidebarTrash.render((scenarioWidth+sidebarLaunch.getWidth()-sidebarTrash.getWidth())*scale,sidebarTopY*scale,renderer,scale,false,false,2,isSelected?1:0);
+            sidebarTopY=sidebarCurrentHeight;
+        }
+    }
+    //currentTimeCounter.render((scenarioWidth+RIGHT_BAR_PIXELS/2)*scale,(BOTTOM_BAR_PIXELS/2)*scale,renderer,scale);
+}
+
+
+///Loop through the graphical markers of the attack plans, and return the one the mouse is over
+int gui::getSelectedAttackPlan(int scenarioWidth, int scenarioHeight, int mouseX, int mouseY, double scale, const std::map<int, std::vector<attackPlan> > &attackPlans, int selectedUnit, int selectedPlan) const {
+
+    double mouseX_scaled = mouseX/scale;
+    double mouseY_scaled = mouseY/scale;
+
+    int sidebarTopY = BOTTOM_BAR_PIXELS;
+    if (mouseX_scaled<scenarioWidth || mouseY_scaled<sidebarTopY) {
+        return -1;
+    }
+    else
+    {
+        if (selectedUnit!=-1 && attackPlans.contains(selectedUnit)) {
+            for (int i = 0; i < attackPlans.at(selectedUnit).size(); i++) {
+                int attackPlanElementSize=0;
+
+                attackPlanElementSize+=sidebarLaunch.getHeight();
+                for (int j = 1; j+1<attackPlans.at(selectedUnit)[i].getNodes(); ++j) {
+                    attackPlanElementSize+=sidebarNode.getHeight();
+                }
+                attackPlanElementSize+=sidebarTarget.getHeight();
+
+                if (mouseY_scaled>sidebarTopY && mouseY_scaled<sidebarTopY+attackPlanElementSize) {
+                    return i;
+                }
+                sidebarTopY+=attackPlanElementSize;
+            }
+        }
+
+        return -1;
+    }
 }

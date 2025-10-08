@@ -192,6 +192,8 @@ void scenario::render(SDL_Renderer* renderer, int mouseX, int mouseY, bool shift
             const auto& selectedPlan = attackPlans.at(selectedUnit)[selectedAttackPlan];
             const auto plan_end = selectedPlan.getEndNode();
 
+            size_t nnodes = selectedPlan.getNodes();
+
             double range = units[selectedUnit].getSSMRange()-selectedPlan.getLength();
 
             drawCircle(plan_end.first, plan_end.second, range, scale,255,0,0,128, renderer);
@@ -199,7 +201,7 @@ void scenario::render(SDL_Renderer* renderer, int mouseX, int mouseY, bool shift
 
             SDL_SetRenderDrawColor(renderer,0,255,0,255);
             double dist = sqrt(pow(plan_end.first-mouseX/scale,2)+pow(plan_end.second-mouseY/scale,2));
-            if (dist<range) {
+            if (dist<range && nnodes<units[selectedUnit].getSSMNodes()) {
                 shiftMarker.render(mouseX,mouseY,renderer,scale,false,false,2,shiftKey?1:0);
                 //Draw a little green line, showing us where a potential attack plan may go
                 if (shiftKey) {
@@ -210,7 +212,7 @@ void scenario::render(SDL_Renderer* renderer, int mouseX, int mouseY, bool shift
         }
 
         //Draw a little green line, showing us where a potential attack plan may go, from the unit itself
-        if (selectedUnit!=-1 && !hasShownGreenLine) {
+        if (selectedUnit!=-1 && !hasShownGreenLine && (!attackPlans.contains(selectedUnit) || units[selectedUnit].getSSMSalvoSize()>attackPlans.at(selectedUnit).size())) {
 
             SDL_SetRenderDrawColor(renderer,0,255,0,255);
             double dist = sqrt(pow(units[selectedUnit].getX()-mouseX/scale,2)+pow(units[selectedUnit].getY()-mouseY/scale,2));
@@ -253,11 +255,14 @@ void scenario::render(SDL_Renderer* renderer, int mouseX, int mouseY, bool shift
 
     myGui.render(scenarioWidthPx,scenarioHeightPx,renderer,scale,millis,currentPhase);
 
+    //Render some phase dependent gui elements on top
     if (currentPhase==ATTACK_EXECUTION)
         myGui.renderAttackExecution(scenarioWidthPx,scenarioHeightPx,renderer,scale,attackExecutionPlaybackTimer,attackExecutionPlaybackMaxTime);
+    if (currentPhase==ATTACK_PLANNING)
+        myGui.renderAttackPlanning(scenarioWidthPx,scenarioHeightPx,mouseX,mouseY,renderer,scale,attackPlans,selectedUnit,selectedAttackPlan);
 }
 
-void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,  int mouseX, int mouseY, bool isLeftMouseClick, bool isRightMouseClick, bool executeClick, bool shiftKey, uint32_t millis, uint32_t dmillis) {
+void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,  int mouseX, int mouseY, bool isLeftMouseClick, bool isRightMouseClick, bool executeClick, bool shiftKey, int scrollwheel, uint32_t millis, uint32_t dmillis) {
     scale = std::min(static_cast<double>(screenWidth) / static_cast<double>(scenarioWidthPx+gui::getRightBarPixels()),
                      static_cast<double>(screenHeight) / static_cast<double>(scenarioHeightPx+gui::getBottomBarPixels()));
 
@@ -541,6 +546,30 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
                 }
             }
         }
+
+
+        //Scroll to adjust the launch timing of the selected attack plan in 1 second intervals
+        if (scrollwheel!=0) {
+            if (selectedAttackPlan!=-1 && attackPlans.contains(selectedUnit) && attackPlans[selectedUnit].size()>selectedAttackPlan) {
+                attackPlans[selectedUnit][selectedAttackPlan].modifyLaunchTime(scrollwheel,renderer,inGameFont);
+            }
+        }
+
+
+        //Mouse over element in the gui to select it
+        int newSelectedPlan = myGui.getSelectedAttackPlan(scenarioWidthPx,scenarioHeightPx,mouseX,mouseY,scale,attackPlans,selectedUnit,selectedAttackPlan);
+        if (newSelectedPlan != -1) {
+            selectedAttackPlan=newSelectedPlan;
+            //Click to delete
+            if (isLeftMouseClick || isRightMouseClick) {
+                //If we got here, we know the plan exists alright
+                attackPlans[selectedUnit].erase(attackPlans[selectedUnit].begin()+newSelectedPlan);
+                selectedAttackPlan=-1;
+            }
+        }
+
+
+
 
         if (executeClick || myGui.isExecuteButtonPressed()) {
             currentPhase=ATTACK_EXECUTION;

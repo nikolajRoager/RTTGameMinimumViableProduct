@@ -105,7 +105,7 @@ public:
     ~scenario();
 
     void render(SDL_Renderer* renderer, int mouseX, int mouseY, bool shiftKey, uint32_t millis) const;
-    void update(SDL_Renderer* renderer, int screenWidth, int screenHeight, int mouseX, int mouseY, bool isLeftMouseClick, bool isRightMouseClick, bool executeClick, bool shiftKey, uint32_t millis, uint32_t dmillis);
+    void update(SDL_Renderer* renderer, int screenWidth, int screenHeight, int mouseX, int mouseY, bool isLeftMouseClick, bool isRightMouseClick, bool executeClick, bool shiftKey, int scrollwheel, uint32_t millis, uint32_t dmillis);
 };
 
 #endif //PREMVPMAPGAME_SCENARIO_H

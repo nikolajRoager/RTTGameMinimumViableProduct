@@ -34,7 +34,7 @@ void attackPlan::render(SDL_Renderer *renderer, double scale, bool isSelected) c
 }
 
 std::pair<double, double> attackPlan::getLocation(double time) const {
-    if (time<=launchTime) {
+    if (time<=getLaunchTime()) {
         return std::make_pair(attackVectors[0].x,attackVectors[0].y);
     }
     else if (time>getEndTime()) {
@@ -57,11 +57,20 @@ std::pair<double, double> attackPlan::getLocation(double time) const {
 }
 
 void attackPlan::addNode(double x, double y, double maxRange, SDL_Renderer* renderer, TTF_Font* font) {
-    //TODO TEMP
     double prev_dist = attackVectors.back().distance;
+    double prev_time = attackVectors.back().time;
     double x0 = attackVectors.back().x;
     double y0 = attackVectors.back().y;
-    double dist = sqrt(pow(x-x0,2)+pow(y-y0,2))+prev_dist;
+    double thisDistance = sqrt(pow(x-x0,2)+pow(y-y0,2));
+    double dist = thisDistance+prev_dist;
     if (dist<=maxRange)
-        attackVectors.emplace_back(x,y,dist/projectileSpeed,dist,renderer,font);
+        attackVectors.emplace_back(x,y,prev_time+thisDistance/projectileSpeed,dist,renderer,font);
+}
+
+void attackPlan::modifyLaunchTime(int amount, SDL_Renderer* renderer,  TTF_Font* font) {
+    if (attackVectors.front().time+amount>=0)
+        for (auto& point : attackVectors) {
+                point.time+=amount;
+                point.timeMarker=texwrap(std::format("{:.3f}", point.time),renderer,font,0,0,0);
+        }
 }

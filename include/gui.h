@@ -5,9 +5,11 @@
 #ifndef PREMVPMAPGAME_GUI_H
 #define PREMVPMAPGAME_GUI_H
 #include <filesystem>
+#include <map>
 #include <vector>
 #include <SDL2/SDL_render.h>
 
+#include "attackPlan.h"
 #include "phase.h"
 #include "texwrap.h"
 
@@ -29,8 +31,15 @@ private:
     texwrap flipButton;
 
     texwrap mapModeHexOutline;
-    texwrap samRangeHexOutline;
-    texwrap ssmRangeHexOutline;
+    texwrap mapModeSamRange;
+    texwrap mapModeSsmRange;
+
+    texwrap sidebarLaunch;
+    texwrap sidebarNode;
+    texwrap sidebarTarget;
+    texwrap sidebarTrash;
+
+    texwrap sidebarSelection;
 
     TTF_Font *infoScreenFont;
 
@@ -63,6 +72,11 @@ public:
 
     ///Render the GUI specifically for the playback of the attack animation
     void renderAttackExecution(int scenarioWidth, int scenarioHeight, SDL_Renderer* renderer, double scale, double playbackTime, double maxPlaybackTime) const;
+
+    ///Render the GUI specifically for the planning of the attacks (the sidebar
+    void renderAttackPlanning(int scenarioWidth, int scenarioHeight, int mouseX, int mouseY, SDL_Renderer* renderer, double scale, const std::map<int,std::vector<attackPlan> >& attackPlans, int selectedUnit, int selectedPlan) const;
+
+    [[nodiscard]] int getSelectedAttackPlan(int scenarioWidth, int scenarioHeight, int mouseX, int mouseY, double scale, const std::map<int,std::vector<attackPlan> >& attackPlans, int selectedUnit, int selectedPlan) const;
 
     [[nodiscard]] bool isExecuteButtonPressed() const {return pressExecuteButton;}
 

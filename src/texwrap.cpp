@@ -33,9 +33,9 @@ texwrap&  texwrap::operator=(texwrap&& other)  noexcept {
     return *this;
 }
 
-texwrap::texwrap(const std::string& words, SDL_Renderer* renderer, TTF_Font* _font) {
+texwrap::texwrap(const std::string& words, SDL_Renderer* renderer, TTF_Font* _font, Uint8 r, Uint8 g, Uint8 b) {
 
-    const SDL_Color color = {255,255,255,255};
+    const SDL_Color color = {r,g,b,255};
     SDL_Surface* surface = TTF_RenderText_Solid( _font,!words.empty()? words.c_str() :" ", color);
     if (surface == nullptr) {
         throw std::runtime_error("Unable to create text texture: " + std::string(SDL_GetError()));

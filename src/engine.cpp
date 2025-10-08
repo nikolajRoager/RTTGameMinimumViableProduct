@@ -107,6 +107,8 @@ void engine::run() {
         prevRightMouseDown=rightMouseDown;
         prevLeftMouseDown=leftMouseDown;
         prevExecuteDown=executeDown;
+
+        int scroll=0;
         SDL_Event event;
         //First handle events
         while (SDL_PollEvent(&event)) {
@@ -123,6 +125,9 @@ void engine::run() {
                         break;
                 }
 
+            }
+            if (event.type == SDL_MOUSEWHEEL) {
+                scroll=event.wheel.y;
             }
             if (event.type == SDL_MOUSEMOTION) {
                 SDL_GetMouseState( &mouseXPos, &mouseYPos );
@@ -163,7 +168,7 @@ void engine::run() {
         //Milliseconds since program start is preferred time measurement for animations
         unsigned int millis = SDL_GetTicks();
 
-        theScenario->update(renderer, windowWidthPx,windowHeightPx,mouseXPos,mouseYPos,(leftMouseDown && !prevLeftMouseDown),(rightMouseDown && !prevRightMouseDown),(executeDown && !prevExecuteDown),shiftDown,millis,millis-pmillis);
+        theScenario->update(renderer, windowWidthPx,windowHeightPx,mouseXPos,mouseYPos,(leftMouseDown && !prevLeftMouseDown),(rightMouseDown && !prevRightMouseDown),(executeDown && !prevExecuteDown),shiftDown,scroll,millis,millis-pmillis);
 
         //Black background, shouldn't be seen but won't hurt
         SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0x00);
