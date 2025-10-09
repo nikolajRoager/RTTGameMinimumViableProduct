@@ -97,6 +97,11 @@ public:
     ///Spawn particles at this time, with this time interval
     void spawnParticles(std::deque<particle>& smokeParticles,double time, double smokeSpawnRate, uint32_t dmillis);
 
+    void clear() {
+        SSMVectors.clear();
+        unitHealthEvents.clear();
+        particleEvents.clear();
+    }
 
 };
 

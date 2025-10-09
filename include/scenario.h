@@ -10,6 +10,7 @@
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_ttf.h>
 
+#include "AIMovementClient.h"
 #include "attackPlan.h"
 #include "gui.h"
 #include "hexGrid.h"
@@ -50,11 +51,11 @@ private:
     hexGrid grid;
 
     ///What phase of the game are we going through
-    phase currentPhase=MOVEMENT_PLANNING_FRIEND;
+    phase currentPhase=MOVEMENT_PLANNING;
 
 
     ///The queued up movements for the good guys, indexed by unit id,
-    std::map<int,std::vector<int> > friendMovementPlans;
+    std::map<int,std::vector<int> > movementPlans;
 
     ///The queued up attack plans for each unit, again index by unit id
     std::map<int,std::vector<attackPlan> > attackPlans;
@@ -98,6 +99,10 @@ private:
     double missileSmokeSpawnRate = 10;
 
     physicsCake myCake;
+
+    bool hasCalculatedAIMovement=false;
+
+    AIMovementClient aiMovementClient;
 
     void drawCircle(double x, double y, double radius, double scale, Uint8 r, Uint8 g, Uint8 b, Uint8 a, SDL_Renderer* renderer) const;
 public:

@@ -37,20 +37,43 @@ scenario::scenario(SDL_Renderer* renderer, TTF_Font* _font) : background(fs::pat
     units.clear();
     units.emplace_back(unitLibrary[0],true,20,8);
     units.emplace_back(unitLibrary[2],true,18,12);
-    units.emplace_back(unitLibrary[4],false,20,16);
     units.emplace_back(unitLibrary[1],true,25,20);
     units.emplace_back(unitLibrary[1],true,32,15);
     units.emplace_back(unitLibrary[1],true,31,14);
-    units.emplace_back(unitLibrary[3],true,10,23);
-    units.emplace_back(unitLibrary[3],true,8,23);
 
+    //Evil enemy Ruskys and Yankees as enemies, because we need to fight both at the same time, otherwise it wouldn't be a fair fight
+    units.emplace_back(unitLibrary[4],false,20,16);
+    //American Destroyer SPAM
+    units.emplace_back(unitLibrary[3],false,10,23);
+    units.emplace_back(unitLibrary[3],true,8,23);
+    units.emplace_back(unitLibrary[3],true,9,23);
+    units.emplace_back(unitLibrary[3],true,8,22);
+    units.emplace_back(unitLibrary[3],true,10,22);
+    units.emplace_back(unitLibrary[3],true,11,22);
+
+    aiMovementClient.addPatrolHex(99);
+    aiMovementClient.addPatrolHex(179);
+    aiMovementClient.addPatrolHex(554);
+    aiMovementClient.addPatrolHex(521);
+    aiMovementClient.addPatrolHex(332);
+    aiMovementClient.addPatrolHex(563);
+    aiMovementClient.addPatrolHex(95);
+    aiMovementClient.addPatrolHex(207);
+    aiMovementClient.addPatrolHex(359);
+    aiMovementClient.addPatrolHex(472);
+    aiMovementClient.addPatrolHex(665);
+    aiMovementClient.addPatrolHex(587);
+    aiMovementClient.addPatrolHex(404);
+    aiMovementClient.addPatrolHex(215);
+    aiMovementClient.addPatrolHex(393);
+    aiMovementClient.addPatrolHex(775);
 
 
     std::cout<<"Verifying screen dimensions"<<std::endl;
     scenarioWidthPx=grid.getScenarioWidth();
     scenarioHeightPx=grid.getScenarioHeight();
 
-    currentPhase=MOVEMENT_PLANNING_FRIEND;
+    currentPhase=MOVEMENT_PLANNING;
 
     scale=1.0;
 
@@ -80,7 +103,7 @@ void scenario::render(SDL_Renderer* renderer, int mouseX, int mouseY, bool shift
     if (myGui.doShowHexOutline())
         grid.drawAllTiles(renderer,scale);
 
-    if (currentPhase==MOVEMENT_PLANNING_FRIEND) {
+    if (currentPhase==MOVEMENT_PLANNING) {
         //Show the tile the mouse is over
         grid.drawTile(renderer,mouseOverTile,scale);
 
@@ -94,7 +117,7 @@ void scenario::render(SDL_Renderer* renderer, int mouseX, int mouseY, bool shift
             for (const unit& u : units) {
                 obstructed.insert(grid.getHexId(u.getHexX(),u.getHexY()));
             }
-            for (const auto &[fst, snd]: friendMovementPlans ) {
+            for (const auto &[fst, snd]: movementPlans ) {
                 if (!snd.empty() && fst!=selectedUnit) {
                     obstructed.insert(snd.back());
                 }
@@ -108,7 +131,7 @@ void scenario::render(SDL_Renderer* renderer, int mouseX, int mouseY, bool shift
         }
 
         //Draw all planned movement
-        for (const auto &val: friendMovementPlans | std::views::values) {
+        for (const auto &val: movementPlans | std::views::values) {
             grid.drawPath(renderer,val,scale);
         }
 
@@ -260,6 +283,10 @@ void scenario::render(SDL_Renderer* renderer, int mouseX, int mouseY, bool shift
         myGui.renderAttackExecution(scenarioWidthPx,scenarioHeightPx,renderer,scale,attackExecutionPlaybackTimer,attackExecutionPlaybackMaxTime);
     if (currentPhase==ATTACK_PLANNING)
         myGui.renderAttackPlanning(scenarioWidthPx,scenarioHeightPx,mouseX,mouseY,renderer,scale,attackPlans,selectedUnit,selectedAttackPlan);
+
+
+    //TODO, remove this, it is for debugging only
+    aiMovementClient.render(grid,renderer,scale);
 }
 
 void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,  int mouseX, int mouseY, bool isLeftMouseClick, bool isRightMouseClick, bool executeClick, bool shiftKey, int scrollwheel, uint32_t millis, uint32_t dmillis) {
@@ -271,16 +298,28 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
 
     mouseOverTile=grid.getHexFromLocation(mouseX,mouseY,scale);
 
-    if (currentPhase==MOVEMENT_PLANNING_FRIEND) {
+    if (currentPhase==MOVEMENT_PLANNING) {
+
+        if (!hasCalculatedAIMovement) {
+            std::cout <<"Calculating AI movement"<< std::endl;
+            aiMovementClient.makeAIMovementPlans(grid,units,movementPlans);
+            hasCalculatedAIMovement=true;
+        }
+
 
         //Right click to select units, or give movement order
         if (isRightMouseClick) {
+            //TODO, this is debug remove this
+            int mouseOverHexX = 0;
+            int mouseOverHexY = 0;
+            grid.getHexXYs(mouseOverTile,mouseOverHexX,mouseOverHexY);
+            std::cout<<mouseOverTile<<" ("<<mouseOverHexX<<","<<mouseOverHexY<<")"<<std::endl;
 
             //See if there is a new unit to select
             int newSelectedUnit=-1;
 
             for (int i = 0; i < units.size(); i++) {
-                if (grid.getHexId(units[i].getHexX(),units[i].getHexY())==mouseOverTile) {
+                if (grid.getHexId(units[i].getHexX(),units[i].getHexY())==mouseOverTile && units[i].isFriendly()) {
                     selectedTile = mouseOverTile;
                     newSelectedUnit = i;
                     units[i].doReadyAttack();
@@ -297,8 +336,8 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
                     else {
                         //Click the same unit to cancel movement order
                         units[selectedUnit].unreadyAttack();
-                        if (friendMovementPlans.contains(selectedUnit))
-                            friendMovementPlans.erase(selectedUnit);
+                        if (movementPlans.contains(selectedUnit))
+                            movementPlans.erase(selectedUnit);
                         selectedUnit = -1;
                         myGui.setInfoScreenText(movementPlanningDescription,renderer);
                     }
@@ -323,7 +362,7 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
                     for (const unit& u : units) {
                         obstructed.insert(grid.getHexId(u.getHexX(),u.getHexY()));
                     }
-                    for (const auto &plans: friendMovementPlans ) {
+                    for (const auto &plans: movementPlans ) {
                         if (!plans.second.empty() && plans.first!=selectedUnit) {
                             obstructed.insert(plans.second.back());
                         }
@@ -335,11 +374,11 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
                     for (int i = 0; i < fullPath.size() && i<units[selectedUnit].getMovementPoints()+1; i++)
                         limitedPath.push_back(fullPath[i]);
 
-                    if (friendMovementPlans.contains(selectedUnit)) {
-                        friendMovementPlans.at(selectedUnit)=limitedPath;
+                    if (movementPlans.contains(selectedUnit)) {
+                        movementPlans.at(selectedUnit)=limitedPath;
                     }
                     else
-                        friendMovementPlans.insert(std::make_pair(selectedUnit,limitedPath));
+                        movementPlans.insert(std::make_pair(selectedUnit,limitedPath));
 
                     selectedUnit=-1;
 
@@ -377,6 +416,7 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
             currentPhase=MOVEMENT_EXECUTION;
             selectedUnit=-1;
             selectedTile=-1;
+            hasCalculatedAIMovement=false;
             myGui.setInfoScreenText(movementExecutionDescription,renderer);
         }
     }
@@ -390,7 +430,7 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
             auto& U = units[i];
             U.unreadyAttack();
             {
-                if (U.getAnimationPhase()!=unitType::MOVE || !friendMovementPlans.contains(i)) {
+                if (U.getAnimationPhase()!=unitType::MOVE || !movementPlans.contains(i)) {
                     //It is the scenario which is responsible for the grid, so we are responsible for getting the coordinates
                     const int hexX = U.getHexX();
                     const int hexY = U.getHexY();
@@ -399,7 +439,7 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
                     U.setX(unitTile.getHexCenterX());
                     U.setY(unitTile.getHexCenterY());
 
-                    if (friendMovementPlans.contains(i)) {
+                    if (movementPlans.contains(i)) {
                         ++pendingUnits;
                         U.startMovement(millis);
                     }
@@ -410,7 +450,7 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
                     uint32_t millisSinceMovementStart = U.timeSinceAnimationStart(millis);
                     double progress = millisSinceMovementStart *hexPerMs;
                     //We already checked that the path exists for this thing
-                    const auto& path = friendMovementPlans.at(i);
+                    const auto& path = movementPlans.at(i);
 
                     //Have we arrived at our destination?
                     if (progress+1>=path.size()) {
@@ -427,7 +467,7 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
                         U.setX(unitTile.getHexCenterX());
                         U.setY(unitTile.getHexCenterY());
 
-                        friendMovementPlans.erase(i);
+                        movementPlans.erase(i);
                         U.setAnimation(millis,unitType::IDLE);
                     }
                     else {
@@ -471,7 +511,7 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
             selectedUnit=-1;
             selectedTile=-1;
             myGui.setInfoScreenText(attackPlanningDescription,renderer);
-            friendMovementPlans.clear();
+            movementPlans.clear();
         }
     }
     else if (currentPhase == ATTACK_PLANNING) {
@@ -613,6 +653,35 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
             if (attackExecutionPlaybackTimer>attackExecutionPlaybackMaxTime) {
                 //wait for the player to end this state, or re-play or whatever they feel like
                 attackExecutionState=FINISHED;
+            }
+        }
+
+        if (attackExecutionState==FINISHED) {
+
+            if (executeClick || myGui.isExecuteButtonPressed()) {
+                currentPhase=MOVEMENT_PLANNING;
+                selectedUnit=-1;
+                selectedTile=-1;
+                selectedAttackPlan=-1;
+                myGui.setInfoScreenText(movementPlanningDescription,renderer);
+                attackExecutionPlaybackTimer=0.0;
+                attackExecutionPlaybackMaxTime=0.0;
+                attackExecutionState=UNSTARTED;
+                hasCalculatedAIMovement=false;
+                attackPlans.clear();
+                myCake.clear();
+
+
+                //Check if health is 0 for units, and swap in a new vector of units
+                //I prefer to do it this way, rather than to erase(), because each erase requires a lot of copying
+                //Also, erase requires copy assignments, which doesn't work with the unit class, since the unit class contains a const reference
+                std::vector<unit> newUnits;
+                for (unit& u : units) {
+                    if (u.getHp()>0) {
+                        newUnits.push_back(u);
+                    }
+                }
+                units.swap(newUnits);
             }
         }
     }

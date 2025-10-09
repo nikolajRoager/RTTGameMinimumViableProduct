@@ -90,7 +90,7 @@ void gui::render(int scenarioWidth, int scenarioHeight, SDL_Renderer *renderer, 
 
     //The flashing buttons are drawn atop each other, on the 2nd tile from the right
     movementPhaseMarker.render((scenarioWidth-RIGHT_BAR_PIXELS)*scale,scenarioHeight*scale,renderer,scale,false,false,3,
-        (thePhase == MOVEMENT_PLANNING_FRIEND ) ?  (millis%1000<500 ? 1 : 0) : (
+        (thePhase == MOVEMENT_PLANNING ) ?  (millis%1000<500 ? 1 : 0) : (
         (thePhase == MOVEMENT_EXECUTION) ?  (millis%1000<500 ? 2 : 1) : 0
             )
         );

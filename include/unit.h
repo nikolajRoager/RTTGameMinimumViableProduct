@@ -34,7 +34,13 @@ private:
     bool flip;
 
     int hp;
+
+    int AIMovementTarget;
+
 public:
+    void setAIMovementTarget(int _AIMovementTarget) {AIMovementTarget=_AIMovementTarget;}
+    [[nodiscard]] int getAIMovementTarget() const {return AIMovementTarget;}
+
     [[nodiscard]] int getHp() const {return hp;};
 
     void setHp(int _hp,uint32_t millis) {

@@ -48,4 +48,5 @@ add_executable(PreMVPMapGame main.cpp
         src/gui.cpp
         src/attackPlan.cpp
         src/physicsCake.cpp
+        src/AIMovementClient.cpp
 )
