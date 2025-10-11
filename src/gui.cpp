@@ -66,7 +66,7 @@ void gui::update( int mouseX, int mouseY, bool mouseClicked, int scenarioWidth, 
 
 }
 
-void gui::render(int scenarioWidth, int scenarioHeight, SDL_Renderer *renderer, double scale,uint32_t millis, phase thePhase) const {
+void gui::render(int scenarioWidth, int scenarioHeight, SDL_Renderer *renderer, double scale,uint32_t millis, phase thePhase, bool overrideShowExecute) const {
 
     for (int x = scenarioWidth+RIGHT_BAR_PIXELS;x>-RIGHT_BAR_PIXELS;x-=RIGHT_BAR_PIXELS-1) {
         backgroundTile.render(x*scale,scenarioHeight*scale,renderer,scale);
@@ -99,7 +99,7 @@ void gui::render(int scenarioWidth, int scenarioHeight, SDL_Renderer *renderer, 
         );
 
     //The execute button is in the bottom right tile
-    executeMarker.render((scenarioWidth+RIGHT_BAR_PIXELS/2)*scale,(scenarioHeight+BOTTOM_BAR_PIXELS/2)*scale,renderer,scale,true,false,2,thePhase==MOVEMENT_EXECUTION? 1 : 0);
+    executeMarker.render((scenarioWidth+RIGHT_BAR_PIXELS/2)*scale,(scenarioHeight+BOTTOM_BAR_PIXELS/2)*scale,renderer,scale,true,false,2,!overrideShowExecute && (thePhase==MOVEMENT_EXECUTION || thePhase==ATTACK_EXECUTION)? 1 : 0);
 
     //The info screen is four tiles wide and just to the left of the phase markers
 

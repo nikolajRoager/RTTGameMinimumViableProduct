@@ -99,8 +99,14 @@ public:
     [[nodiscard]] std::set<int> getNeighbours(int hexId,int steps,const std::set<int>& obstructed) const;
 
     ///Get a list of the hexes we need to travel to, to get from start to stop
-    [[nodiscard]] std::vector<int> findPath(int startId, int stopId,const std::set<int>& obstructions, bool ignoreObstructedGoal=false) const;
+    [[nodiscard]] std::vector<int> findPathAdvanced(int startId, int stopId,const std::set<int>& obstructions, bool ignoreObstructedGoal=false,int range=-1,bool avoidObstacles=false) const;
 
+    [[nodiscard]] std::vector<int> findPath(int startId, int stopId,const std::set<int>& obstructions,int range=-1) const {
+        auto out = findPathAdvanced(startId,stopId,obstructions,false,range,false);
+        if (out.empty())
+            return findPathAdvanced(startId,stopId,obstructions,false,range,true);
+        return out;
+    }
 };
 
 #endif //PREMVPMAPGAME_HEXGRID_H

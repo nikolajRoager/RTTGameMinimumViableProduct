@@ -123,12 +123,10 @@ void physicsCake::render(double time,const texwrap &SSMTexture, SDL_Renderer *re
                     break;
                 }
             }
-
     }
 }
 
 void physicsCake::spawnParticles(std::deque<particle> &smokeParticles, double time, double smokeSpawnRate, uint32_t dmillis) {
-
     for (const auto& SSMVector : SSMVectors) {
         if (time>SSMVector.line.front().time && time<SSMVector.line.back().time)
             for (int i = 1; i < SSMVector.line.size(); ++i) {

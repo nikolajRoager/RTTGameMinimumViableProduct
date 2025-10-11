@@ -11,4 +11,4 @@ SAMRange 100
 SSMRange 150
 SSMSalvoSize 4
 SSMNodes 2
-maxHp 4
+maxHp 3

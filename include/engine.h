@@ -44,6 +44,8 @@ private:
     bool shiftDown=false;
     bool prevShiftDown=false;
 
+    std::default_random_engine generator;
+
     SDL_KeyCode executekey = SDLK_RETURN;
 
 

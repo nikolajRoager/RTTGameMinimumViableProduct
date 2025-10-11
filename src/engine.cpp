@@ -64,8 +64,9 @@ engine::engine() {
 
     SDL_GetMouseState( &mouseXPos, &mouseYPos );
 
+    generator=std::default_random_engine(time(nullptr));
     //Only load scenario AFTER SDL
-    theScenario = new scenario(renderer,gameFont);
+    theScenario = new scenario(renderer,gameFont,generator);
 
     mouseXPos=0;
     mouseYPos=0;

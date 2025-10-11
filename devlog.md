@@ -496,3 +496,39 @@ At the same time, here is a list of super-long term features, in no particular o
 * Airplanes which can accept many waypoints, and which return to base
 * submarines and ASW
 * Radar and hidden units
+
+
+Day 17.5, thursay 9/10/2025 CE and Friday 10/10/2025
+===================
+
+background
+-----
+Now, I am waiting for someone else to fix an internal server error, ... and they have just gone on autumn holiday.
+
+As a result, I am unable to do anything at work... (I really need a better job). as a result, I have had some time to work on this project instead.
+
+work
+---------
+I merely added AI movement to the game, the AI now tries to get to its patrol locations
+
+
+todo
+----
+The time has STILL come to create the actual project, now that the minimum viable product is done.
+
+At the same time, here is a list of super-long term features, in no particular order
+
+* Playback replay
+* Kirov class cruiser
+* create a new project
+* Sounds
+* AI Attack
+* What Air-defence doing? SAM should automatically get tasked against vampires
+* static buildings
+* ammunition management
+* Ai should move back to port when it is out of ammo
+* transport submarine (to move ground units across the sea)
+* Building/Lend Lease/recruitment phase
+* Airplanes which can accept many waypoints, and which return to base
+* submarines and ASW
+* Radar and hidden units

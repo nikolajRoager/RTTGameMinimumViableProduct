@@ -68,7 +68,7 @@ public:
     static int getBottomBarPixels() {return BOTTOM_BAR_PIXELS;}
 
     void update( int mouseX, int mouseY, bool mouseClicked, int scenarioWidth, int scenarioHeight, double scale, uint32_t dmillis);
-    void render(int scenarioWidth, int scenarioHeight, SDL_Renderer* renderer, double scale, uint32_t millis, phase thePhase) const;
+    void render(int scenarioWidth, int scenarioHeight, SDL_Renderer* renderer, double scale, uint32_t millis, phase thePhase, bool overrideShowExecute) const;
 
     ///Render the GUI specifically for the playback of the attack animation
     void renderAttackExecution(int scenarioWidth, int scenarioHeight, SDL_Renderer* renderer, double scale, double playbackTime, double maxPlaybackTime) const;
@@ -80,7 +80,7 @@ public:
 
     [[nodiscard]] bool isExecuteButtonPressed() const {return pressExecuteButton;}
 
-    ///Set screen on the infoscreen, use newline character to force line-breaks, write hline to get a horizontal line
+    ///Set screen on the infoscreen, use newline character to force line-breaks
     void setInfoScreenText(std::string text, SDL_Renderer* renderer);
 };
 

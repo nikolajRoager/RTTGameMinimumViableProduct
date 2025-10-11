@@ -51,7 +51,7 @@ private:
     ///We start at time 0, and end at this time
     double endTime;
 
-    std::default_random_engine generator;
+    std::default_random_engine& generator;
     std::uniform_real_distribution<double> distribution;
 
     struct healthEvent {
@@ -80,8 +80,7 @@ private:
     std::vector<particleSoundEvent> particleEvents;
 
 public:
-    explicit physicsCake(const int seed) {
-        generator = std::default_random_engine(seed);
+    explicit physicsCake(std::default_random_engine& _generator): generator(_generator) {
         distribution = std::uniform_real_distribution(0.0,1.0);
         endTime=0.0;
     }

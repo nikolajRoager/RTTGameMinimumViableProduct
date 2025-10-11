@@ -16,7 +16,7 @@ void scenario::drawCircle(double x, double y, double radius, double scale, Uint8
     circle10.render(x*scale,y*scale,r,g,b,a,renderer,scale*2*radius/circle10.getWidth(),true);
 }
 
-scenario::scenario(SDL_Renderer* renderer, TTF_Font* _font) : background(fs::path("assets")/"background.png",renderer), hexSelectionOutline(fs::path("assets")/"hexoutline.png",renderer),circle10(fs::path("assets")/"circle10.png",renderer), grid(fs::path("assets"),renderer), myGui(fs::path("assets")/"gui",renderer,_font), flyingSSM(fs::path("assets")/"physicsGraphics"/"SSM.png",renderer), smokeParticleTexture(fs::path("assets")/"physicsGraphics"/"smoke.png",renderer), myCake(time(nullptr)),hpMarker(fs::path("assets")/"hitpoint.png",renderer),shiftMarker(fs::path("assets")/"shift.png",renderer){
+scenario::scenario(SDL_Renderer* renderer, TTF_Font* _font, std::default_random_engine& _generator) : background(fs::path("assets")/"background.png",renderer), hexSelectionOutline(fs::path("assets")/"hexoutline.png",renderer),circle10(fs::path("assets")/"circle10.png",renderer), grid(fs::path("assets"),renderer), myGui(fs::path("assets")/"gui",renderer,_font), flyingSSM(fs::path("assets")/"physicsGraphics"/"SSM.png",renderer), smokeParticleTexture(fs::path("assets")/"physicsGraphics"/"smoke.png",renderer), myCake(_generator),aiMovementClient(_generator),hpMarker(fs::path("assets")/"hitpoint.png",renderer),shiftMarker(fs::path("assets")/"shift.png",renderer){
 
 
     inGameFont = _font;
@@ -35,21 +35,33 @@ scenario::scenario(SDL_Renderer* renderer, TTF_Font* _font) : background(fs::pat
     std::cout<<"Loading units"<<std::endl;
     //TODO: load from disk, and allow spawning
     units.clear();
-    units.emplace_back(unitLibrary[0],true,20,8);
+    units.emplace_back(unitLibrary[2],true,20,9);
+    units.emplace_back(unitLibrary[2],true,19,10);
+    units.emplace_back(unitLibrary[2],true,19,11);
     units.emplace_back(unitLibrary[2],true,18,12);
     units.emplace_back(unitLibrary[1],true,25,20);
     units.emplace_back(unitLibrary[1],true,32,15);
-    units.emplace_back(unitLibrary[1],true,31,14);
+    units.emplace_back(unitLibrary[1],true,30,12);
 
     //Evil enemy Ruskys and Yankees as enemies, because we need to fight both at the same time, otherwise it wouldn't be a fair fight
-    units.emplace_back(unitLibrary[4],false,20,16);
-    //American Destroyer SPAM
+    units.emplace_back(unitLibrary[4],false,32,3);
+    units.emplace_back(unitLibrary[4],false,28,23);
+    //Yankee destroyer spam
+    units.emplace_back(unitLibrary[3],false,8,23);
+    units.emplace_back(unitLibrary[3],false,9,23);
     units.emplace_back(unitLibrary[3],false,10,23);
-    units.emplace_back(unitLibrary[3],true,8,23);
-    units.emplace_back(unitLibrary[3],true,9,23);
-    units.emplace_back(unitLibrary[3],true,8,22);
-    units.emplace_back(unitLibrary[3],true,10,22);
-    units.emplace_back(unitLibrary[3],true,11,22);
+    units.emplace_back(unitLibrary[3],false,11,23);
+    units.emplace_back(unitLibrary[3],false,12,23);
+    units.emplace_back(unitLibrary[3],false,13,23);
+    units.emplace_back(unitLibrary[3],false,14,23);
+    units.emplace_back(unitLibrary[3],false,15,23);
+    units.emplace_back(unitLibrary[3],false,16,23);
+    units.emplace_back(unitLibrary[3],false,8,22);
+    units.emplace_back(unitLibrary[3],false,9,22);
+    units.emplace_back(unitLibrary[3],false,10,22);
+    units.emplace_back(unitLibrary[3],false,11,22);
+    units.emplace_back(unitLibrary[3],false,12,22);
+    units.emplace_back(unitLibrary[3],false,14,22);
 
     aiMovementClient.addPatrolHex(99);
     aiMovementClient.addPatrolHex(179);
@@ -126,7 +138,7 @@ void scenario::render(SDL_Renderer* renderer, int mouseX, int mouseY, bool shift
             const std::set<int> tilesNearSelection=grid.getNeighbours(selectedTile,units[selectedUnit].getMovementPoints(),obstructed);
             grid.drawTiles(renderer,tilesNearSelection,scale,hexGrid::COLOR);
 
-            const std::vector<int> line = grid.findPath(selectedTile,mouseOverTile,obstructed);
+            const std::vector<int> line = grid.findPath(selectedTile,mouseOverTile,obstructed,units[selectedUnit].getMovementPoints());
             grid.drawPath(renderer,line,scale);
         }
 
@@ -276,7 +288,7 @@ void scenario::render(SDL_Renderer* renderer, int mouseX, int mouseY, bool shift
 
 
 
-    myGui.render(scenarioWidthPx,scenarioHeightPx,renderer,scale,millis,currentPhase);
+    myGui.render(scenarioWidthPx,scenarioHeightPx,renderer,scale,millis,currentPhase,currentPhase==ATTACK_EXECUTION && attackExecutionState==FINISHED);
 
     //Render some phase dependent gui elements on top
     if (currentPhase==ATTACK_EXECUTION)
@@ -303,6 +315,7 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
         if (!hasCalculatedAIMovement) {
             std::cout <<"Calculating AI movement"<< std::endl;
             aiMovementClient.makeAIMovementPlans(grid,units,movementPlans);
+            std::cout <<"Calculated AI movement"<< std::endl;
             hasCalculatedAIMovement=true;
         }
 
@@ -369,16 +382,18 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
                     }
 
 
-                    auto fullPath =grid.findPath(selectedTile,mouseOverTile,obstructed);
+                    auto fullPath =grid.findPath(selectedTile,mouseOverTile,obstructed,units[selectedUnit].getMovementPoints());
+                    /*
+                     *TODO, I REPLACED LIMITED PATH WITH FULL PATH BELOW
                     auto limitedPath =std::vector<int>();
                     for (int i = 0; i < fullPath.size() && i<units[selectedUnit].getMovementPoints()+1; i++)
                         limitedPath.push_back(fullPath[i]);
-
+                    */
                     if (movementPlans.contains(selectedUnit)) {
-                        movementPlans.at(selectedUnit)=limitedPath;
+                        movementPlans.at(selectedUnit)=fullPath ;
                     }
                     else
-                        movementPlans.insert(std::make_pair(selectedUnit,limitedPath));
+                        movementPlans.insert(std::make_pair(selectedUnit,fullPath ));
 
                     selectedUnit=-1;
 
@@ -418,15 +433,23 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
             selectedTile=-1;
             hasCalculatedAIMovement=false;
             myGui.setInfoScreenText(movementExecutionDescription,renderer);
+
+
+            //Remove any empty plans which got added
+            std::erase_if(movementPlans, [](const auto& userPlan) {
+                return userPlan.second.empty();
+            });
         }
     }
     else if (currentPhase == MOVEMENT_EXECUTION) {
+        std::cout<<"Start movement execution"<<std::endl;
 
         //How many units have NOT finished their movements yet
         int pendingUnits=0;
 
-        //Update animation of units, friends as well as todo foes
+        //Update animation of units, friends as well as foes
         for (int i = 0; i < units.size(); i++) {
+            std::cout<<"Unit "<<i<<std::endl;
             auto& U = units[i];
             U.unreadyAttack();
             {
@@ -445,6 +468,7 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
                     }
                 }
                 else {
+                    std::cout<<"Move unit "<<i<<std::endl;
                     ++pendingUnits;
                     double hexPerMs = 2.0/1000;
                     uint32_t millisSinceMovementStart = U.timeSinceAnimationStart(millis);
@@ -454,23 +478,33 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
 
                     //Have we arrived at our destination?
                     if (progress+1>=path.size()) {
-
+                        std::cout<<"Has arrived "<<i<<std::endl;
 
                         int hexX=0;
                         int hexY=0;
+                        std::cout<<"getting back hexId "<<i<<" from path size "<< path.size()<<std::endl;
+                        //We can SAFELY ASSUME the path is not empty, because we removed empty movement plans
                         grid.getHexXYs(path.back(),hexX, hexY);
+                        std::cout<<"set hex x"<<std::endl;
                         U.setHexX(hexX);
+                        std::cout<<"set hex y"<<std::endl;
                         U.setHexY(hexY);
 
+                        std::cout<<"get hex"<<std::endl;
                         const hexTile& unitTile = grid.getHexTile(hexX, hexY);
 
+                        std::cout<<"set x"<<std::endl;
                         U.setX(unitTile.getHexCenterX());
+                        std::cout<<"set y"<<std::endl;
                         U.setY(unitTile.getHexCenterY());
 
+                        std::cout<<"Erase"<<i<<std::endl;
                         movementPlans.erase(i);
+                        std::cout<<"Setting animation"<<i<<std::endl;
                         U.setAnimation(millis,unitType::IDLE);
                     }
                     else {
+                        std::cout<<"Has not arrived "<<i<<std::endl;
 
                         //Get the hex just before, and just after the current location (id in the path)
                         int hexBefore = std::min(static_cast<int>(progress),static_cast<int>(path.size())-1);
@@ -506,6 +540,7 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
             }
         }
         if (pendingUnits==0) {
+            std::cout<<"Halt movement execution"<<std::endl;
             currentPhase=ATTACK_PLANNING;
             selectedAttackPlan=-1;
             selectedUnit=-1;
@@ -513,6 +548,7 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
             myGui.setInfoScreenText(attackPlanningDescription,renderer);
             movementPlans.clear();
         }
+        std::cout<<"End loop movement execution"<<std::endl;
     }
     else if (currentPhase == ATTACK_PLANNING) {
         //Right click to select units

@@ -106,7 +106,7 @@ private:
 
     void drawCircle(double x, double y, double radius, double scale, Uint8 r, Uint8 g, Uint8 b, Uint8 a, SDL_Renderer* renderer) const;
 public:
-    explicit scenario(SDL_Renderer* renderer, TTF_Font* _font);
+    explicit scenario(SDL_Renderer* renderer, TTF_Font* _font, std::default_random_engine& _generator);
     ~scenario();
 
     void render(SDL_Renderer* renderer, int mouseX, int mouseY, bool shiftKey, uint32_t millis) const;

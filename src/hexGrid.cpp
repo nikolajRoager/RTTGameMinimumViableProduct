@@ -183,7 +183,7 @@ std::set<int> hexGrid::getNeighbours(int hexId,int steps,const std::set<int>& ob
     return visited;
 }
 
-std::vector<int> hexGrid::findPath(int startId, int stopId, const std::set<int> &obstructed, bool ignoreObstructedGoal) const {
+std::vector<int> hexGrid::findPathAdvanced(int startId, int stopId, const std::set<int> &obstructed, bool ignoreObstructedGoal,int range,bool avoidObstacles) const {
     //The hexagon pathfinding algorithm is largely based on the find-neighbours algorithm
     //We are going to be searching in layers of hexes
     std::map<int,int> visitedBacktrack;
@@ -205,6 +205,8 @@ std::vector<int> hexGrid::findPath(int startId, int stopId, const std::set<int> 
     //We will be searching backwards, to make back-tracking give us the correct path
     oldQueue.emplace(stopId,stopId);
 
+    int layer=0;
+
     while (!oldQueue.empty()) {
 
         for (auto i_from : oldQueue) {
@@ -216,9 +218,8 @@ std::vector<int> hexGrid::findPath(int startId, int stopId, const std::set<int> 
             {
 
                 if (i!=stopId) {
-                    if (!ignoreObstructedGoal)
-                        if (visitedBacktrack.contains(i) || startingStatus != hexTiles[i].getStatus())
-                            continue;
+                    if (visitedBacktrack.contains(i) || startingStatus != hexTiles[i].getStatus() || (avoidObstacles && obstructed.count(i)) /*Uncomment this to make units impassable*/)
+                        continue;
                 }
                 else
                     if (visitedBacktrack.contains(i) || startingStatus != hexTiles[i].getStatus())
@@ -230,7 +231,18 @@ std::vector<int> hexGrid::findPath(int startId, int stopId, const std::set<int> 
                 for (int j = from; j!=stopId; j=visitedBacktrack[j])
                     out.push_back(j);
                 out.push_back(stopId);
-                return out;
+
+                if (range==-1)
+                    return out;
+
+                auto limitedPath =std::vector<int>();
+                for (int i = 0; i < out.size() && i<range+1; i++)
+                    limitedPath.push_back(out[i]);
+
+                if (limitedPath.empty() || obstructed.count(limitedPath.back()))
+                    return {};
+
+                return limitedPath;
             }
             visitedBacktrack.emplace(i,from);
 
@@ -272,6 +284,7 @@ std::vector<int> hexGrid::findPath(int startId, int stopId, const std::set<int> 
         //swap buffers and reset new queue
         newQueue.swap(oldQueue);
         newQueue.clear();
+        layer++;
     }
 
     //If we got here, we FAILED to find a valid path
