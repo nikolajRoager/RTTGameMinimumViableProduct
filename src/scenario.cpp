@@ -93,12 +93,9 @@ scenario::scenario(SDL_Renderer* renderer, TTF_Font* _font, std::default_random_
     movementPlanningDescription="Right click to select a unit, then right click to move\nPress enter or \"execute\" to execute the plan\nRight click a friendly unit for more details\n\nFriendly units are highlighted with Green";
     movementExecutionDescription="Executing movement plans&please wait";
     attackPlanningDescription="Right click to select a unit, left click to give attack order\nPress enter or \"execute\" to execute the plans";
-    attackExecutionDescription="Executing attack plans&please wait";
+    attackExecutionDescription="Executing attack plans\n&press space to pause/unpause or replay";
 
     myGui.setInfoScreenText(movementPlanningDescription,renderer);
-
-
-    smokeParticles.emplace_back(200,200,0,0,0);
 
     std::cout<< " constructor finished"<<std::endl;
 }
@@ -677,12 +674,12 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
                 myCake.bake(grid,units,attackPlans);
                 attackExecutionPlaybackTimer=0.0;
                 attackExecutionPlaybackMaxTime=myCake.getEndTime();
-
+                pauseAttackExecutionPlayback=false;
             }
         }
         if (attackExecutionState==PLAYING) {
 
-            if (playbuttonClick)
+            if (playbuttonClick || (myGui.isOverPauseButton(scenarioWidthPx,scenarioHeightPx,mouseX,mouseY,scale) && (isLeftMouseClick || isRightMouseClick)))
                 pauseAttackExecutionPlayback=!pauseAttackExecutionPlayback;
 
             if (!pauseAttackExecutionPlayback)
@@ -699,7 +696,7 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
 
         if (attackExecutionState==FINISHED) {
 
-            if (playbuttonClick)
+            if (playbuttonClick || (myGui.isOverPauseButton(scenarioWidthPx,scenarioHeightPx,mouseX,mouseY,scale) && (isLeftMouseClick || isRightMouseClick)))
             {
                 pauseAttackExecutionPlayback=false;
                 attackExecutionPlaybackTimer=0.0;

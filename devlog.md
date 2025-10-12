@@ -533,7 +533,18 @@ At the same time, here is a list of super-long term features, in no particular o
 * submarines and ASW
 * Radar and hidden units
 
+Day 18, Sunday 12/10/2025
+===================
 
-playback replay
- pause button
- replay button
+background
+-----
+I worked a lot las t week, so I didn't feel like working in the weekend, I only got half a day of work sunday
+
+work
+---------
+I added the option to pause the playing of the attack execution phase
+
+
+todo
+----
+I think it is time to add in air-defence next

@@ -72,6 +72,7 @@ public:
     static int getRightBarPixels() {return RIGHT_BAR_PIXELS;}
     static int getBottomBarPixels() {return BOTTOM_BAR_PIXELS;}
 
+
     void update(int mouseX, int mouseY, bool mouseClicked, int scenarioWidth, int scenarioHeight, double scale, uint32_t dmillis);
     void render(int scenarioWidth, int scenarioHeight, SDL_Renderer* renderer, double scale, uint32_t millis, phase thePhase, bool overrideShowExecute) const;
 
@@ -80,6 +81,10 @@ public:
 
     ///Render the GUI specifically for the planning of the attacks (the sidebar
     void renderAttackPlanning(int scenarioWidth, int scenarioHeight, int mouseX, int mouseY, SDL_Renderer* renderer, double scale, const std::map<int,std::vector<attackPlan> >& attackPlans, int selectedUnit, int selectedPlan) const;
+
+    [[nodiscard]] bool isOverPauseButton(int scenarioWidth, int scenarioHeight, int mouseX, int mouseY, double scale) const {
+        return mouseX>(scenarioWidth-playButton.getWidth()/4+playBar.getWidth()/2)*scale &&  mouseX*(scenarioWidth+playButton.getWidth()/4+playBar.getWidth()/2)*scale && mouseY> (BOTTOM_BAR_PIXELS-playButton.getHeight())*scale && mouseY < (BOTTOM_BAR_PIXELS)*scale;
+    }
 
     [[nodiscard]] int getSelectedAttackPlan(int scenarioWidth, int scenarioHeight, int mouseX, int mouseY, double scale, const std::map<int,std::vector<attackPlan> >& attackPlans, int selectedUnit, int selectedPlan) const;
 
