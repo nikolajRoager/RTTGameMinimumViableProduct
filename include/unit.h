@@ -47,6 +47,10 @@ public:
         if (hp!=0 && _hp==0) {
             setAnimation(millis,unitType::DIE);
         }
+        //Necromancy (happens during replays)
+        else if (hp==0 && _hp!=0) {
+            setAnimation(millis,unitType::READY);
+        }
         hp=_hp;
     }
 

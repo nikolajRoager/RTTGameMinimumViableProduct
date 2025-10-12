@@ -101,6 +101,8 @@ void engine::run() {
     prevLeftMouseDown=false;
     executeDown=false;
     prevExecuteDown=false;
+    playButtonDown=false;
+    prevPlayButtonDown=false;
 
     uint32_t pmillis=SDL_GetTicks();
 
@@ -108,6 +110,7 @@ void engine::run() {
         prevRightMouseDown=rightMouseDown;
         prevLeftMouseDown=leftMouseDown;
         prevExecuteDown=executeDown;
+        prevPlayButtonDown=playButtonDown;
 
         int scroll=0;
         SDL_Event event;
@@ -153,10 +156,16 @@ void engine::run() {
                 if (event.key.keysym.sym == executekey) {
                     executeDown=true;
                 }
+                if (event.key.keysym.sym == SDLK_SPACE) {
+                    playButtonDown=true;
+                }
             }
             if (event.type == SDL_KEYUP) {
                 if (event.key.keysym.sym == executekey) {
                     executeDown=false;
+                }
+                if (event.key.keysym.sym == SDLK_SPACE) {
+                    playButtonDown=false;
                 }
             }
         }
@@ -169,7 +178,7 @@ void engine::run() {
         //Milliseconds since program start is preferred time measurement for animations
         unsigned int millis = SDL_GetTicks();
 
-        theScenario->update(renderer, windowWidthPx,windowHeightPx,mouseXPos,mouseYPos,(leftMouseDown && !prevLeftMouseDown),(rightMouseDown && !prevRightMouseDown),(executeDown && !prevExecuteDown),shiftDown,scroll,millis,millis-pmillis);
+        theScenario->update(renderer, windowWidthPx,windowHeightPx,mouseXPos,mouseYPos,(leftMouseDown && !prevLeftMouseDown),(rightMouseDown && !prevRightMouseDown),(executeDown && !prevExecuteDown),shiftDown,(playButtonDown && !prevPlayButtonDown),scroll,millis,millis-pmillis);
 
         //Black background, shouldn't be seen but won't hurt
         SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0x00);

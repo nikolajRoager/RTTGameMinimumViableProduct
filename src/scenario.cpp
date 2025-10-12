@@ -292,7 +292,7 @@ void scenario::render(SDL_Renderer* renderer, int mouseX, int mouseY, bool shift
 
     //Render some phase dependent gui elements on top
     if (currentPhase==ATTACK_EXECUTION)
-        myGui.renderAttackExecution(scenarioWidthPx,scenarioHeightPx,renderer,scale,attackExecutionPlaybackTimer,attackExecutionPlaybackMaxTime);
+        myGui.renderAttackExecution(scenarioWidthPx,scenarioHeightPx,mouseX,mouseY,renderer,scale,attackExecutionPlaybackTimer,attackExecutionPlaybackMaxTime,pauseAttackExecutionPlayback);
     if (currentPhase==ATTACK_PLANNING)
         myGui.renderAttackPlanning(scenarioWidthPx,scenarioHeightPx,mouseX,mouseY,renderer,scale,attackPlans,selectedUnit,selectedAttackPlan);
 
@@ -301,7 +301,7 @@ void scenario::render(SDL_Renderer* renderer, int mouseX, int mouseY, bool shift
     aiMovementClient.render(grid,renderer,scale);
 }
 
-void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,  int mouseX, int mouseY, bool isLeftMouseClick, bool isRightMouseClick, bool executeClick, bool shiftKey, int scrollwheel, uint32_t millis, uint32_t dmillis) {
+void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,  int mouseX, int mouseY, bool isLeftMouseClick, bool isRightMouseClick, bool executeClick, bool shiftKey, bool playbuttonClick, int scrollwheel, uint32_t millis, uint32_t dmillis) {
     scale = std::min(static_cast<double>(screenWidth) / static_cast<double>(scenarioWidthPx+gui::getRightBarPixels()),
                      static_cast<double>(screenHeight) / static_cast<double>(scenarioHeightPx+gui::getBottomBarPixels()));
 
@@ -656,7 +656,7 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
             attackExecutionPlaybackTimer=0.0;
             attackExecutionPlaybackMaxTime=0.0;
             attackExecutionState=UNSTARTED;
-
+            pauseAttackExecutionPlayback=false;
         }
     }
     else if (currentPhase == ATTACK_EXECUTION) {
@@ -681,7 +681,12 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
             }
         }
         if (attackExecutionState==PLAYING) {
-            attackExecutionPlaybackTimer+=dmillis*0.001;
+
+            if (playbuttonClick)
+                pauseAttackExecutionPlayback=!pauseAttackExecutionPlayback;
+
+            if (!pauseAttackExecutionPlayback)
+                attackExecutionPlaybackTimer+=dmillis*0.001;
 
             myCake.spawnParticles(smokeParticles,attackExecutionPlaybackTimer,missileSmokeSpawnRate,dmillis);
             myCake.updateUnits(units,attackExecutionPlaybackTimer,millis);
@@ -694,6 +699,12 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
 
         if (attackExecutionState==FINISHED) {
 
+            if (playbuttonClick)
+            {
+                pauseAttackExecutionPlayback=false;
+                attackExecutionPlaybackTimer=0.0;
+                attackExecutionState=PLAYING;
+            }
             if (executeClick || myGui.isExecuteButtonPressed()) {
                 currentPhase=MOVEMENT_PLANNING;
                 selectedUnit=-1;
@@ -718,6 +729,9 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
                     }
                 }
                 units.swap(newUnits);
+
+                for (unit& u : units)
+                    u.unreadyAttack();
             }
         }
     }

@@ -532,3 +532,8 @@ At the same time, here is a list of super-long term features, in no particular o
 * Airplanes which can accept many waypoints, and which return to base
 * submarines and ASW
 * Radar and hidden units
+
+
+playback replay
+ pause button
+ replay button

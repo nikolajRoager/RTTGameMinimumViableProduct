@@ -9,7 +9,7 @@
 #include <iostream>
 #include <SDL2/SDL_render.h>
 
-gui::gui(const fs::path& guiFolder, SDL_Renderer *renderer, TTF_Font* font): backgroundTile((guiFolder/"guiTile.png"),renderer),movementPhaseMarker((guiFolder/"movementPhase.png"),renderer),attackPhaseMarker((guiFolder/"attackPhase.png"),renderer),executeMarker((guiFolder/"execute.png"),renderer),infoScreen((guiFolder/"infoScreen.png"),renderer), flipButton((guiFolder/"flipButton.png"),renderer),sidebarLaunch(guiFolder/"sidebarLaunch.png",renderer),sidebarNode(guiFolder/"sidebarNode.png",renderer),sidebarTarget(guiFolder/"sidebarTarget.png",renderer),sidebarSelection(guiFolder/"sidebarSelection.png",renderer),sidebarTrash(guiFolder/"sidebarTrash.png",renderer),mapModeHexOutline("Hex outlines",renderer,font),mapModeSamRange("SAM range",renderer,font),mapModeSsmRange("SSM range",renderer,font) {
+gui::gui(const fs::path& guiFolder, SDL_Renderer *renderer, TTF_Font* font): backgroundTile((guiFolder/"guiTile.png"),renderer),movementPhaseMarker((guiFolder/"movementPhase.png"),renderer),attackPhaseMarker((guiFolder/"attackPhase.png"),renderer),executeMarker((guiFolder/"execute.png"),renderer),infoScreen((guiFolder/"infoScreen.png"),renderer), flipButton((guiFolder/"flipButton.png"),renderer),sidebarLaunch(guiFolder/"sidebarLaunch.png",renderer),sidebarNode(guiFolder/"sidebarNode.png",renderer),sidebarTarget(guiFolder/"sidebarTarget.png",renderer),sidebarSelection(guiFolder/"sidebarSelection.png",renderer),sidebarTrash(guiFolder/"sidebarTrash.png",renderer),mapModeHexOutline("Hex outlines",renderer,font),mapModeSamRange("SAM range",renderer,font),mapModeSsmRange("SSM range",renderer,font), playBar(guiFolder/"playbar.png",renderer), playButton(guiFolder/"playButton.png",renderer), pauseButton(guiFolder/"pauseButton.png",renderer), replayButton(guiFolder/"replayButton.png",renderer) {
     std::cout<<"Loaded gui"<<std::endl;
     infoScreenFont=font;
     infoScreenMaxExpansion=infoScreen.getHeight();
@@ -113,13 +113,29 @@ void gui::render(int scenarioWidth, int scenarioHeight, SDL_Renderer *renderer, 
     }
 }
 
-void gui::renderAttackExecution(int scenarioWidth, int scenarioHeight, SDL_Renderer *renderer, double scale, double playbackTime, double maxPlaybackTime) const {
+void gui::renderAttackExecution(int scenarioWidth, int scenarioHeight, int mouseX, int mouseY, SDL_Renderer *renderer, double scale, double playbackTime, double maxPlaybackTime,bool isPaused) const {
 
     //Yes, creating a temporary texture class with a string every frame is bad practice
     //But this thing ACTUALLY changes every single frame so we NEED a new texture every frame
-    texwrap currentTimeCounter (std::format("{:.3f}", playbackTime)+"/"+std::format("{:.3f}", maxPlaybackTime),renderer,infoScreenFont);
+    //texwrap currentTimeCounter (std::format("{:.3f}", playbackTime)+"/"+std::format("{:.3f}", maxPlaybackTime),renderer,infoScreenFont);
 
-    currentTimeCounter.render((scenarioWidth+RIGHT_BAR_PIXELS/2)*scale,(BOTTOM_BAR_PIXELS/2)*scale,renderer,scale);
+    //currentTimeCounter.render((scenarioWidth+RIGHT_BAR_PIXELS/2)*scale,(BOTTOM_BAR_PIXELS/2)*scale,renderer,scale);
+
+    playBar.render((scenarioWidth)*scale,(BOTTOM_BAR_PIXELS)*scale,renderer,scale);
+
+    bool insideButton = mouseX>(scenarioWidth-playButton.getWidth()/4+playBar.getWidth()/2)*scale &&  mouseX*(scenarioWidth+playButton.getWidth()/4+playBar.getWidth()/2)*scale && mouseY> (BOTTOM_BAR_PIXELS-playButton.getHeight())*scale && mouseY < (BOTTOM_BAR_PIXELS)*scale;
+
+    if (playbackTime>=maxPlaybackTime)
+        replayButton.render((scenarioWidth-replayButton.getWidth()/4+playBar.getWidth()/2)*scale,(BOTTOM_BAR_PIXELS-replayButton.getHeight())*scale,renderer,scale,false,false,2,insideButton?1:0);
+    else if (isPaused)
+        playButton.render((scenarioWidth-playButton.getWidth()/4+playBar.getWidth()/2)*scale,(BOTTOM_BAR_PIXELS-playButton.getHeight())*scale,renderer,scale,false,false,2,insideButton?1:0);
+    else
+        pauseButton.render((scenarioWidth-pauseButton.getWidth()/4+playBar.getWidth()/2)*scale,(BOTTOM_BAR_PIXELS-pauseButton.getHeight())*scale,renderer,scale,false,false,2,insideButton?1:0);
+    if (maxPlaybackTime > 0.0) {
+        SDL_Rect fillRect = {(int)((scenarioWidth)*scale),(int)((BOTTOM_BAR_PIXELS)*scale+2) , (int)((playBar.getWidth()*std::min(1.0,playbackTime/maxPlaybackTime))*scale),(int)((playBar.getHeight()-4)*scale) };
+        SDL_SetRenderDrawColor( renderer, 0xFF, 0x00, 0xFF, 0xFF );
+        SDL_RenderFillRect( renderer, &fillRect );
+    }
 }
 
 

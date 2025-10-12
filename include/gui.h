@@ -39,6 +39,11 @@ private:
     texwrap sidebarTarget;
     texwrap sidebarTrash;
 
+    texwrap playBar;
+    texwrap playButton;
+    texwrap pauseButton;
+    texwrap replayButton;
+
     texwrap sidebarSelection;
 
     TTF_Font *infoScreenFont;
@@ -67,11 +72,11 @@ public:
     static int getRightBarPixels() {return RIGHT_BAR_PIXELS;}
     static int getBottomBarPixels() {return BOTTOM_BAR_PIXELS;}
 
-    void update( int mouseX, int mouseY, bool mouseClicked, int scenarioWidth, int scenarioHeight, double scale, uint32_t dmillis);
+    void update(int mouseX, int mouseY, bool mouseClicked, int scenarioWidth, int scenarioHeight, double scale, uint32_t dmillis);
     void render(int scenarioWidth, int scenarioHeight, SDL_Renderer* renderer, double scale, uint32_t millis, phase thePhase, bool overrideShowExecute) const;
 
     ///Render the GUI specifically for the playback of the attack animation
-    void renderAttackExecution(int scenarioWidth, int scenarioHeight, SDL_Renderer* renderer, double scale, double playbackTime, double maxPlaybackTime) const;
+    void renderAttackExecution(int scenarioWidth, int scenarioHeight, int mouseX, int mouseY, SDL_Renderer* renderer, double scale, double playbackTime, double maxPlaybackTime, bool isPaused) const;
 
     ///Render the GUI specifically for the planning of the attacks (the sidebar
     void renderAttackPlanning(int scenarioWidth, int scenarioHeight, int mouseX, int mouseY, SDL_Renderer* renderer, double scale, const std::map<int,std::vector<attackPlan> >& attackPlans, int selectedUnit, int selectedPlan) const;
