@@ -519,6 +519,7 @@ The time has STILL come to create the actual project, now that the minimum viabl
 At the same time, here is a list of super-long term features, in no particular order
 
 * Playback replay
+* Multithreaded physics calculations (if we encounter poor performance)
 * Kirov class cruiser
 * create a new project
 * Sounds
@@ -532,13 +533,15 @@ At the same time, here is a list of super-long term features, in no particular o
 * Airplanes which can accept many waypoints, and which return to base
 * submarines and ASW
 * Radar and hidden units
+* Events
+* Rubber-banding AI recruitment
 
 Day 18, Sunday 12/10/2025
 ===================
 
 background
 -----
-I worked a lot las t week, so I didn't feel like working in the weekend, I only got half a day of work sunday
+I worked a lot last week, so I didn't feel like working in the weekend, I only got half a day of work sunday
 
 work
 ---------
@@ -548,3 +551,51 @@ I added the option to pause the playing of the attack execution phase
 todo
 ----
 I think it is time to add in air-defence next
+
+Day 19, Monday 13/10/2025 CE
+===================
+
+background
+-----
+With the guy I need to fix the internal server error on the server side on holiday, I have nothing to do at work
+
+So I had a little time to work on this project instead. Not a lot of time, I still had a few work assignments I could work on, but enough time to do something amazing
+
+Also, it looks like the peace deal in Gaza is going to hold, this is a good thing.
+
+work
+----
+I got air-defence interception calculations working, now SAM automatically get tasked against incoming missiles and successfully intercept
+
+Well, the missiles don't get deleted yet when they get intercepted, but getting the paths to line up is a major step in the right direction, figuratively and literally.
+
+todo
+----
+Here is a short term list of things
+
+* Air defence: delete intercepted missiles
+* air defence salvo size
+* longer air-defence reload
+* print air-defence stat to screen
+
+
+The time has STILL come to create the actual project, now that the minimum viable product is done.
+
+At the same time, here is a list of super-long term features, in no particular order
+
+* Multithreaded physics calculations (if we encounter poor performance)
+* Kirov class cruiser
+* create a new project
+* Sounds
+* AI Attack
+* static buildings
+* ammunition management
+* Ai should move back to port when it is out of ammo
+* transport submarine (to move ground units across the sea)
+* Building/Lend Lease/recruitment phase
+* Airplanes which can accept many waypoints, and which return to base
+* submarines and ASW
+* Radar and hidden units
+* Events
+* Rubber-banding AI recruitment
+

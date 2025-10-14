@@ -9,11 +9,12 @@
 #include <iostream>
 #include <SDL2/SDL_render.h>
 
-attackPlan::attackPlan(int _launcherId, double x0, double y0, double x1, double y1, SDL_Renderer *renderer, TTF_Font *font) {
+attackPlan::attackPlan(int _launcherId, double x0, double y0, double x1, double y1, SDL_Renderer *renderer, TTF_Font *font, bool _isPlayerSide) {
     launcherId=_launcherId;
     attackVectors.reserve(2);
 
-    //TODO, dynamic launch time
+    isPlayerSide=_isPlayerSide;
+
     attackVectors.emplace_back(x0,y0,0,0,renderer,font);
     double dist = sqrt(pow(x0-x1,2)+pow(y0-y1,2));
     attackVectors.emplace_back(x1,y1,dist/projectileSpeed,dist,renderer,font);

@@ -17,6 +17,8 @@ private:
     int launcherId;
     double projectileSpeed=50;
 
+    bool isPlayerSide;
+
     struct attackVectorPoint {
         double x;
         double y;
@@ -30,7 +32,9 @@ private:
 
 public:
 
-    attackPlan(int _launcherId,double x0,double y0, double x1,double y1, SDL_Renderer* renderer,  TTF_Font* font);
+    attackPlan(int _launcherId,double x0,double y0, double x1,double y1, SDL_Renderer* renderer,  TTF_Font* font, bool isPlayerSide);
+
+    [[nodiscard]] bool getPlayerSide() const {return isPlayerSide;}
 
     void render(SDL_Renderer *renderer, double scale, bool isSelected=false) const;
     [[nodiscard]] double getLaunchTime() const {return attackVectors.front().time;}

@@ -50,6 +50,8 @@ private:
     ///SAM will automatically engage all air threats in range
     double SAMRange;
 
+    double SAMDelay=0.5;
+
     ///Range of surface-to-surface missiles aboard this thing
     ///is 0 if it has no SSM
     double SSMRange;
@@ -66,6 +68,8 @@ private:
 public:
 
     [[nodiscard]] double getSAMRange() const {return SAMRange;};
+    [[nodiscard]] double getSAMDelay() const {return SAMDelay;};
+
     [[nodiscard]] double getSSMRange() const {return SSMRange;};
 
     [[nodiscard]] int getSSMSalvoSize() const {return SSMSalvoSize;};

@@ -15,6 +15,9 @@
 #include "unit.h"
 
 
+
+
+
 struct bakedAttackVectorNode {
     double x, y;
     double time;
@@ -39,20 +42,58 @@ struct bakedAttackVector {
 
     ///For the playback, have we already played the effect of this finishing? (explosion or splash)
     std::vector<bakedAttackVectorNode> line;
+    bool playerSide;
 
-    [[nodiscard]] const bakedAttackVectorNode& getDestination () const {return line.back();}
-    bakedAttackVector()= default;
+    [[nodiscard]] const bakedAttackVectorNode& getLastPosition () const {return line.back();}
+    explicit bakedAttackVector(bool _playerSide): playerSide(_playerSide) {}
 };
 
 ///A physics cake contains all the baked in physics
 class physicsCake {
 private:
+
+    double SAMSpeed=100;
+
+
     std::vector<bakedAttackVector> SSMVectors;
+    std::vector<bakedAttackVector> SAMVectors;
+
     ///We start at time 0, and end at this time
     double endTime;
 
     std::default_random_engine& generator;
     std::uniform_real_distribution<double> distribution;
+
+    ///A flying surface-to-air missile
+    struct SAMInAir {
+        bool terminated;
+        double x,y;
+        double vx,vy;
+        ///What SSM is this targeting, -1 if flying with no target
+        int target;
+        ///Time until we run out of fuel and crash
+        double fuelTimeLeft;
+
+        SAMInAir(double _x, double _y, double _vx, double _vy,double _fuelTimeLeft, int _target) : x(_x), y(_y), vx(_vx), vy(_vy), target(_target), fuelTimeLeft(_fuelTimeLeft) {terminated=false;};
+    };
+
+    struct SAMLauncher {
+        int unitId;
+        bool playerSide;
+        double fuelTime;
+        double launchDelay;
+        double ongoingDelay;
+        double range;
+
+        SAMLauncher(int _unitId, bool _playerSide, double _fuelTime, double _range, double _launchDelay) {
+            unitId=_unitId;
+            playerSide=_playerSide;
+            fuelTime=_fuelTime;
+            range=_range;
+            launchDelay=_launchDelay;
+            ongoingDelay=0;
+        }
+    };
 
     struct healthEvent {
         int health;
@@ -61,6 +102,7 @@ private:
         healthEvent(int _health, double _time) : health(_health), time(_time) {};
     };
 
+    //TODO, unused
     struct particleSoundEvent {
         enum evenType {
             SPLASH,
@@ -75,9 +117,6 @@ private:
 
     ///For each unit, what is our health when, in chronological order
     std::vector<std::vector<healthEvent> > unitHealthEvents;
-
-    ///What particle and sound events happen when, in chronological order
-    std::vector<particleSoundEvent> particleEvents;
 
 public:
     explicit physicsCake(std::default_random_engine& _generator): generator(_generator) {
@@ -99,7 +138,6 @@ public:
     void clear() {
         SSMVectors.clear();
         unitHealthEvents.clear();
-        particleEvents.clear();
     }
 
 };

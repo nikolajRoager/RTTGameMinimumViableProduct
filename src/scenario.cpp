@@ -35,16 +35,17 @@ scenario::scenario(SDL_Renderer* renderer, TTF_Font* _font, std::default_random_
     std::cout<<"Loading units"<<std::endl;
     //TODO: load from disk, and allow spawning
     units.clear();
-    units.emplace_back(unitLibrary[2],true,20,9);
-    units.emplace_back(unitLibrary[2],true,19,10);
-    units.emplace_back(unitLibrary[2],true,19,11);
-    units.emplace_back(unitLibrary[2],true,18,12);
+    //units.emplace_back(unitLibrary[2],true,20,9);
+    //units.emplace_back(unitLibrary[2],true,19,10);
+    units.emplace_back(unitLibrary[0],true,21,11);
+    units.emplace_back(unitLibrary[2],true,20,12);
     units.emplace_back(unitLibrary[1],true,25,20);
     units.emplace_back(unitLibrary[1],true,32,15);
     units.emplace_back(unitLibrary[1],true,30,12);
 
-    //Evil enemy Ruskys and Yankees as enemies, because we need to fight both at the same time, otherwise it wouldn't be a fair fight
-    units.emplace_back(unitLibrary[4],false,32,3);
+    //Russian Warship which ought to go fuck itself
+    units.emplace_back(unitLibrary[4],false,16,12);
+/*
     units.emplace_back(unitLibrary[4],false,28,23);
     //Yankee destroyer spam
     units.emplace_back(unitLibrary[3],false,8,23);
@@ -62,7 +63,8 @@ scenario::scenario(SDL_Renderer* renderer, TTF_Font* _font, std::default_random_
     units.emplace_back(unitLibrary[3],false,11,22);
     units.emplace_back(unitLibrary[3],false,12,22);
     units.emplace_back(unitLibrary[3],false,14,22);
-
+*/
+    /*
     aiMovementClient.addPatrolHex(99);
     aiMovementClient.addPatrolHex(179);
     aiMovementClient.addPatrolHex(554);
@@ -71,14 +73,14 @@ scenario::scenario(SDL_Renderer* renderer, TTF_Font* _font, std::default_random_
     aiMovementClient.addPatrolHex(563);
     aiMovementClient.addPatrolHex(95);
     aiMovementClient.addPatrolHex(207);
-    aiMovementClient.addPatrolHex(359);
-    aiMovementClient.addPatrolHex(472);
+    aiMovementClient.addPatrolHex(359);*/
+    aiMovementClient.addPatrolHex(472);/*
     aiMovementClient.addPatrolHex(665);
     aiMovementClient.addPatrolHex(587);
     aiMovementClient.addPatrolHex(404);
     aiMovementClient.addPatrolHex(215);
     aiMovementClient.addPatrolHex(393);
-    aiMovementClient.addPatrolHex(775);
+    aiMovementClient.addPatrolHex(775);*/
 
 
     std::cout<<"Verifying screen dimensions"<<std::endl;
@@ -295,7 +297,7 @@ void scenario::render(SDL_Renderer* renderer, int mouseX, int mouseY, bool shift
 
 
     //TODO, remove this, it is for debugging only
-    aiMovementClient.render(grid,renderer,scale);
+    //aiMovementClient.render(grid,renderer,scale);
 }
 
 void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,  int mouseX, int mouseY, bool isLeftMouseClick, bool isRightMouseClick, bool executeClick, bool shiftKey, bool playbuttonClick, int scrollwheel, uint32_t millis, uint32_t dmillis) {
@@ -607,7 +609,7 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
 
                         //Check that we are not above the salvo size
                         if (attackPlans[selectedUnit].size()<units[selectedUnit].getSSMSalvoSize()) {
-                            attackPlans[selectedUnit].emplace_back(selectedUnit,sourceX,sourceY,destinationX,destinationY,renderer,inGameFont);
+                            attackPlans[selectedUnit].emplace_back(selectedUnit,sourceX,sourceY,destinationX,destinationY,renderer,inGameFont,units[selectedUnit].isFriendly());
                             selectedAttackPlan=attackPlans[selectedUnit].size()-1;
                         }
                     }
