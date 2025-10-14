@@ -133,6 +133,15 @@ unitType::unitType(const fs::path& unitPath, SDL_Renderer *renderer): texture((u
         if (tag=="maxHp") {
             ss >> maxHp;
         }
+        if (tag=="SAMDelay") {
+            ss >> SAMDelay;
+        }
+        if (tag=="SAMReloadDelay") {
+            ss >> SAMReloadDelay;
+        }
+        if (tag=="SAMSalvoSize") {
+            ss >> SAMSalvoSize;
+        }
     }
 
 }

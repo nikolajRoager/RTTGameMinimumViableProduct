@@ -36,7 +36,7 @@ scenario::scenario(SDL_Renderer* renderer, TTF_Font* _font, std::default_random_
     //TODO: load from disk, and allow spawning
     units.clear();
     //units.emplace_back(unitLibrary[2],true,20,9);
-    //units.emplace_back(unitLibrary[2],true,19,10);
+    units.emplace_back(unitLibrary[2],true,19,10);
     units.emplace_back(unitLibrary[0],true,21,11);
     units.emplace_back(unitLibrary[2],true,20,12);
     units.emplace_back(unitLibrary[1],true,25,20);

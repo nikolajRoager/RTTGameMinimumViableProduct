@@ -28,7 +28,7 @@ void physicsCake::bake(const hexGrid& grid, const std::vector<unit>& units, cons
 
     for (int i = 0; i < units.size(); i++) {
         if (units[i].getSAMRange()>0) {
-            SAMLaunchers.emplace_back(i,units[i].isFriendly(),units[i].getSAMRange()/SAMSpeed,units[i].getSAMRange(),units[i].getSAMDelay());
+            SAMLaunchers.emplace_back(i,units[i].isFriendly(),units[i].getSAMRange()/SAMSpeed,units[i].getSAMRange(),units[i].getSAMDelay(),units[i].getSAMSalvoSize(),units[i].getSAMReloadDelay());
         }
     }
 
@@ -100,20 +100,30 @@ void physicsCake::bake(const hexGrid& grid, const std::vector<unit>& units, cons
 
                             //Negative time indicates no solution found
                             double interceptTime=-1;
+                            double invInterceptTime=-1;
                             if (discriminant>=0) {
-                                double interceptTime0 = 1/((-2*(rx*ssmVx+ry*ssmVy)-sqrt(discriminant))/(2*(rx*rx+ry*ry)));
-                                double interceptTime1 = 1/((-2*(rx*ssmVx+ry*ssmVy)+sqrt(discriminant))/(2*(rx*rx+ry*ry)));
+                                double invInterceptTime0 = (-2*(rx*ssmVx+ry*ssmVy)-sqrt(discriminant))/(2*(rx*rx+ry*ry));
+                                double invInterceptTime1 = (-2*(rx*ssmVx+ry*ssmVy)+sqrt(discriminant))/(2*(rx*rx+ry*ry));
 
-                                if (interceptTime0>0 && interceptTime1>0)
-                                    interceptTime=std::min(interceptTime0,interceptTime1);
-                                else if (interceptTime0>0)
-                                    interceptTime=interceptTime0;
-                                else if (interceptTime1>0)
-                                    interceptTime=interceptTime1;
+                                if (invInterceptTime0>0 && invInterceptTime1>0) {
+                                    if (invInterceptTime0>invInterceptTime1) {
+                                        invInterceptTime=invInterceptTime0;
+                                    }
+                                    else {
+                                        invInterceptTime=invInterceptTime1;
+                                    }
+                                }
+                                else if (invInterceptTime0>0) {
+                                    invInterceptTime=invInterceptTime0;
+                                }
+                                else if (invInterceptTime1>0) {
+
+                                    invInterceptTime=invInterceptTime1;
+                                }
+                                interceptTime = 1/invInterceptTime;
                             }
 
-                            double dist = sqrt(pow(ssmPosition.x-samX,2)+pow(ssmPosition.y-samY,2));
-                            //todo calculate intercept and use that for range instead
+                            //If the intercept is in the future, and we can make it with our fuel, engage track!
                             if (interceptTime>0 && interceptTime<launcher.fuelTime) {
                                 std::cout<<"Launcher at "<<units[launcher.unitId].getHexX()<<","<<units[launcher.unitId].getHexY()<<": engage track "<<ssmId<<" at time "<<currentTime<<std::endl;
                                 //Assign SAM to track
@@ -121,15 +131,21 @@ void physicsCake::bake(const hexGrid& grid, const std::vector<unit>& units, cons
                                     //Lock down this track, so we don't spam missiles against the same thing
                                     SAMTaskedAgainstSSM[ssmId]=flyingSAMs.size();
 
-                                    //Todo, store inverse time
-                                    double samVx = ssmVx+rx/interceptTime;
-                                    double samVy = ssmVy+ry/interceptTime;
+                                    double samVx = ssmVx+rx*invInterceptTime;
+                                    double samVy = ssmVy+ry*invInterceptTime;
 
-                                    flyingSAMs.emplace_back(samX,samY,samVx,samVy,launcher.fuelTime,ssmId);
+                                    flyingSAMs.emplace_back(samX,samY,samVx,samVy,launcher.fuelTime,interceptTime,ssmId);
                                     SAMVectors.emplace_back(launcher.playerSide);
                                 }
-                                //reload launcher
-                                launcher.ongoingDelay=launcher.launchDelay;
+
+                                //cool down, or reload the launcher
+                                launcher.loadedLaunchers--;
+                                if (launcher.loadedLaunchers<=0) {
+                                    launcher.loadedLaunchers=launcher.salvoSize;
+                                    launcher.ongoingDelay=launcher.reloadDelay;
+                                }
+                                else
+                                    launcher.ongoingDelay=launcher.launchDelay;
                                 break;
                             }
                         }
@@ -164,8 +180,8 @@ void physicsCake::bake(const hexGrid& grid, const std::vector<unit>& units, cons
                 if (attackPlans.at(unitId)[planId].getEndTime()<currentTime) {
                     SSMVectorsStatus[i]=TERMINATED;
                     //We will either be detonated, splashed, or crashed
-                    const auto& dist = SSMVectors[i].getLastPosition();
-                    int hexWeHitId = grid.getHexFromLocation(dist.x, dist.y,1);
+                    const auto& crashNode = SSMVectors[i].getLastPosition();
+                    int hexWeHitId = grid.getHexFromLocation(crashNode.x, crashNode.y,1);
 
 
                     bool hitUnit = false;
@@ -199,16 +215,40 @@ void physicsCake::bake(const hexGrid& grid, const std::vector<unit>& units, cons
                 SAM.x+=SAM.vx*dt;
                 SAM.y+=SAM.vy*dt;
                 SAM.fuelTimeLeft-=dt;
+                SAM.fuze-=dt;
 
 
                 SAMVectors[i].line.emplace_back(SAM.x,SAM.y,currentTime);
 
                 if (SAM.fuelTimeLeft <= 0) {
                     SAM.terminated = true;
+                    //TODO, crash or splash
                     SAMVectors[i].fate=bakedAttackVector::DETONATE;
                     //Clear track
                     if (SAM.target!=-1)
                         SAMTaskedAgainstSSM[SAM.target]=-1;
+                }
+
+
+                //Turn on proximity fuze for one physics frame, and either detonate or become lost
+                if (SAM.target!=-1 && SAM.fuze <= 0) {
+
+
+                    auto targetPosition = SSMVectors[SAM.target].getLastPosition();
+                    double dist = sqrt(pow(SAM.x-targetPosition.x,2)+pow(SAM.y-targetPosition.y,2));
+
+                    //10 pixels explosion radius seems fair to me
+                    if (dist<10) {
+                        std::cout<<"Kill track "<<SAM.target<<std::endl;
+                        SAM.terminated = true;
+                        SSMVectorsStatus[SAM.target]=TERMINATED;
+                        SSMVectors[SAM.target].fate=bakedAttackVector::INTERCEPTED;
+                    } else {
+                        std::cout<<"Miss track "<<SAM.target<<std::endl;
+                        SAMTaskedAgainstSSM[SAM.target]=-1;
+                        SAM.target=-1;
+                    }
+
                 }
             }
         }
@@ -279,6 +319,30 @@ void physicsCake::spawnParticles(std::deque<particle> &smokeParticles, double ti
                         //Or isolating the factor fac
                         double fac=(time-SSMVector.line[i-1].time)/(SSMVector.line[i].time-SSMVector.line[i-1].time) ;
                         auto temp = std::make_pair(fac*SSMVector.line[i].x+(1-fac)*SSMVector.line[i-1].x,fac*SSMVector.line[i].y+(1-fac)*SSMVector.line[i-1].y);
+                        smokeParticles.emplace_back(temp.first,temp.second,0,0,0);
+
+                    }
+                    break;
+                }
+            }
+    }
+
+    for (const auto& SAMVector : SAMVectors) {
+        if (time>SAMVector.line.front().time && time<SAMVector.line.back().time)
+            for (int i = 1; i < SAMVector.line.size(); ++i) {
+                if (time<SAMVector.line[i].time) {
+                    //Check if we should spawn particles
+                    double t = dmillis*0.001;
+                    //Poisson distribution
+                    double p = 1-std::exp(-smokeSpawnRate*t);
+                    if (distribution(generator)<p) {
+
+                        //we are inside this line
+                        //We want the interpolation factor such that
+                        //time = fac*attackVectors[i].time+(1-fac)*attackVectors[i-1].time;
+                        //Or isolating the factor fac
+                        double fac=(time-SAMVector.line[i-1].time)/(SAMVector.line[i].time-SAMVector.line[i-1].time) ;
+                        auto temp = std::make_pair(fac*SAMVector.line[i].x+(1-fac)*SAMVector.line[i-1].x,fac*SAMVector.line[i].y+(1-fac)*SAMVector.line[i-1].y);
                         smokeParticles.emplace_back(temp.first,temp.second,0,0,0);
 
                     }

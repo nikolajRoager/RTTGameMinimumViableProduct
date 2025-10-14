@@ -583,6 +583,7 @@ The time has STILL come to create the actual project, now that the minimum viabl
 
 At the same time, here is a list of super-long term features, in no particular order
 
+* Allow clicking on enemy units during movement phase
 * Multithreaded physics calculations (if we encounter poor performance)
 * Kirov class cruiser
 * create a new project

@@ -91,14 +91,15 @@ private:
 
     texwrap smokeParticleTexture;
 
-    //Since smoke particles have the same lifetime, and are inserted at the back of a list, they need to be removed from the front
+    //Since all smoke particles have the same lifetime, and are inserted at the back of a list, they need to be removed from the front
     //A double ended queue (deque) is perfect for this
     std::deque<particle> smokeParticles;
+    //TODO: crash particle, detonate particle, splash particle intercept particle
 
     int smokeParticleLifetimeMs=1000;
 
     ///average number of smoke particles spawned per second by missiles
-    double missileSmokeSpawnRate = 10;
+    double missileSmokeSpawnRate = 20;
 
     physicsCake myCake;
 

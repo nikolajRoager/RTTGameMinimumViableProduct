@@ -74,24 +74,34 @@ private:
         ///Time until we run out of fuel and crash
         double fuelTimeLeft;
 
-        SAMInAir(double _x, double _y, double _vx, double _vy,double _fuelTimeLeft, int _target) : x(_x), y(_y), vx(_vx), vy(_vy), target(_target), fuelTimeLeft(_fuelTimeLeft) {terminated=false;};
+        ///Time until we expect to turn on our proximity fuze and likely explode
+        double fuze;
+
+        SAMInAir(double _x, double _y, double _vx, double _vy,double _fuelTimeLeft, double _fuze, int _target) : x(_x), y(_y), vx(_vx), vy(_vy), target(_target), fuelTimeLeft(_fuelTimeLeft), fuze(_fuze) {terminated=false;};
     };
 
     struct SAMLauncher {
         int unitId;
         bool playerSide;
         double fuelTime;
+        int salvoSize;
+        int loadedLaunchers;
         double launchDelay;
+        double reloadDelay;
         double ongoingDelay;
+
         double range;
 
-        SAMLauncher(int _unitId, bool _playerSide, double _fuelTime, double _range, double _launchDelay) {
+        SAMLauncher(int _unitId, bool _playerSide, double _fuelTime, double _range, double _launchDelay, int _salvoSize, double _reloadDelay) {
             unitId=_unitId;
             playerSide=_playerSide;
             fuelTime=_fuelTime;
             range=_range;
             launchDelay=_launchDelay;
+            salvoSize=_salvoSize;
+            reloadDelay=_reloadDelay;
             ongoingDelay=0;
+            loadedLaunchers=salvoSize;
         }
     };
 

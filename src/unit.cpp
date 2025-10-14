@@ -63,7 +63,11 @@ std::string unit::getDescription() const {
     if (samRange>0) {
         const std::string samRangeStr = std::format("{:.3f}", samRange);
         out+="Surface to Air Missile range: &"+samRangeStr+"\n";
+        out+="Launch delay (in salvo): &"+std::format("{:.3f}", myType.getSAMDelay())+"\n";
+        out+="Reload delay (between salvos): &"+std::format("{:.3f}", myType.getSAMReloadDelay())+"\n";
+        out+="Surface to Air Missile Salvo size: &"+std::to_string(myType.getSAMSalvoSize())+"\n";
         out+="&Will auto-attack air targets in range\n";
+
     }
     double ssmRange =myType.getSSMRange();
     if (ssmRange>0) {

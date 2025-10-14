@@ -51,6 +51,8 @@ private:
     double SAMRange;
 
     double SAMDelay=0.5;
+    int SAMSalvoSize=4;
+    double SAMReloadDelay=4;
 
     ///Range of surface-to-surface missiles aboard this thing
     ///is 0 if it has no SSM
@@ -66,9 +68,11 @@ private:
     int maxHp=2;
 
 public:
-
+    [[nodiscard]] int getSAMSalvoSize() const {return SAMSalvoSize;}
+    [[nodiscard]] double getSAMReloadDelay() const {return SAMReloadDelay;}
     [[nodiscard]] double getSAMRange() const {return SAMRange;};
     [[nodiscard]] double getSAMDelay() const {return SAMDelay;};
+
 
     [[nodiscard]] double getSSMRange() const {return SSMRange;};
 

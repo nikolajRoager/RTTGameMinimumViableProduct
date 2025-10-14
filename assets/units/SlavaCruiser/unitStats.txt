@@ -12,3 +12,6 @@ SSMRange 200
 SSMSalvoSize 4
 SSMNodes 3
 maxHp 4
+SAMSalvoSize 4
+SAMDelay 0.5
+SAMReloadDelay 2

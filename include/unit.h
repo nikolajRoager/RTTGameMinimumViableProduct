@@ -58,7 +58,11 @@ public:
 
     [[nodiscard]] int getMovementPoints() const { return myType.getMovementPoints(); }
     [[nodiscard]] double getSAMRange() const { return myType.getSAMRange(); }
+
+    [[nodiscard]] int getSAMSalvoSize() const {return myType.getSAMSalvoSize();}
+    [[nodiscard]] double getSAMReloadDelay() const {return myType.getSAMReloadDelay();}
     [[nodiscard]] double getSAMDelay() const { return myType.getSAMDelay(); }
+
     [[nodiscard]] double getSSMRange() const { return myType.getSSMRange(); }
     [[nodiscard]] int getSSMSalvoSize() const { return myType.getSSMSalvoSize(); }
     [[nodiscard]] bool isFriendly() const {return isFriend;}
