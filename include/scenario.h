@@ -90,13 +90,27 @@ private:
     texwrap flyingSSM;
 
     texwrap smokeParticleTexture;
+    texwrap splashParticleTexture;
+    texwrap crashParticleTexture;
+    texwrap hitTargetTexture;
+    texwrap interceptTexture;
 
-    //Since all smoke particles have the same lifetime, and are inserted at the back of a list, they need to be removed from the front
+    //Each particle type has its own queue
+    //Since all particles have the same lifetime, and are inserted at the back of a list, they need to be removed from the front
     //A double ended queue (deque) is perfect for this
     std::deque<particle> smokeParticles;
+    std::deque<particle> splashParticles;
+    std::deque<particle> crashParticles;
+    std::deque<particle> hitTargetParticles;
+    std::deque<particle> interceptParticles;
     //TODO: crash particle, detonate particle, splash particle intercept particle
 
+
     int smokeParticleLifetimeMs=1000;
+    int splashParticleLifetimeMs=200;
+    int crashParticleLifetimeMs=200;
+    int hitTargetParticleLifetimeMs=200;
+    int interceptParticleLifetimeMs=200;
 
     ///average number of smoke particles spawned per second by missiles
     double missileSmokeSpawnRate = 20;

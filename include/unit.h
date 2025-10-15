@@ -44,11 +44,11 @@ public:
     [[nodiscard]] int getHp() const {return hp;};
 
     void setHp(int _hp,uint32_t millis) {
-        if (hp!=0 && _hp==0) {
+        if (hp>0 && _hp<=0) {
             setAnimation(millis,unitType::DIE);
         }
         //Necromancy (happens during replays)
-        else if (hp==0 && _hp!=0) {
+        else if (hp<=0 && _hp>0) {
             setAnimation(millis,unitType::READY);
         }
         hp=_hp;

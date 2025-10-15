@@ -222,8 +222,14 @@ void physicsCake::bake(const hexGrid& grid, const std::vector<unit>& units, cons
 
                 if (SAM.fuelTimeLeft <= 0) {
                     SAM.terminated = true;
-                    //TODO, crash or splash
-                    SAMVectors[i].fate=bakedAttackVector::DETONATE;
+                    int hexWeHitId = grid.getHexFromLocation(SAM.x, SAM.y,1);
+
+                    if ( grid.getHexTile(hexWeHitId).getStatus()==hexTile::SEA) {
+                        SAMVectors[i].fate=bakedAttackVector::SPLASH;
+                    }
+                    else {
+                        SAMVectors[i].fate=bakedAttackVector::CRASH;
+                    }
                     //Clear track
                     if (SAM.target!=-1)
                         SAMTaskedAgainstSSM[SAM.target]=-1;
@@ -302,10 +308,12 @@ void physicsCake::render(double time,const texwrap &SSMTexture, SDL_Renderer *re
     }
 }
 
-void physicsCake::spawnParticles(std::deque<particle> &smokeParticles, double time, double smokeSpawnRate, uint32_t dmillis) {
+void physicsCake::spawnParticles(std::deque<particle> &smokeParticles, std::deque<particle>& splashParticles,std::deque<particle>& crashParticles,std::deque<particle>& hitTargetParticles,std::deque<particle>& interceptParticles, double time, double smokeSpawnRate, uint32_t dmillis) {
     for (const auto& SSMVector : SSMVectors) {
+        //Loop through all live ssms and find the current position
         if (time>SSMVector.line.front().time && time<SSMVector.line.back().time)
             for (int i = 1; i < SSMVector.line.size(); ++i) {
+                //This is the current position
                 if (time<SSMVector.line[i].time) {
                     //Check if we should spawn particles
                     double t = dmillis*0.001;
@@ -325,6 +333,24 @@ void physicsCake::spawnParticles(std::deque<particle> &smokeParticles, double ti
                     break;
                 }
             }
+        //If this SSM has JUST died
+        else if (time>SSMVector.line.front().time && time-dmillis*0.001<SSMVector.line.back().time) {
+            switch (SSMVector.fate) {
+                case bakedAttackVector::CRASH:
+                    crashParticles.emplace_back(SSMVector.line.back().x,SSMVector.line.back().y,0,0,0);
+                    break;
+                case bakedAttackVector::DETONATE:
+                    hitTargetParticles.emplace_back(SSMVector.line.back().x,SSMVector.line.back().y,0,0,0);
+                    break;
+                case bakedAttackVector::SPLASH:
+                    splashParticles.emplace_back(SSMVector.line.back().x,SSMVector.line.back().y,0,0,0);
+                    break;
+                default:
+                case bakedAttackVector::INTERCEPTED:
+                    interceptParticles.emplace_back(SSMVector.line.back().x,SSMVector.line.back().y,0,0,0);
+                    break;
+            }
+        }
     }
 
     for (const auto& SAMVector : SAMVectors) {
@@ -349,6 +375,23 @@ void physicsCake::spawnParticles(std::deque<particle> &smokeParticles, double ti
                     break;
                 }
             }
+        else if (time>SAMVector.line.front().time && time-dmillis*0.001<SAMVector.line.back().time) {
+            switch (SAMVector.fate) {
+                case bakedAttackVector::CRASH:
+                    crashParticles.emplace_back(SAMVector.line.back().x,SAMVector.line.back().y,0,0,0);
+                    break;
+                case bakedAttackVector::DETONATE:
+                    interceptParticles.emplace_back(SAMVector.line.back().x,SAMVector.line.back().y,0,0,0);
+                    break;
+                case bakedAttackVector::SPLASH:
+                    splashParticles.emplace_back(SAMVector.line.back().x,SAMVector.line.back().y,0,0,0);
+                    break;
+                default:
+                case bakedAttackVector::INTERCEPTED:
+                    //Should never happen for sams
+                    break;
+            }
+        }
     }
 }
 

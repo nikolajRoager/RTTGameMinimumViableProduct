@@ -600,3 +600,16 @@ At the same time, here is a list of super-long term features, in no particular o
 * Events
 * Rubber-banding AI recruitment
 
+Day 20, Tuesday 14/10/2025 CE and 15/10/2025
+===================
+background
+------
+I took a few hours to work on this project after work for two days
+
+work
+----
+Now intercepted missiles get deleted, and they make a nice particle effect indicating their fate.
+
+todo
+----
+The time has really come to add sound

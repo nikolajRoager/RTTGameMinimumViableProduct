@@ -16,7 +16,7 @@ void scenario::drawCircle(double x, double y, double radius, double scale, Uint8
     circle10.render(x*scale,y*scale,r,g,b,a,renderer,scale*2*radius/circle10.getWidth(),true);
 }
 
-scenario::scenario(SDL_Renderer* renderer, TTF_Font* _font, std::default_random_engine& _generator) : background(fs::path("assets")/"background.png",renderer), hexSelectionOutline(fs::path("assets")/"hexoutline.png",renderer),circle10(fs::path("assets")/"circle10.png",renderer), grid(fs::path("assets"),renderer), myGui(fs::path("assets")/"gui",renderer,_font), flyingSSM(fs::path("assets")/"physicsGraphics"/"SSM.png",renderer), smokeParticleTexture(fs::path("assets")/"physicsGraphics"/"smoke.png",renderer), myCake(_generator),aiMovementClient(_generator),hpMarker(fs::path("assets")/"hitpoint.png",renderer),shiftMarker(fs::path("assets")/"shift.png",renderer){
+scenario::scenario(SDL_Renderer* renderer, TTF_Font* _font, std::default_random_engine& _generator) : background(fs::path("assets")/"background.png",renderer), hexSelectionOutline(fs::path("assets")/"hexoutline.png",renderer),circle10(fs::path("assets")/"circle10.png",renderer), grid(fs::path("assets"),renderer), myGui(fs::path("assets")/"gui",renderer,_font), flyingSSM(fs::path("assets")/"physicsGraphics"/"SSM.png",renderer), smokeParticleTexture(fs::path("assets")/"physicsGraphics"/"smoke.png",renderer), splashParticleTexture(fs::path("assets")/"physicsGraphics"/"splash.png",renderer), crashParticleTexture(fs::path("assets")/"physicsGraphics"/"crash.png",renderer), hitTargetTexture(fs::path("assets")/"physicsGraphics"/"hitTarget.png",renderer), interceptTexture(fs::path("assets")/"physicsGraphics"/"intercept.png",renderer), myCake(_generator),aiMovementClient(_generator),hpMarker(fs::path("assets")/"hitpoint.png",renderer),shiftMarker(fs::path("assets")/"shift.png",renderer){
 
 
     inGameFont = _font;
@@ -100,6 +100,10 @@ scenario::scenario(SDL_Renderer* renderer, TTF_Font* _font, std::default_random_
     myGui.setInfoScreenText(movementPlanningDescription,renderer);
 
     std::cout<< " constructor finished"<<std::endl;
+
+    //TODO TEMP REMOVE
+    interceptParticles.emplace_back(100,100,0,0,0);
+
 }
 
 scenario::~scenario() = default;
@@ -284,6 +288,18 @@ void scenario::render(SDL_Renderer* renderer, int mouseX, int mouseY, bool shift
     for (const auto& particle : smokeParticles) {
         smokeParticleTexture.render(particle.x*scale,particle.y*scale,renderer,scale,true,false,4,std::min(3,(4*particle.ageMs)/smokeParticleLifetimeMs));
     }
+    for (const auto& particle : splashParticles) {
+        splashParticleTexture.render(particle.x*scale,particle.y*scale,renderer,scale,true,false,4,std::min(3,(4*particle.ageMs)/splashParticleLifetimeMs));
+    }
+    for (const auto& particle : crashParticles) {
+        crashParticleTexture.render(particle.x*scale,particle.y*scale,renderer,scale,true,false,4,std::min(3,(4*particle.ageMs)/crashParticleLifetimeMs));
+    }
+    for (const auto& particle : hitTargetParticles) {
+        hitTargetTexture.render(particle.x*scale,particle.y*scale,renderer,scale,true,false,4,std::min(3,(4*particle.ageMs)/hitTargetParticleLifetimeMs));
+    }
+    for (const auto& particle : interceptParticles) {
+        interceptTexture.render(particle.x*scale,particle.y*scale,renderer,scale,true,false,4,std::min(3,(4*particle.ageMs)/interceptParticleLifetimeMs));
+    }
 
 
 
@@ -296,7 +312,7 @@ void scenario::render(SDL_Renderer* renderer, int mouseX, int mouseY, bool shift
         myGui.renderAttackPlanning(scenarioWidthPx,scenarioHeightPx,mouseX,mouseY,renderer,scale,attackPlans,selectedUnit,selectedAttackPlan);
 
 
-    //TODO, remove this, it is for debugging only
+    //for debugging only
     //aiMovementClient.render(grid,renderer,scale);
 }
 
@@ -382,12 +398,6 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
 
 
                     auto fullPath =grid.findPath(selectedTile,mouseOverTile,obstructed,units[selectedUnit].getMovementPoints());
-                    /*
-                     *TODO, I REPLACED LIMITED PATH WITH FULL PATH BELOW
-                    auto limitedPath =std::vector<int>();
-                    for (int i = 0; i < fullPath.size() && i<units[selectedUnit].getMovementPoints()+1; i++)
-                        limitedPath.push_back(fullPath[i]);
-                    */
                     if (movementPlans.contains(selectedUnit)) {
                         movementPlans.at(selectedUnit)=fullPath ;
                     }
@@ -412,7 +422,7 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
         }
 
 
-        //Update animation of friendly and todo hostile units
+        //Update animation of friendly and hostile units
         for (auto & U : units) {
             //It is the scenario which is responsible for the grid, so we are responsible for getting the coordinates
             const int hexX = U.getHexX();
@@ -687,7 +697,7 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
             if (!pauseAttackExecutionPlayback)
                 attackExecutionPlaybackTimer+=dmillis*0.001;
 
-            myCake.spawnParticles(smokeParticles,attackExecutionPlaybackTimer,missileSmokeSpawnRate,dmillis);
+            myCake.spawnParticles(smokeParticles,splashParticles,crashParticles,hitTargetParticles,interceptParticles,attackExecutionPlaybackTimer,missileSmokeSpawnRate,pauseAttackExecutionPlayback?0:dmillis);
             myCake.updateUnits(units,attackExecutionPlaybackTimer,millis);
 
             if (attackExecutionPlaybackTimer>attackExecutionPlaybackMaxTime) {
@@ -743,8 +753,42 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
         particle.ageMs+=dmillis;
     }
 
+
+    for (auto& particle : splashParticles) {
+        particle.x+=particle.vx*dmillis*0.001;
+        particle.y+=particle.vy*dmillis*0.001;
+        particle.ageMs+=dmillis;
+    }
+    for (auto& particle : crashParticles) {
+        particle.x+=particle.vx*dmillis*0.001;
+        particle.y+=particle.vy*dmillis*0.001;
+        particle.ageMs+=dmillis;
+    }
+    for (auto& particle : hitTargetParticles) {
+        particle.x+=particle.vx*dmillis*0.001;
+        particle.y+=particle.vy*dmillis*0.001;
+        particle.ageMs+=dmillis;
+    }
+    for (auto& particle : interceptParticles) {
+        particle.x+=particle.vx*dmillis*0.001;
+        particle.y+=particle.vy*dmillis*0.001;
+        particle.ageMs+=dmillis;
+    }
+
     while (!smokeParticles.empty() && smokeParticles.front().ageMs>smokeParticleLifetimeMs) {
         smokeParticles.pop_front();
+    }
+    while (!splashParticles.empty() && splashParticles.front().ageMs>splashParticleLifetimeMs) {
+        splashParticles.pop_front();
+    }
+    while (!hitTargetParticles.empty() && hitTargetParticles.front().ageMs>hitTargetParticleLifetimeMs) {
+        hitTargetParticles.pop_front();
+    }
+    while (!interceptParticles.empty() && interceptParticles.front().ageMs>interceptParticleLifetimeMs) {
+        interceptParticles.pop_front();
+    }
+    while (!crashParticles.empty() && crashParticles.front().ageMs> crashParticleLifetimeMs) {
+         crashParticles.pop_front();
     }
 
     for (unit& U: units) {
