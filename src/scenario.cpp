@@ -16,7 +16,7 @@ void scenario::drawCircle(double x, double y, double radius, double scale, Uint8
     circle10.render(x*scale,y*scale,r,g,b,a,renderer,scale*2*radius/circle10.getWidth(),true);
 }
 
-scenario::scenario(SDL_Renderer* renderer, TTF_Font* _font, std::default_random_engine& _generator) : background(fs::path("assets")/"background.png",renderer), hexSelectionOutline(fs::path("assets")/"hexoutline.png",renderer),circle10(fs::path("assets")/"circle10.png",renderer), grid(fs::path("assets"),renderer), myGui(fs::path("assets")/"gui",renderer,_font), flyingSSM(fs::path("assets")/"physicsGraphics"/"SSM.png",renderer), smokeParticleTexture(fs::path("assets")/"physicsGraphics"/"smoke.png",renderer), splashParticleTexture(fs::path("assets")/"physicsGraphics"/"splash.png",renderer), crashParticleTexture(fs::path("assets")/"physicsGraphics"/"crash.png",renderer), hitTargetTexture(fs::path("assets")/"physicsGraphics"/"hitTarget.png",renderer), interceptTexture(fs::path("assets")/"physicsGraphics"/"intercept.png",renderer), myCake(_generator),aiMovementClient(_generator),hpMarker(fs::path("assets")/"hitpoint.png",renderer),shiftMarker(fs::path("assets")/"shift.png",renderer), splashSound(fs::path("assets")/"sounds"/"splash.wav"), crashOrInterceptSound(fs::path("assets")/"sounds"/"smallExplosion.wav") {
+scenario::scenario(SDL_Renderer* renderer, TTF_Font* _font, std::default_random_engine& _generator) : background(fs::path("assets")/"background.png",renderer), hexSelectionOutline(fs::path("assets")/"hexoutline.png",renderer),circle10(fs::path("assets")/"circle10.png",renderer), grid(fs::path("assets"),renderer), myGui(fs::path("assets")/"gui",renderer,_font), flyingSSM(fs::path("assets")/"physicsGraphics"/"SSM.png",renderer), smokeParticleTexture(fs::path("assets")/"physicsGraphics"/"smoke.png",renderer), splashParticleTexture(fs::path("assets")/"physicsGraphics"/"splash.png",renderer), crashParticleTexture(fs::path("assets")/"physicsGraphics"/"crash.png",renderer), hitTargetTexture(fs::path("assets")/"physicsGraphics"/"hitTarget.png",renderer), interceptTexture(fs::path("assets")/"physicsGraphics"/"intercept.png",renderer), myCake(_generator),aiMovementClient(_generator),hpMarker(fs::path("assets")/"hitpoint.png",renderer),shiftMarker(fs::path("assets")/"shift.png",renderer), splashSound(fs::path("assets")/"sounds"/"splash.wav"), crashOrInterceptSound(fs::path("assets")/"sounds"/"smallExplosion.wav"), hitTargetSound(fs::path("assets")/"sounds"/"hittarget.wav"), missileSound(fs::path("assets")/"sounds"/"missile.wav") {
     inGameFont = _font;
     //Will instantly be overwritten
     mouseOverTile=0;
@@ -345,7 +345,7 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
             int newSelectedUnit=-1;
 
             for (int i = 0; i < units.size(); i++) {
-                if (grid.getHexId(units[i].getHexX(),units[i].getHexY())==mouseOverTile && units[i].isFriendly()) {
+                if (grid.getHexId(units[i].getHexX(),units[i].getHexY())==mouseOverTile) {
                     selectedTile = mouseOverTile;
                     newSelectedUnit = i;
                     units[i].doReadyAttack();
@@ -359,8 +359,8 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
                         selectedUnit=newSelectedUnit;
                         myGui.setInfoScreenText(units[selectedUnit].getDescription(),renderer);
                     }
-                    else {
-                        //Click the same unit to cancel movement order
+                    else if (units[selectedUnit].isFriendly()){
+                        //Click the same unit to cancel movement order, if it is a friendly unit
                         units[selectedUnit].unreadyAttack();
                         if (movementPlans.contains(selectedUnit))
                             movementPlans.erase(selectedUnit);
@@ -373,7 +373,7 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
                     myGui.setInfoScreenText(units[selectedUnit].getDescription(),renderer);
                 }
             }
-            else {
+            else if (units[selectedUnit].isFriendly()){
                 //You clicked somewhere else, while a unit was selected this is a movement command
                 if (selectedUnit!=-1) {
                     units[selectedUnit].unreadyAttack();
@@ -695,7 +695,7 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
             if (!pauseAttackExecutionPlayback)
                 attackExecutionPlaybackTimer+=dmillis*0.001;
 
-            myCake.spawnParticlesAndSound(smokeParticles,splashParticles,crashParticles,hitTargetParticles,interceptParticles,splashSound,crashOrInterceptSound,crashOrInterceptSound,attackExecutionPlaybackTimer,missileSmokeSpawnRate,pauseAttackExecutionPlayback?0:dmillis);
+            myCake.spawnParticlesAndSound(smokeParticles,splashParticles,crashParticles,hitTargetParticles,interceptParticles,splashSound,crashOrInterceptSound,crashOrInterceptSound,hitTargetSound,missileSound,attackExecutionPlaybackTimer,missileSmokeSpawnRate,pauseAttackExecutionPlayback?0:dmillis);
             myCake.updateUnits(units,attackExecutionPlaybackTimer,millis);
 
             if (attackExecutionPlaybackTimer>attackExecutionPlaybackMaxTime) {

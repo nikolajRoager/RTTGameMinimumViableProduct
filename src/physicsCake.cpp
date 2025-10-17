@@ -308,10 +308,10 @@ void physicsCake::render(double time,const texwrap &SSMTexture, SDL_Renderer *re
     }
 }
 
-void physicsCake::spawnParticlesAndSound(std::deque<particle> &smokeParticles, std::deque<particle>& splashParticles,std::deque<particle>& crashParticles,std::deque<particle>& hitTargetParticles,std::deque<particle>& interceptParticles,const soundwrap& splashSound, const soundwrap& crashSound, const soundwrap& interceptSound, double time, double smokeSpawnRate, uint32_t dmillis) {
+void physicsCake::spawnParticlesAndSound(std::deque<particle> &smokeParticles, std::deque<particle>& splashParticles,std::deque<particle>& crashParticles,std::deque<particle>& hitTargetParticles,std::deque<particle>& interceptParticles,const soundwrap& splashSound, const soundwrap& crashSound, const soundwrap& interceptSound, const soundwrap& hitTargetSound, const soundwrap& missileSound, double time, double smokeSpawnRate, uint32_t dmillis) {
     for (const auto& SSMVector : SSMVectors) {
         //Loop through all live ssms and find the current position
-        if (time>SSMVector.line.front().time && time<SSMVector.line.back().time)
+        if (time>SSMVector.line.front().time && time<SSMVector.line.back().time) {
             for (int i = 1; i < SSMVector.line.size(); ++i) {
                 //This is the current position
                 if (time<SSMVector.line[i].time) {
@@ -333,6 +333,12 @@ void physicsCake::spawnParticlesAndSound(std::deque<particle> &smokeParticles, s
                     break;
                 }
             }
+
+            //We just launched, play the launch sound effect
+            if (time-dmillis*0.001<SSMVector.line.front().time) {
+                missileSound.play();
+            }
+        }
         //If this SSM has JUST died
         else if (time>SSMVector.line.front().time && time-dmillis*0.001<SSMVector.line.back().time) {
             switch (SSMVector.fate) {
@@ -342,6 +348,7 @@ void physicsCake::spawnParticlesAndSound(std::deque<particle> &smokeParticles, s
                     break;
                 case bakedAttackVector::DETONATE:
                     hitTargetParticles.emplace_back(SSMVector.line.back().x,SSMVector.line.back().y,0,0,0);
+                    hitTargetSound.play();
                     break;
                 case bakedAttackVector::SPLASH:
                     splashParticles.emplace_back(SSMVector.line.back().x,SSMVector.line.back().y,0,0,0);
@@ -357,7 +364,7 @@ void physicsCake::spawnParticlesAndSound(std::deque<particle> &smokeParticles, s
     }
 
     for (const auto& SAMVector : SAMVectors) {
-        if (time>SAMVector.line.front().time && time<SAMVector.line.back().time)
+        if (time>SAMVector.line.front().time && time<SAMVector.line.back().time) {
             for (int i = 1; i < SAMVector.line.size(); ++i) {
                 if (time<SAMVector.line[i].time) {
                     //Check if we should spawn particles
@@ -378,6 +385,13 @@ void physicsCake::spawnParticlesAndSound(std::deque<particle> &smokeParticles, s
                     break;
                 }
             }
+
+            //We just launched, play the launch sound effect
+            if (time-dmillis*0.001<SAMVector.line.front().time) {
+                missileSound.play();
+            }
+
+        }
         else if (time>SAMVector.line.front().time && time-dmillis*0.001<SAMVector.line.back().time) {
             switch (SAMVector.fate) {
                 case bakedAttackVector::CRASH:

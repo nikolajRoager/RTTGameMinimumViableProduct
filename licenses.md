@@ -15,3 +15,8 @@ splash.wav
 ---------
 By user rombart on freesound.org: https://freesound.org/people/rombart/sounds/186748/
 Licensed under creative commons 0
+
+missile.wav
+-----------
+By user BananaMilkshake on freesound.org: https://freesound.org/people/BananaMilkshake/sounds/632703/
+Licensed under creative commons attribution 4.0

@@ -34,6 +34,8 @@ private:
 
     soundwrap splashSound;
     soundwrap crashOrInterceptSound;
+    soundwrap hitTargetSound;
+    soundwrap missileSound;
 
     std::vector<unitType> unitLibrary;
 
