@@ -650,10 +650,10 @@ A and B priority definitely, C either needs to be added, or a workaround found, 
 * (A If performance is a problem, otherwise E) Multithreaded physics and AI calculations
 * B create a new project, with a more fitting name
 * A Sweden and norway need to be friendly territory (Denmark is too small for buildings)
-* A static buildings
+* A static buildings, just units with movement range set to 0
   * A Buildings can not move, buildings may stick around if destroyed (can be repaired)
     * A Depot (For ammunition management)
-    * A Army headquarters (For land combat, or just as an additional thing to protect)
+    * C Army headquarters (For land combat, or just as an additional thing to protect)
     * A City (As land target, maybe make it a terrain type)
     * A Factory (For ammunition management, maybe need to be in-range of a city)
     * A Power plant (maybe required by city or factory to function)

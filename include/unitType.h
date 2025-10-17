@@ -24,9 +24,10 @@ public:
 private:
     std::string name;
 
-    bool landUnit;
+    bool landUnit=false;
     ///Number of moves possible per turn
-    int movementPoints;
+    ///Buildings have 0 movement points
+    int movementPoints=0;
 
     texwrap texture;
 
@@ -38,17 +39,17 @@ private:
     texwrap die;
 
     //Use unsigned int to avoid casting issues since millis is unsigned
-    unsigned int idle_frames;
-    unsigned int move_frames;
-    unsigned int prepare_frames;
-    unsigned int ready_frames;
-    unsigned int unprepare_frames;
-    unsigned int die_frames;
+    unsigned int idle_frames=1;
+    unsigned int move_frames=1;
+    unsigned int prepare_frames=1;
+    unsigned int ready_frames=1;
+    unsigned int unprepare_frames=1;
+    unsigned int die_frames=1;
 
     ///Range of surface-to-air missiles aboard this thing
     ///is 0 if it has no SAM,
     ///SAM will automatically engage all air threats in range
-    double SAMRange;
+    double SAMRange=0;
 
     double SAMDelay=0.5;
     int SAMSalvoSize=4;
@@ -56,7 +57,7 @@ private:
 
     ///Range of surface-to-surface missiles aboard this thing
     ///is 0 if it has no SSM
-    double SSMRange;
+    double SSMRange=0;
 
     ///How many SSMs we can fire in one turn
     int SSMSalvoSize=4;

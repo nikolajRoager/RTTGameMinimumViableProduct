@@ -1,0 +1,10 @@
+idle 1
+move 1
+prepare 1
+ready 1
+unprepare 1
+die 4
+landUnit true
+movementPoints 0
+name City
+maxHp 3

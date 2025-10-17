@@ -29,6 +29,10 @@ scenario::scenario(SDL_Renderer* renderer, TTF_Font* _font, std::default_random_
     unitLibrary.emplace_back(fs::path("assets")/"units"/"NeptuneLauncherDK",renderer);
     unitLibrary.emplace_back(fs::path("assets")/"units"/"ArleighBurke",renderer);
     unitLibrary.emplace_back(fs::path("assets")/"units"/"SlavaCruiser",renderer);
+    unitLibrary.emplace_back(fs::path("assets")/"units"/"city",renderer);
+    unitLibrary.emplace_back(fs::path("assets")/"units"/"depot",renderer);
+    unitLibrary.emplace_back(fs::path("assets")/"units"/"factory",renderer);
+    unitLibrary.emplace_back(fs::path("assets")/"units"/"powerplant",renderer);
 
     std::cout<<"Loading units"<<std::endl;
     //TODO: load from disk, and allow spawning
@@ -41,9 +45,33 @@ scenario::scenario(SDL_Renderer* renderer, TTF_Font* _font, std::default_random_
     units.emplace_back(unitLibrary[1],true,32,15);
     units.emplace_back(unitLibrary[1],true,30,12);
 
+    //Location of cities, mainly for gameplay purposes, not necessarily realism
+    units.emplace_back(unitLibrary[5],true,18,13);//Nuuk, really not a city
+    units.emplace_back(unitLibrary[5],true,33,12);//København and Malmö
+    units.emplace_back(unitLibrary[5],true,32,10);//Stockholm
+    //We SKIP Oslo, because otherwise movement would be blocked
+    units.emplace_back(unitLibrary[5],true,33,7);//Helsinki, Tampere and Turku
+    units.emplace_back(unitLibrary[5],true,31,7);//Luleå
+
+    units.emplace_back(unitLibrary[6],true,20,11);
+    units.emplace_back(unitLibrary[6],true,20,7);
+    units.emplace_back(unitLibrary[6],true,30,10);
+    units.emplace_back(unitLibrary[6],true,30,6);
+
+
+    units.emplace_back(unitLibrary[7],true,33,13);
+    units.emplace_back(unitLibrary[7],true,32,11);
+    units.emplace_back(unitLibrary[7],true,31,8 );
+    units.emplace_back(unitLibrary[7],true,32,6);
+
+    units.emplace_back(unitLibrary[8],true,33,11);
+    units.emplace_back(unitLibrary[8],true,32,9);
+    units.emplace_back(unitLibrary[8],true,31,6 );
+    units.emplace_back(unitLibrary[8],true,19,13 );
+
+
     //Russian Warship which ought to go fuck itself
-    units.emplace_back(unitLibrary[4],false,16,12);
-/*
+    units.emplace_back(unitLibrary[4],false,32,3);
     units.emplace_back(unitLibrary[4],false,28,23);
     //Yankee destroyer spam
     units.emplace_back(unitLibrary[3],false,8,23);
@@ -61,8 +89,6 @@ scenario::scenario(SDL_Renderer* renderer, TTF_Font* _font, std::default_random_
     units.emplace_back(unitLibrary[3],false,11,22);
     units.emplace_back(unitLibrary[3],false,12,22);
     units.emplace_back(unitLibrary[3],false,14,22);
-*/
-    /*
     aiMovementClient.addPatrolHex(99);
     aiMovementClient.addPatrolHex(179);
     aiMovementClient.addPatrolHex(554);
@@ -71,14 +97,14 @@ scenario::scenario(SDL_Renderer* renderer, TTF_Font* _font, std::default_random_
     aiMovementClient.addPatrolHex(563);
     aiMovementClient.addPatrolHex(95);
     aiMovementClient.addPatrolHex(207);
-    aiMovementClient.addPatrolHex(359);*/
-    aiMovementClient.addPatrolHex(472);/*
+    aiMovementClient.addPatrolHex(359);
+    aiMovementClient.addPatrolHex(472);
     aiMovementClient.addPatrolHex(665);
     aiMovementClient.addPatrolHex(587);
     aiMovementClient.addPatrolHex(404);
     aiMovementClient.addPatrolHex(215);
     aiMovementClient.addPatrolHex(393);
-    aiMovementClient.addPatrolHex(775);*/
+    aiMovementClient.addPatrolHex(775);
 
 
     std::cout<<"Verifying screen dimensions"<<std::endl;
@@ -373,7 +399,7 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
                     myGui.setInfoScreenText(units[selectedUnit].getDescription(),renderer);
                 }
             }
-            else if (units[selectedUnit].isFriendly()){
+            else if (selectedUnit==-1 || units[selectedUnit].isFriendly()){
                 //You clicked somewhere else, while a unit was selected this is a movement command
                 if (selectedUnit!=-1) {
                     units[selectedUnit].unreadyAttack();

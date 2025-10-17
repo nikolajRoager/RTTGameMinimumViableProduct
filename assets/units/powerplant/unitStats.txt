@@ -1,0 +1,10 @@
+idle 2
+move 2
+prepare 2
+ready 2
+unprepare 2
+die 4
+landUnit true
+movementPoints 0
+name Power Plant
+maxHp 3

@@ -1,0 +1,10 @@
+idle 2
+move 2
+prepare 4
+ready 2
+unprepare 4
+die 4
+landUnit true
+movementPoints 0
+name Factory
+maxHp 3

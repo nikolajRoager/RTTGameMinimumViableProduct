@@ -27,7 +27,8 @@ void AIMovementClient::makeAIMovementPlans(const hexGrid &grid, std::vector<unit
 
     //Loop through all hostile units, and populate the set of taken and vacant patrol positions
     for (unit& u : units) {
-        if (!u.isFriendly()) {
+        //Only control hostile moveable units, i.e. no buildings
+        if (!u.isFriendly() && u.getMovementPoints()>0) {
             int patrol = u.getAIMovementTarget();
             if (patrol != -1) {
                 //If it is already taken, or if it is not on the menu we just became vacant

@@ -51,7 +51,7 @@ public:
         else if (hp<=0 && _hp>0) {
             setAnimation(millis,unitType::READY);
         }
-        hp=_hp;
+        hp=std::max(0,_hp);
     }
 
     [[nodiscard]] const std::string& getName() const {return myType.getName();}
