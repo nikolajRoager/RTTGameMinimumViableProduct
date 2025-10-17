@@ -662,6 +662,7 @@ A and B priority definitely, C either needs to be added, or a workaround found, 
     * A SAM site
     * A Cruise missile site
     * A Ballistic missile site (Longer range, higher speed)
+    * A Population and electricity ranges
 * B AI Attack (requires radar and detection)
   * B AI attacks (only detected) friendly units in range
   * D AI should use dogleg path to avoid air-defence bubbles

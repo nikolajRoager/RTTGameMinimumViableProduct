@@ -142,6 +142,12 @@ unitType::unitType(const fs::path& unitPath, SDL_Renderer *renderer): texture((u
         if (tag=="SAMSalvoSize") {
             ss >> SAMSalvoSize;
         }
+        if (tag=="populationRange") {
+            ss >> populationRange;
+        }
+        if (tag=="powerRange") {
+            ss >> powerRange;
+        }
     }
 
 }

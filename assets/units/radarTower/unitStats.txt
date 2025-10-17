@@ -1,0 +1,10 @@
+idle 4
+move 4
+prepare 4
+ready 4
+unprepare 4
+die 4
+landUnit true
+movementPoints 0
+name Radar Tower
+maxHp 2

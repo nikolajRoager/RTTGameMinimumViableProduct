@@ -98,6 +98,8 @@ public:
     ///Get the ID's of all neighbour a maximum number of steps from a hex
     [[nodiscard]] std::set<int> getNeighbours(int hexId,int steps,const std::set<int>& obstructed) const;
 
+    void addNeighbour(int hexId, int steps,const std::set<int>& obstructed);
+
     ///Get a list of the hexes we need to travel to, to get from start to stop
     [[nodiscard]] std::vector<int> findPathAdvanced(int startId, int stopId,const std::set<int>& obstructions, bool ignoreObstructedGoal=false,int range=-1,bool avoidObstacles=false) const;
 

@@ -68,6 +68,14 @@ private:
 
     int maxHp=2;
 
+    ///If this is a population centre, what is the range of its population
+    int populationRange = 0;
+    ///If this is a power-plant, what range does it power
+    int powerRange = 0;
+
+    bool requirePower = false;
+    bool requirPopulation=false;
+
 public:
     [[nodiscard]] int getSAMSalvoSize() const {return SAMSalvoSize;}
     [[nodiscard]] double getSAMReloadDelay() const {return SAMReloadDelay;}
