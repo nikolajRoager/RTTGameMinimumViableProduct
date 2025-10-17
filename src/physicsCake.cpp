@@ -308,7 +308,7 @@ void physicsCake::render(double time,const texwrap &SSMTexture, SDL_Renderer *re
     }
 }
 
-void physicsCake::spawnParticles(std::deque<particle> &smokeParticles, std::deque<particle>& splashParticles,std::deque<particle>& crashParticles,std::deque<particle>& hitTargetParticles,std::deque<particle>& interceptParticles, double time, double smokeSpawnRate, uint32_t dmillis) {
+void physicsCake::spawnParticlesAndSound(std::deque<particle> &smokeParticles, std::deque<particle>& splashParticles,std::deque<particle>& crashParticles,std::deque<particle>& hitTargetParticles,std::deque<particle>& interceptParticles,const soundwrap& splashSound, const soundwrap& crashSound, const soundwrap& interceptSound, double time, double smokeSpawnRate, uint32_t dmillis) {
     for (const auto& SSMVector : SSMVectors) {
         //Loop through all live ssms and find the current position
         if (time>SSMVector.line.front().time && time<SSMVector.line.back().time)
@@ -338,16 +338,19 @@ void physicsCake::spawnParticles(std::deque<particle> &smokeParticles, std::dequ
             switch (SSMVector.fate) {
                 case bakedAttackVector::CRASH:
                     crashParticles.emplace_back(SSMVector.line.back().x,SSMVector.line.back().y,0,0,0);
+                    crashSound.play();
                     break;
                 case bakedAttackVector::DETONATE:
                     hitTargetParticles.emplace_back(SSMVector.line.back().x,SSMVector.line.back().y,0,0,0);
                     break;
                 case bakedAttackVector::SPLASH:
                     splashParticles.emplace_back(SSMVector.line.back().x,SSMVector.line.back().y,0,0,0);
+                    splashSound.play();
                     break;
                 default:
                 case bakedAttackVector::INTERCEPTED:
                     interceptParticles.emplace_back(SSMVector.line.back().x,SSMVector.line.back().y,0,0,0);
+                    interceptSound.play();
                     break;
             }
         }

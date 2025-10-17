@@ -17,6 +17,7 @@
 #include "particle.h"
 #include "phase.h"
 #include "physicsCake.h"
+#include "soundwrap.h"
 #include "texwrap.h"
 #include "unit.h"
 #include "unitType.h"
@@ -30,6 +31,9 @@ private:
 
     texwrap hpMarker;
     texwrap shiftMarker;
+
+    soundwrap splashSound;
+    soundwrap crashOrInterceptSound;
 
     std::vector<unitType> unitLibrary;
 

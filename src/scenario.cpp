@@ -16,9 +16,7 @@ void scenario::drawCircle(double x, double y, double radius, double scale, Uint8
     circle10.render(x*scale,y*scale,r,g,b,a,renderer,scale*2*radius/circle10.getWidth(),true);
 }
 
-scenario::scenario(SDL_Renderer* renderer, TTF_Font* _font, std::default_random_engine& _generator) : background(fs::path("assets")/"background.png",renderer), hexSelectionOutline(fs::path("assets")/"hexoutline.png",renderer),circle10(fs::path("assets")/"circle10.png",renderer), grid(fs::path("assets"),renderer), myGui(fs::path("assets")/"gui",renderer,_font), flyingSSM(fs::path("assets")/"physicsGraphics"/"SSM.png",renderer), smokeParticleTexture(fs::path("assets")/"physicsGraphics"/"smoke.png",renderer), splashParticleTexture(fs::path("assets")/"physicsGraphics"/"splash.png",renderer), crashParticleTexture(fs::path("assets")/"physicsGraphics"/"crash.png",renderer), hitTargetTexture(fs::path("assets")/"physicsGraphics"/"hitTarget.png",renderer), interceptTexture(fs::path("assets")/"physicsGraphics"/"intercept.png",renderer), myCake(_generator),aiMovementClient(_generator),hpMarker(fs::path("assets")/"hitpoint.png",renderer),shiftMarker(fs::path("assets")/"shift.png",renderer){
-
-
+scenario::scenario(SDL_Renderer* renderer, TTF_Font* _font, std::default_random_engine& _generator) : background(fs::path("assets")/"background.png",renderer), hexSelectionOutline(fs::path("assets")/"hexoutline.png",renderer),circle10(fs::path("assets")/"circle10.png",renderer), grid(fs::path("assets"),renderer), myGui(fs::path("assets")/"gui",renderer,_font), flyingSSM(fs::path("assets")/"physicsGraphics"/"SSM.png",renderer), smokeParticleTexture(fs::path("assets")/"physicsGraphics"/"smoke.png",renderer), splashParticleTexture(fs::path("assets")/"physicsGraphics"/"splash.png",renderer), crashParticleTexture(fs::path("assets")/"physicsGraphics"/"crash.png",renderer), hitTargetTexture(fs::path("assets")/"physicsGraphics"/"hitTarget.png",renderer), interceptTexture(fs::path("assets")/"physicsGraphics"/"intercept.png",renderer), myCake(_generator),aiMovementClient(_generator),hpMarker(fs::path("assets")/"hitpoint.png",renderer),shiftMarker(fs::path("assets")/"shift.png",renderer), splashSound(fs::path("assets")/"sounds"/"splash.wav"), crashOrInterceptSound(fs::path("assets")/"sounds"/"smallExplosion.wav") {
     inGameFont = _font;
     //Will instantly be overwritten
     mouseOverTile=0;
@@ -697,7 +695,7 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
             if (!pauseAttackExecutionPlayback)
                 attackExecutionPlaybackTimer+=dmillis*0.001;
 
-            myCake.spawnParticles(smokeParticles,splashParticles,crashParticles,hitTargetParticles,interceptParticles,attackExecutionPlaybackTimer,missileSmokeSpawnRate,pauseAttackExecutionPlayback?0:dmillis);
+            myCake.spawnParticlesAndSound(smokeParticles,splashParticles,crashParticles,hitTargetParticles,interceptParticles,splashSound,crashOrInterceptSound,crashOrInterceptSound,attackExecutionPlaybackTimer,missileSmokeSpawnRate,pauseAttackExecutionPlayback?0:dmillis);
             myCake.updateUnits(units,attackExecutionPlaybackTimer,millis);
 
             if (attackExecutionPlaybackTimer>attackExecutionPlaybackMaxTime) {

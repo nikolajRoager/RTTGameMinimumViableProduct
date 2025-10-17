@@ -35,6 +35,7 @@ if (WIN32)
     link_libraries(SDL2main)
     link_libraries(SDL2_image)
     link_libraries(SDL2_ttf)
+    link_libraries(SDL2_mixer)
 
 endif (WIN32)
 

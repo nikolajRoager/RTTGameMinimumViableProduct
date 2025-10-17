@@ -12,6 +12,7 @@
 #include "attackPlan.h"
 #include "hexGrid.h"
 #include "particle.h"
+#include "soundwrap.h"
 #include "unit.h"
 
 
@@ -143,7 +144,7 @@ public:
     void updateUnits(std::vector<unit>& units, double time, uint32_t millis) const;
 
     ///Spawn particles at this time, with this time interval
-    void spawnParticles(std::deque<particle>& smokeParticles,std::deque<particle>& splashParticles,std::deque<particle>& crashParticles,std::deque<particle>& hitTargetParticles,std::deque<particle>& interceptParticles,double time, double smokeSpawnRate, uint32_t dmillis);
+    void spawnParticlesAndSound(std::deque<particle>& smokeParticles,std::deque<particle>& splashParticles,std::deque<particle>& crashParticles,std::deque<particle>& hitTargetParticles,std::deque<particle>& interceptParticles,const soundwrap& splashSound, const soundwrap& crashSound, const soundwrap& interceptSound,double time, double smokeSpawnRate, uint32_t dmillis);
 
     void clear() {
         SSMVectors.clear();
