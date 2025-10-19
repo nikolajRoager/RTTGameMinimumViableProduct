@@ -145,6 +145,9 @@ unitType::unitType(const fs::path& unitPath, SDL_Renderer *renderer): texture((u
         if (tag=="effectRange") {
             ss >> effectRange;
         }
+        if (tag=="radarRange") {
+            ss >> radarRange;
+        }
         if (tag=="hasPopulation") {
             std::string str;
             ss >> str;

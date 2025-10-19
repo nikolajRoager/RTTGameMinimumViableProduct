@@ -68,6 +68,9 @@ private:
 
     int maxHp=2;
 
+    double radarRange=0;
+
+
     ///Effect range can be range of population, range of power supply, or range where resource exchange is possible
     int effectRange = 0;
 
@@ -77,6 +80,7 @@ private:
     bool requirePopulation=false;
 
 public:
+    [[nodiscard]] double getRadarRange() const {return radarRange;}
     [[nodiscard]] bool getRequirePower() const {return requirePower;}
     [[nodiscard]] bool getRequirePopulation() const {return requirePopulation;}
     [[nodiscard]] bool getHasPopulation() const {return hasPopulation;}

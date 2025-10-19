@@ -33,6 +33,7 @@ scenario::scenario(SDL_Renderer* renderer, TTF_Font* _font, std::default_random_
     unitLibrary.emplace_back(fs::path("assets")/"units"/"depot",renderer);
     unitLibrary.emplace_back(fs::path("assets")/"units"/"factory",renderer);
     unitLibrary.emplace_back(fs::path("assets")/"units"/"powerplant",renderer);
+    unitLibrary.emplace_back(fs::path("assets")/"units"/"radarTower",renderer);
 
     std::cout<<"Loading units"<<std::endl;
     //TODO: load from disk, and allow spawning
@@ -40,7 +41,7 @@ scenario::scenario(SDL_Renderer* renderer, TTF_Font* _font, std::default_random_
     //units.emplace_back(unitLibrary[2],true,20,9);
     units.emplace_back(unitLibrary[2],true,19,10);
     units.emplace_back(unitLibrary[0],true,21,11);
-    units.emplace_back(unitLibrary[2],true,20,12);
+    units.emplace_back(unitLibrary[2],true,21,12);
     units.emplace_back(unitLibrary[1],true,25,20);
     units.emplace_back(unitLibrary[1],true,32,15);
     units.emplace_back(unitLibrary[1],true,30,12);
@@ -49,7 +50,6 @@ scenario::scenario(SDL_Renderer* renderer, TTF_Font* _font, std::default_random_
     units.emplace_back(unitLibrary[5],true,18,13);//Nuuk, really not a city
     units.emplace_back(unitLibrary[5],true,33,12);//København and Malmö
     units.emplace_back(unitLibrary[5],true,32,10);//Stockholm
-    //We SKIP Oslo, because otherwise movement would be blocked
     units.emplace_back(unitLibrary[5],true,33,7);//Helsinki, Tampere and Turku
     units.emplace_back(unitLibrary[5],true,31,7);//Luleå
 
@@ -69,6 +69,7 @@ scenario::scenario(SDL_Renderer* renderer, TTF_Font* _font, std::default_random_
     units.emplace_back(unitLibrary[8],true,31,6 );
     units.emplace_back(unitLibrary[8],true,19,13 );
 
+    units.emplace_back(unitLibrary[9],true,20,12);
 
     //Russian Warship which ought to go fuck itself
     units.emplace_back(unitLibrary[4],false,32,3);
