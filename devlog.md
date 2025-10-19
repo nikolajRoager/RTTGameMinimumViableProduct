@@ -600,7 +600,7 @@ At the same time, here is a list of super-long term features, in no particular o
 * Events
 * Rubber-banding AI recruitment
 
-Day 20, Tuesday 14/10/2025 CE and 15/10/2025
+Day 20, Tuesday 14/10/2025 CE and Wednesday 15/10/2025
 ===================
 background
 ------
@@ -614,8 +614,9 @@ todo
 ----
 The time has really come to add sound
 
-Day 21, Tuesday 14/10/2025 CE and 15/10/2025
+Day 21, Friday 17/10/2025
 ===================
+
 background
 -------
 I took a day off from work, because I literally have nothing to do, since we are waiting for a client to return from holiday to fix an error on their side (I REALLY need a better job)
@@ -687,7 +688,7 @@ A and B priority definitely, C either needs to be added, or a workaround found, 
   * D AI repairs damaged units, but does not build buildings
 * C Airplanes which can accept many waypoints, and which return to base
 * A Radar and hidden units
-  * A Units get detected by radar in range (range varries from unit to unit)
+  * A Units get detected by radar in range (range varies from unit to unit)
   * A Radar itself gets detected at twice the range
   * A Radars have an EMCON (radar off) setting
   * A Display needs to only display units visible to the player (can be disabled for debug)
@@ -704,10 +705,35 @@ A and B priority definitely, C either needs to be added, or a workaround found, 
       * The midterm election
       * The Rubio-Lavrov pact (Russia joins the war on US side, and invades Europe)
       * The rest of Europe joins the war
-      * Victory in the east IF LAND COMBAT HAS BEEN ADDED, triggered by the player conquering Moscow
-      * Victory in the west IF LAND COMBAT HAS BEEN ADDED, triggered by the player conquering Mar-a-largo
-  * tutorials
+      * Victory in the east IF LAND COMBAT HAS BEEN ADDED, triggered by the player conquering the Russian capital Moscow
+      * Victory in the west IF LAND COMBAT HAS BEEN ADDED, triggered by the player conquering the American capital Mar-A-Largo
+  * c tutorials
 
 Oh god, this is a big long list, I will not have time to add everything!
 
-I think the first thing I should do today, is adding Norway, Sweden and buildings, 
+I think the first thing I should do today, is adding Norway, Sweden and buildings.
+
+Ok, I am done working today, honestly I spend so much time on this list that I didn't have a lot of time to add stuff.
+I added Norway, Sweden, Finland, Iceland and the Faroe Islands as friendly territory, and I added the animations for some buildings
+
+todo
+----
+See the big long list above, in fact I created another file with the big long list, titled bigLongList.md
+
+Day 22, Saturday 18/10/2025 CE
+===================
+
+background
+-------
+This was almost a half day, I really didn't work a lot today, but I worked more than 4 hours so it counts as a full day.
+
+I really need to either commit to work 8 hours or more, or not more than 4 hours
+
+work
+-----
+I only got the ranges of power and population supplied by cities and factories to work
+
+todo
+----
+Tomorrow is radar day, I will also be travelling, so I don't know how much work I actually get to do
+

@@ -8,3 +8,5 @@ landUnit true
 movementPoints 0
 name Power Plant
 maxHp 3
+effectRange 3
+producesPower true

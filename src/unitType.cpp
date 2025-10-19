@@ -142,11 +142,40 @@ unitType::unitType(const fs::path& unitPath, SDL_Renderer *renderer): texture((u
         if (tag=="SAMSalvoSize") {
             ss >> SAMSalvoSize;
         }
-        if (tag=="populationRange") {
-            ss >> populationRange;
+        if (tag=="effectRange") {
+            ss >> effectRange;
         }
-        if (tag=="powerRange") {
-            ss >> powerRange;
+        if (tag=="hasPopulation") {
+            std::string str;
+            ss >> str;
+            if (str=="true")
+                hasPopulation= true;
+            else
+                hasPopulation= false;
+        }
+        if (tag=="producesPower") {
+            std::string str;
+            ss >> str;
+            if (str=="true")
+                producesPower= true;
+            else
+                producesPower= false;
+        }
+        if (tag=="requirePower") {
+            std::string str;
+            ss >> str;
+            if (str=="true")
+                requirePower= true;
+            else
+                requirePower= false;
+        }
+        if (tag=="requirePopulation") {
+            std::string str;
+            ss >> str;
+            if (str=="true")
+                requirePopulation= true;
+            else
+                requirePopulation= false;
         }
     }
 

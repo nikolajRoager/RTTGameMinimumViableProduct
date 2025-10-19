@@ -8,3 +8,4 @@ landUnit true
 movementPoints 0
 name Radar Tower
 maxHp 2
+requirePower true

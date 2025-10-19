@@ -31,6 +31,8 @@ private:
 
     texwrap hpMarker;
     texwrap shiftMarker;
+    texwrap noPeopleMarker;
+    texwrap noPowerMarker;
 
     soundwrap splashSound;
     soundwrap crashOrInterceptSound;
@@ -66,6 +68,19 @@ private:
     ///The queued up attack plans for each unit, again index by unit id
     std::map<int,std::vector<attackPlan> > attackPlans;
 
+    ///Union of the effect hexes of all friendly power generating units
+    std::set<int> friendlyPoweredHexes;
+    ///Union of the effect hexes of all friendly population units
+    std::set<int> friendlyPopulatedHexes;
+
+
+    ///Union of the effect hexes of all friendly power generating units
+    std::set<int> enemyPoweredHexes;
+    ///Union of the effect hexes of all friendly population units
+    std::set<int> enemyPopulatedHexes;
+
+
+    //TODO, add hostile
 
     double scale;
 
@@ -123,7 +138,7 @@ private:
 
     physicsCake myCake;
 
-    bool hasCalculatedAIMovement=false;
+    bool hasCalculatedMovementConstants=false;
 
     AIMovementClient aiMovementClient;
 

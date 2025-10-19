@@ -16,7 +16,7 @@ void scenario::drawCircle(double x, double y, double radius, double scale, Uint8
     circle10.render(x*scale,y*scale,r,g,b,a,renderer,scale*2*radius/circle10.getWidth(),true);
 }
 
-scenario::scenario(SDL_Renderer* renderer, TTF_Font* _font, std::default_random_engine& _generator) : background(fs::path("assets")/"background.png",renderer), hexSelectionOutline(fs::path("assets")/"hexoutline.png",renderer),circle10(fs::path("assets")/"circle10.png",renderer), grid(fs::path("assets"),renderer), myGui(fs::path("assets")/"gui",renderer,_font), flyingSSM(fs::path("assets")/"physicsGraphics"/"SSM.png",renderer), smokeParticleTexture(fs::path("assets")/"physicsGraphics"/"smoke.png",renderer), splashParticleTexture(fs::path("assets")/"physicsGraphics"/"splash.png",renderer), crashParticleTexture(fs::path("assets")/"physicsGraphics"/"crash.png",renderer), hitTargetTexture(fs::path("assets")/"physicsGraphics"/"hitTarget.png",renderer), interceptTexture(fs::path("assets")/"physicsGraphics"/"intercept.png",renderer), myCake(_generator),aiMovementClient(_generator),hpMarker(fs::path("assets")/"hitpoint.png",renderer),shiftMarker(fs::path("assets")/"shift.png",renderer), splashSound(fs::path("assets")/"sounds"/"splash.wav"), crashOrInterceptSound(fs::path("assets")/"sounds"/"smallExplosion.wav"), hitTargetSound(fs::path("assets")/"sounds"/"hittarget.wav"), missileSound(fs::path("assets")/"sounds"/"missile.wav") {
+scenario::scenario(SDL_Renderer* renderer, TTF_Font* _font, std::default_random_engine& _generator) : background(fs::path("assets")/"background.png",renderer), hexSelectionOutline(fs::path("assets")/"hexoutline.png",renderer),circle10(fs::path("assets")/"circle10.png",renderer), grid(fs::path("assets"),renderer), myGui(fs::path("assets")/"gui",renderer,_font), flyingSSM(fs::path("assets")/"physicsGraphics"/"SSM.png",renderer), smokeParticleTexture(fs::path("assets")/"physicsGraphics"/"smoke.png",renderer), splashParticleTexture(fs::path("assets")/"physicsGraphics"/"splash.png",renderer), crashParticleTexture(fs::path("assets")/"physicsGraphics"/"crash.png",renderer), hitTargetTexture(fs::path("assets")/"physicsGraphics"/"hitTarget.png",renderer), interceptTexture(fs::path("assets")/"physicsGraphics"/"intercept.png",renderer), myCake(_generator),aiMovementClient(_generator),hpMarker(fs::path("assets")/"hitpoint.png",renderer),noPeopleMarker(fs::path("assets")/"nopeople.png",renderer),noPowerMarker(fs::path("assets")/"nopower.png",renderer),shiftMarker(fs::path("assets")/"shift.png",renderer), splashSound(fs::path("assets")/"sounds"/"splash.wav"), crashOrInterceptSound(fs::path("assets")/"sounds"/"smallExplosion.wav"), hitTargetSound(fs::path("assets")/"sounds"/"hittarget.wav"), missileSound(fs::path("assets")/"sounds"/"missile.wav") {
     inGameFont = _font;
     //Will instantly be overwritten
     mouseOverTile=0;
@@ -125,9 +125,6 @@ scenario::scenario(SDL_Renderer* renderer, TTF_Font* _font, std::default_random_
 
     std::cout<< " constructor finished"<<std::endl;
 
-    //TODO TEMP REMOVE
-    interceptParticles.emplace_back(100,100,0,0,0);
-
 }
 
 scenario::~scenario() = default;
@@ -135,8 +132,6 @@ scenario::~scenario() = default;
 
 void scenario::render(SDL_Renderer* renderer, int mouseX, int mouseY, bool shiftKey, uint32_t millis) const {
 
-    //TODO, this is for debugging an unidentified crash bug, remove when the bug is found
- //   std::cout<<"render"<<std::endl;
     background.render(0,0,renderer,scale);
 
     if (myGui.doShowHexOutline())
@@ -147,8 +142,19 @@ void scenario::render(SDL_Renderer* renderer, int mouseX, int mouseY, bool shift
         grid.drawTile(renderer,mouseOverTile,scale);
 
 
-        //Display how far we can move
+        //Display how far we can move, and how far our effect range is
         if (selectedUnit!=-1 && selectedTile!=-1) {
+
+            if (units[selectedUnit].getEffectRange()>0 && units[selectedUnit].getHp()>0) {
+                //I assume units either have population, storage, or power generation, not all at once
+                //Yellow for power
+                if (units[selectedUnit].getProducesPower())
+                    grid.drawTiles(renderer,units[selectedUnit].getEffectHexes(),scale,hexGrid::COLOR,255,255,0);
+                //Orange for population
+                else if (units[selectedUnit].getHasPopulation())
+                    grid.drawTiles(renderer,units[selectedUnit].getEffectHexes(),scale,hexGrid::COLOR,255,125,125);
+                //TODO blue for storage exchange
+            }
 
             //TODO: DO NOT RECALCULATE THIS EVERY FRAME
             std::set<int> obstructed;
@@ -162,8 +168,8 @@ void scenario::render(SDL_Renderer* renderer, int mouseX, int mouseY, bool shift
                 }
             }
 
-            const std::set<int> tilesNearSelection=grid.getNeighbours(selectedTile,units[selectedUnit].getMovementPoints(),obstructed);
-            grid.drawTiles(renderer,tilesNearSelection,scale,hexGrid::COLOR);
+            const std::set<int> tilesInMovementRange=grid.getNeighbours(selectedTile,units[selectedUnit].getMovementPoints(),obstructed);
+            grid.drawTiles(renderer,tilesInMovementRange,scale,hexGrid::COLOR);
 
             const std::vector<int> line = grid.findPath(selectedTile,mouseOverTile,obstructed,units[selectedUnit].getMovementPoints());
             grid.drawPath(renderer,line,scale);
@@ -174,11 +180,23 @@ void scenario::render(SDL_Renderer* renderer, int mouseX, int mouseY, bool shift
             grid.drawPath(renderer,val,scale);
         }
 
+        {
+            if (myGui.doShowPowerRange()) {
+                grid.drawTiles(renderer,friendlyPoweredHexes,scale,hexGrid::COLOR,255,255,0);
+                //todo debug
+                grid.drawTiles(renderer,enemyPoweredHexes,scale,hexGrid::COLOR,255,255,0);
+            }
+            if (myGui.doShowPopulationRange()) {
+                grid.drawTiles(renderer,friendlyPopulatedHexes,scale,hexGrid::COLOR,255,125,125);
+                //todo debug
+                grid.drawTiles(renderer,enemyPopulatedHexes,scale,hexGrid::COLOR,255,125,125);
+            }
+        }
 
         for (int i = 0; i < units.size(); i++) {
             const unit& U = units[i];
             grid.drawTile(renderer,grid.getHexId(U.getHexX(),U.getHexY()),scale,hexGrid::COLOR,U.isFriendly()?128:255,U.isFriendly()? 255:128,128,255);
-            U.render(scale,millis,renderer,hpMarker);
+            U.render(scale,millis,renderer,hpMarker,noPowerMarker,noPeopleMarker);
 
             if (myGui.doShowSSMRange() || i == selectedUnit) {
                 //Show SSM range
@@ -195,11 +213,26 @@ void scenario::render(SDL_Renderer* renderer, int mouseX, int mouseY, bool shift
         }
     }
     else if (currentPhase==MOVEMENT_EXECUTION) {
+
+        {
+            if (myGui.doShowPowerRange()) {
+                grid.drawTiles(renderer,friendlyPoweredHexes,scale,hexGrid::COLOR,255,255,0);
+                //todo debug
+                grid.drawTiles(renderer,enemyPoweredHexes,scale,hexGrid::COLOR,255,255,0);
+            }
+            if (myGui.doShowPopulationRange()) {
+                grid.drawTiles(renderer,friendlyPopulatedHexes,scale,hexGrid::COLOR,255,125,125);
+                //todo debug
+                grid.drawTiles(renderer,enemyPopulatedHexes,scale,hexGrid::COLOR,255,125,125);
+            }
+        }
+
+
         //Show the tile the mouse is over
         grid.drawTile(renderer,mouseOverTile,scale);
 
         for (const auto & U : units) {
-            U.render(scale,millis,renderer,hpMarker);
+            U.render(scale,millis,renderer,hpMarker,noPowerMarker,noPeopleMarker);
 
             if (myGui.doShowSSMRange()) {
                 //Show SSM range
@@ -214,14 +247,29 @@ void scenario::render(SDL_Renderer* renderer, int mouseX, int mouseY, bool shift
                     drawCircle(U.getX(), U.getY(), samRange, scale,255,255,0,64, renderer);
             }
         }
+
     }
     else if (currentPhase==ATTACK_PLANNING) {
+        {
+            if (myGui.doShowPowerRange()) {
+                grid.drawTiles(renderer,friendlyPoweredHexes,scale,hexGrid::COLOR,255,255,0);
+                //todo debug
+                grid.drawTiles(renderer,enemyPoweredHexes,scale,hexGrid::COLOR,255,255,0);
+            }
+            if (myGui.doShowPopulationRange()) {
+                grid.drawTiles(renderer,friendlyPopulatedHexes,scale,hexGrid::COLOR,255,125,125);
+                //todo debug
+                grid.drawTiles(renderer,enemyPopulatedHexes,scale,hexGrid::COLOR,255,125,125);
+            }
+        }
+
+
         grid.drawTile(renderer,mouseOverTile,scale);
         for (int i = 0; i < units.size(); i++) {
             const unit& U = units[i];
             if (i != selectedUnit || millis%500<250)
                 grid.drawTile(renderer,grid.getHexId(U.getHexX(),U.getHexY()),scale,hexGrid::COLOR,U.isFriendly()?128:255,U.isFriendly()? 255:128,128,255);
-            U.render(scale,millis,renderer,hpMarker);
+            U.render(scale,millis,renderer,hpMarker,noPowerMarker,noPeopleMarker);
 
             if (myGui.doShowSSMRange() || i == selectedUnit) {
                 //Show SSM range
@@ -283,9 +331,24 @@ void scenario::render(SDL_Renderer* renderer, int mouseX, int mouseY, bool shift
         }
     }
     else if (currentPhase==ATTACK_EXECUTION) {
+        {
+            if (myGui.doShowPowerRange()) {
+                grid.drawTiles(renderer,friendlyPoweredHexes,scale,hexGrid::COLOR,255,255,0);
+                //todo debug
+                grid.drawTiles(renderer,enemyPoweredHexes,scale,hexGrid::COLOR,255,255,0);
+            }
+            if (myGui.doShowPopulationRange()) {
+                grid.drawTiles(renderer,friendlyPopulatedHexes,scale,hexGrid::COLOR,255,125,125);
+                //todo debug
+                grid.drawTiles(renderer,enemyPopulatedHexes,scale,hexGrid::COLOR,255,125,125);
+            }
+        }
+
+
+
         for (int i = 0; i < units.size(); i++) {
             const unit& U = units[i];
-            U.render(scale,millis,renderer,hpMarker);
+            U.render(scale,millis,renderer,hpMarker,noPowerMarker,noPeopleMarker);
 
             if (myGui.doShowSSMRange() || i == selectedUnit) {
                 //Show SSM range
@@ -344,18 +407,76 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
     scale = std::min(static_cast<double>(screenWidth) / static_cast<double>(scenarioWidthPx+gui::getRightBarPixels()),
                      static_cast<double>(screenHeight) / static_cast<double>(scenarioHeightPx+gui::getBottomBarPixels()));
 
-    //TODO, this is for debugging an unidentified crash bug, remove when the bug is found
-  //  std::cout<<"update"<<std::endl;
-
     mouseOverTile=grid.getHexFromLocation(mouseX,mouseY,scale);
 
     if (currentPhase==MOVEMENT_PLANNING) {
 
-        if (!hasCalculatedAIMovement) {
+        if (!hasCalculatedMovementConstants) {
+            //Update factories, powerplants, cities and such
+
+            //Update everyones effects
+            for (unit& u : units) {
+            //const std::set<int> tilesInMovementRange=grid.getNeighbours(selectedTile,units[selectedUnit].getMovementPoints(),obstructed);
+
+                std::set<int> noObstruction={};
+                u.setEffectHexes(grid.getNeighbours(grid.getHexId(u.getHexX(),u.getHexY()),u.getEffectRange(),noObstruction));
+            }
+            friendlyPopulatedHexes.clear();
+            friendlyPoweredHexes.clear();
+            enemyPopulatedHexes.clear();
+            enemyPoweredHexes.clear();
+
+            for (unit& u : units) {
+                const auto& effect = u.getEffectHexes();
+                if (u.getProducesPower() && u.getHp()>0) {
+                    if (u.isFriendly()) {
+                        std::set<int> Union;
+                        std::set_union(effect.begin(),effect.end(),friendlyPoweredHexes.begin(),friendlyPoweredHexes.end(),std::inserter(Union,Union.begin()));
+                        friendlyPoweredHexes.swap(Union);
+                    }
+                    else {
+                        std::set<int> Union;
+                        std::set_union(effect.begin(),effect.end(),enemyPoweredHexes.begin(),enemyPoweredHexes.end(),std::inserter(Union,Union.begin()));
+                        enemyPoweredHexes.swap(Union);
+                    }
+                }
+                if (u.getHasPopulation() && u.getHp()>0) {
+                    if (u.isFriendly()) {
+                        std::set<int> Union;
+                        std::set_union(effect.begin(),effect.end(),friendlyPopulatedHexes.begin(),friendlyPopulatedHexes.end(),std::inserter(Union,Union.begin()));
+                        friendlyPopulatedHexes.swap(Union);
+                    }
+                    else {
+                        std::set<int> Union;
+                        std::set_union(effect.begin(),effect.end(),enemyPopulatedHexes.begin(),enemyPopulatedHexes.end(),std::inserter(Union,Union.begin()));
+                        enemyPopulatedHexes.swap(Union);
+                    }
+                }
+            }
+
+
+            for (unit& u : units) {
+                int hexID = grid.getHexId(u.getHexX(),u.getHexY());
+                if (u.isFriendly()) {
+                    u.setPower(friendlyPoweredHexes.contains(hexID));
+                    u.setPopulation(friendlyPopulatedHexes.contains(hexID));
+                }
+                else {
+                    u.setPower(enemyPoweredHexes.contains(hexID));
+                    u.setPopulation(enemyPopulatedHexes.contains(hexID));
+                }
+            }
+
+
+
             std::cout <<"Calculating AI movement"<< std::endl;
             aiMovementClient.makeAIMovementPlans(grid,units,movementPlans);
-            std::cout <<"Calculated AI movement"<< std::endl;
-            hasCalculatedAIMovement=true;
+            std::cout <<"Calculating effect hexes"<< std::endl;
+
+
+
+
+            hasCalculatedMovementConstants=true;
         }
 
 
@@ -464,7 +585,7 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
             currentPhase=MOVEMENT_EXECUTION;
             selectedUnit=-1;
             selectedTile=-1;
-            hasCalculatedAIMovement=false;
+            hasCalculatedMovementConstants=false;
             myGui.setInfoScreenText(movementExecutionDescription,renderer);
 
 
@@ -747,7 +868,7 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
                 attackExecutionPlaybackTimer=0.0;
                 attackExecutionPlaybackMaxTime=0.0;
                 attackExecutionState=UNSTARTED;
-                hasCalculatedAIMovement=false;
+                hasCalculatedMovementConstants=false;
                 attackPlans.clear();
                 myCake.clear();
 

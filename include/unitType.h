@@ -68,15 +68,19 @@ private:
 
     int maxHp=2;
 
-    ///If this is a population centre, what is the range of its population
-    int populationRange = 0;
-    ///If this is a power-plant, what range does it power
-    int powerRange = 0;
+    ///Effect range can be range of population, range of power supply, or range where resource exchange is possible
+    int effectRange = 0;
 
-    bool requirePower = false;
-    bool requirPopulation=false;
+    bool producesPower=false;
+    bool hasPopulation=false;
+    bool requirePower =false;
+    bool requirePopulation=false;
 
 public:
+    [[nodiscard]] bool getRequirePower() const {return requirePower;}
+    [[nodiscard]] bool getRequirePopulation() const {return requirePopulation;}
+    [[nodiscard]] bool getHasPopulation() const {return hasPopulation;}
+    [[nodiscard]] bool getProducesPower() const {return producesPower;}
     [[nodiscard]] int getSAMSalvoSize() const {return SAMSalvoSize;}
     [[nodiscard]] double getSAMReloadDelay() const {return SAMReloadDelay;}
     [[nodiscard]] double getSAMRange() const {return SAMRange;};
@@ -104,6 +108,8 @@ public:
     [[nodiscard]] bool isAnimationFinished(uint32_t millis,animationPhase phase) const;
 
     [[nodiscard]] const std::string& getName() const { return name; }
+
+    [[nodiscard]] int getEffectRange() const { return effectRange; }
 
 };
 

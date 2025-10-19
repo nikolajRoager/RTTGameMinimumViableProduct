@@ -9,7 +9,7 @@
 #include <iostream>
 #include <SDL2/SDL_render.h>
 
-gui::gui(const fs::path& guiFolder, SDL_Renderer *renderer, TTF_Font* font): backgroundTile((guiFolder/"guiTile.png"),renderer),movementPhaseMarker((guiFolder/"movementPhase.png"),renderer),attackPhaseMarker((guiFolder/"attackPhase.png"),renderer),executeMarker((guiFolder/"execute.png"),renderer),infoScreen((guiFolder/"infoScreen.png"),renderer), flipButton((guiFolder/"flipButton.png"),renderer),sidebarLaunch(guiFolder/"sidebarLaunch.png",renderer),sidebarNode(guiFolder/"sidebarNode.png",renderer),sidebarTarget(guiFolder/"sidebarTarget.png",renderer),sidebarSelection(guiFolder/"sidebarSelection.png",renderer),sidebarTrash(guiFolder/"sidebarTrash.png",renderer),mapModeHexOutline("Hex outlines",renderer,font),mapModeSamRange("SAM range",renderer,font),mapModeSsmRange("SSM range",renderer,font), playBar(guiFolder/"playbar.png",renderer), playButton(guiFolder/"playButton.png",renderer), pauseButton(guiFolder/"pauseButton.png",renderer), replayButton(guiFolder/"replayButton.png",renderer) {
+gui::gui(const fs::path& guiFolder, SDL_Renderer *renderer, TTF_Font* font): backgroundTile((guiFolder/"guiTile.png"),renderer),movementPhaseMarker((guiFolder/"movementPhase.png"),renderer),attackPhaseMarker((guiFolder/"attackPhase.png"),renderer),executeMarker((guiFolder/"execute.png"),renderer),infoScreen((guiFolder/"infoScreen.png"),renderer), flipButton((guiFolder/"flipButton.png"),renderer),sidebarLaunch(guiFolder/"sidebarLaunch.png",renderer),sidebarNode(guiFolder/"sidebarNode.png",renderer),sidebarTarget(guiFolder/"sidebarTarget.png",renderer),sidebarSelection(guiFolder/"sidebarSelection.png",renderer),sidebarTrash(guiFolder/"sidebarTrash.png",renderer),mapModeHexOutline("Hex outlines",renderer,font),mapModeSamRange("SAM range",renderer,font),mapModeSsmRange("SSM range",renderer,font), mapModePopulationRange("Population",renderer,font),mapModePowerRange("Power",renderer,font), playBar(guiFolder/"playbar.png",renderer), playButton(guiFolder/"playButton.png",renderer), pauseButton(guiFolder/"pauseButton.png",renderer), replayButton(guiFolder/"replayButton.png",renderer) {
     std::cout<<"Loaded gui"<<std::endl;
     infoScreenFont=font;
     infoScreenMaxExpansion=infoScreen.getHeight();
@@ -64,6 +64,20 @@ void gui::update( int mouseX, int mouseY, bool mouseClicked, int scenarioWidth, 
         mouseClicked)
         showSSMRange =!showSSMRange;
 
+    if (mouseX>(scenarioWidth-2*RIGHT_BAR_PIXELS+10)*scale &&
+        mouseY>(scenarioHeight+40+3*flipButton.getHeight())*scale &&
+        mouseX<(scenarioWidth-2*RIGHT_BAR_PIXELS+10+flipButton.getWidth()*0.5)*scale &&
+        mouseY<(scenarioHeight+40+4*flipButton.getHeight())*scale &&
+        mouseClicked)
+        showPowerRange=!showPowerRange;
+
+    if (mouseX>(scenarioWidth-1*RIGHT_BAR_PIXELS+10)*scale &&
+        mouseY>(scenarioHeight+40+3*flipButton.getHeight())*scale &&
+        mouseX<(scenarioWidth-1*RIGHT_BAR_PIXELS+10+flipButton.getWidth()*0.5)*scale &&
+        mouseY<(scenarioHeight+40+4*flipButton.getHeight())*scale &&
+        mouseClicked)
+        showPopulationRange=!showPopulationRange;
+
 }
 
 void gui::render(int scenarioWidth, int scenarioHeight, SDL_Renderer *renderer, double scale,uint32_t millis, phase thePhase, bool overrideShowExecute) const {
@@ -87,6 +101,11 @@ void gui::render(int scenarioWidth, int scenarioHeight, SDL_Renderer *renderer, 
     flipButton.render((scenarioWidth-2*RIGHT_BAR_PIXELS+10)*scale,(scenarioHeight+30+flipButton.getHeight()*2)*scale,renderer,scale,false,false,2,showSSMRange?1:0);
     mapModeSsmRange.render((scenarioWidth-2*RIGHT_BAR_PIXELS+flipButton.getWidth()*0.5+10)*scale,(scenarioHeight+30+2*flipButton.getHeight())*scale,renderer,scale);
 
+    flipButton.render((scenarioWidth-2*RIGHT_BAR_PIXELS+10)*scale,(scenarioHeight+40+flipButton.getHeight()*3)*scale,renderer,scale,false,false,2,showPowerRange?1:0);
+    mapModePowerRange.render((scenarioWidth-2*RIGHT_BAR_PIXELS+flipButton.getWidth()*0.5+10)*scale,(scenarioHeight+40+3*flipButton.getHeight())*scale,renderer,scale);
+
+    flipButton.render((scenarioWidth-1*RIGHT_BAR_PIXELS+10)*scale,(scenarioHeight+40+flipButton.getHeight()*3)*scale,renderer,scale,false,false,2,showPopulationRange?1:0);
+    mapModePopulationRange.render((scenarioWidth-1*RIGHT_BAR_PIXELS+flipButton.getWidth()*0.5+10)*scale,(scenarioHeight+40+3*flipButton.getHeight())*scale,renderer,scale);
 
     //The flashing buttons are drawn atop each other, on the 2nd tile from the right
     movementPhaseMarker.render((scenarioWidth-RIGHT_BAR_PIXELS)*scale,scenarioHeight*scale,renderer,scale,false,false,3,

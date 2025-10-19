@@ -8,3 +8,5 @@ landUnit true
 movementPoints 0
 name Factory
 maxHp 3
+requirePower true
+requirePopulation true

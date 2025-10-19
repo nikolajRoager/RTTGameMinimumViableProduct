@@ -33,6 +33,8 @@ private:
     texwrap mapModeHexOutline;
     texwrap mapModeSamRange;
     texwrap mapModeSsmRange;
+    texwrap mapModePowerRange;
+    texwrap mapModePopulationRange;
 
     texwrap sidebarLaunch;
     texwrap sidebarNode;
@@ -60,11 +62,14 @@ private:
     bool showHexOutline=false;
     bool showSAMRange = false;
     bool showSSMRange = false;
-
+    bool showPowerRange = false;
+    bool showPopulationRange = false;
 public:
     [[nodiscard]] bool doShowSAMRange () const {return showSAMRange;}
     [[nodiscard]] bool doShowSSMRange () const {return showSSMRange;}
     [[nodiscard]] bool doShowHexOutline () const {return showHexOutline;}
+    [[nodiscard]] bool doShowPopulationRange () const {return showPopulationRange;}
+    [[nodiscard]] bool doShowPowerRange () const {return showPowerRange;}
 
 
     gui(const fs::path& guiFolder, SDL_Renderer* renderer, TTF_Font* font);

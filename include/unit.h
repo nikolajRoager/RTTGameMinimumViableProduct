@@ -35,10 +35,32 @@ private:
 
     int hp;
 
-    int AIMovementTarget;
+    int AIMovementTarget=-1;
+
+    ///Hexes in range of our effect, whatever it is
+    std::set<int> effectHexes;
+
+    ///Are we in range of a power source?
+    bool hasPower=false;
+    ///Are we in range of a population source?
+    bool hasPopulation=false;
 
 public:
-    void setAIMovementTarget(int _AIMovementTarget) {AIMovementTarget=_AIMovementTarget;}
+
+    void setPower (bool power) {hasPower=power;}
+    void setPopulation (bool population) {hasPopulation=population;}
+
+
+
+    [[nodiscard]] bool getHasPopulation() const {return myType.getHasPopulation();}
+    [[nodiscard]] bool getProducesPower() const {return myType.getProducesPower();}
+
+
+    void setAIMovementTarget(const int new_AIMovementTarget) {AIMovementTarget=new_AIMovementTarget;}
+
+    [[nodiscard]] const std::set<int>& getEffectHexes() const {return effectHexes;}
+    void setEffectHexes(const std::set<int>& hexes) {effectHexes=hexes;}
+
     [[nodiscard]] int getAIMovementTarget() const {return AIMovementTarget;}
 
     [[nodiscard]] int getHp() const {return hp;};
@@ -69,6 +91,8 @@ public:
 
     [[nodiscard]] uint32_t timeSinceAnimationStart(const uint32_t millis) const {return millis-animationStart;}
 
+    [[nodiscard]] int getEffectRange() const { return myType.getEffectRange(); }
+
     unit(const unitType& type, bool _side, int _hexX, int _hexY);
 
     void setHexX(int _hexX) {hexX = _hexX;}
@@ -93,7 +117,7 @@ public:
 
     [[nodiscard]] unitType::animationPhase getAnimationPhase() const { return myPhase; }
 
-    void render(double scale,uint32_t millis,SDL_Renderer *renderer, const texwrap& hpMarker) const;
+    void render(double scale,uint32_t millis,SDL_Renderer *renderer, const texwrap& hpMarker, const texwrap& noPowerMarker, const texwrap& noPeopleMarker) const;
     void updateAnimation(uint32_t millis);
 
 
