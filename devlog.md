@@ -737,3 +737,51 @@ todo
 ----
 Tomorrow is radar day, I will also be travelling, so I don't know how much work I actually get to do
 
+
+Day 22.5, Sunday 19/10/2025 CE
+=====
+background
+----------
+I am travelling today, so I don't have a lot of time to work, I barely did anything actually, and I probably shouldn't have worked at all
+
+work
+----
+Today is radar day, but I haven't started working yet, first, I need to come up with the rules for radar and detection.
+
+All units have a `visible` flag, which is true if detected by the enemy.
+
+Visibility is updated before and after the movement planning phase.
+
+All units have a fixed "visual" detection range, inside which they always detect all enemy units.
+
+Units have a `hasFiredWithoutMoving` flag, which is true iff they fired SAM or SSM last attack execution phase, and can be cleared by moving in the movement planning phase.
+If a unit has `hasFiredWithoutMoving` then `visible` is true
+
+Units have a `radarOn` flag (has no effect if `radarRange<=0`, and if so is hidden), the player can switch this on/off during both the movement planning phase, and the attack planning phase
+
+Units with `radarOn` and `radarRange>0` detect all hostile units inside their radar range, and are detected by all hostile units inside twice their range.
+
+Ok, those are the rules, it looks like there are a bunch of different coding tasks now:
+
+* include visual range, and load radar range from file
+* Make debug rendering of radar-range and visual range
+* create `updateVisual` function, and place it in the appropriate places
+* Add FiredWithoutMoving
+* Add GUI option to show/hide radar range
+* Hide display of hidden units, and also hide SSM and SAM range of hidden units
+* Add DEBUG option to still show them
+* Remember to check that dead, or unpowered radars don't work
+
+Ok, I did a few things at least
+
+todo
+-----
+Regarding the radar, do this:
+
+* Add GUI option to show/hide radar range
+* Continuously update visibility during movement execution
+* Hide display of hidden units, and also hide SSM and SAM range of hidden units
+* Add DEBUG option to still show them
+* Remember to check that dead, or unpowered radars don't work
+
+Regarding buildings: add "immortal" buildings (only damaged and deactivated at 0 hp, never deleted)

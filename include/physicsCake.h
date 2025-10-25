@@ -135,7 +135,7 @@ public:
         endTime=0.0;
     }
     [[nodiscard]] double getEndTime () const {return endTime;}
-    void bake(const hexGrid& grid, const std::vector<unit>& units,const std::map<int,std::vector<attackPlan> >& attackPlans);
+    void bake(const hexGrid& grid, std::vector<unit>& units,const std::map<int,std::vector<attackPlan> >& attackPlans);
 
     void debugRender(SDL_Renderer* renderer, double scale) const;
 

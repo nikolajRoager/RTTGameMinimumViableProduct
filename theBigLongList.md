@@ -34,6 +34,7 @@ TODO: The Big Long List
         * A Cruise missile site
         * A Ballistic missile site (Longer range, higher speed)
         * A Population and electricity ranges ./
+        * A Some buildings only gets "damaged" not destroyed
 * B AI Attack (requires radar and detection)
     * B AI attacks (only detected) friendly units in range
     * D AI should use dogleg path to avoid air-defence bubbles
@@ -78,3 +79,17 @@ TODO: The Big Long List
             * Victory in the east IF LAND COMBAT HAS BEEN ADDED, triggered by the player conquering the Russian capital Moscow
             * Victory in the west IF LAND COMBAT HAS BEEN ADDED, triggered by the player conquering the American capital Mar-A-Largo
     * c tutorials
+
+
+short term todo
+----
+
+* Regarding the radar
+  * Continuously update visibility during movement execution
+  * Add GUI option to show/hide radar range
+  * Hide display of hidden units, and also hide SSM and SAM range of hidden units
+  * Add DEBUG option to still show them
+  * Remember to check that dead, or unpowered radars don't work
+
+* Regarding buildings 
+  * add "immortal" buildings (only damaged and deactivated at 0 hp, never deleted)

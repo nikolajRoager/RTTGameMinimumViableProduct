@@ -33,6 +33,7 @@ private:
     texwrap shiftMarker;
     texwrap noPeopleMarker;
     texwrap noPowerMarker;
+    texwrap visibleMarker;
 
     soundwrap splashSound;
     soundwrap crashOrInterceptSound;
@@ -136,6 +137,8 @@ private:
     ///average number of smoke particles spawned per second by missiles
     double missileSmokeSpawnRate = 20;
 
+    double visualDetectionRange=100;
+
     physicsCake myCake;
 
     bool hasCalculatedMovementConstants=false;
@@ -143,6 +146,7 @@ private:
     AIMovementClient aiMovementClient;
 
     void drawCircle(double x, double y, double radius, double scale, Uint8 r, Uint8 g, Uint8 b, Uint8 a, SDL_Renderer* renderer) const;
+    void updateVisibility();
 public:
     explicit scenario(SDL_Renderer* renderer, TTF_Font* _font, std::default_random_engine& _generator);
     ~scenario();

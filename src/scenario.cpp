@@ -4,6 +4,7 @@
 
 #include "scenario.h"
 
+#include <algorithm>
 #include <cmath>
 #include <fstream>
 #include <iostream>
@@ -16,7 +17,7 @@ void scenario::drawCircle(double x, double y, double radius, double scale, Uint8
     circle10.render(x*scale,y*scale,r,g,b,a,renderer,scale*2*radius/circle10.getWidth(),true);
 }
 
-scenario::scenario(SDL_Renderer* renderer, TTF_Font* _font, std::default_random_engine& _generator) : background(fs::path("assets")/"background.png",renderer), hexSelectionOutline(fs::path("assets")/"hexoutline.png",renderer),circle10(fs::path("assets")/"circle10.png",renderer), grid(fs::path("assets"),renderer), myGui(fs::path("assets")/"gui",renderer,_font), flyingSSM(fs::path("assets")/"physicsGraphics"/"SSM.png",renderer), smokeParticleTexture(fs::path("assets")/"physicsGraphics"/"smoke.png",renderer), splashParticleTexture(fs::path("assets")/"physicsGraphics"/"splash.png",renderer), crashParticleTexture(fs::path("assets")/"physicsGraphics"/"crash.png",renderer), hitTargetTexture(fs::path("assets")/"physicsGraphics"/"hitTarget.png",renderer), interceptTexture(fs::path("assets")/"physicsGraphics"/"intercept.png",renderer), myCake(_generator),aiMovementClient(_generator),hpMarker(fs::path("assets")/"hitpoint.png",renderer),noPeopleMarker(fs::path("assets")/"nopeople.png",renderer),noPowerMarker(fs::path("assets")/"nopower.png",renderer),shiftMarker(fs::path("assets")/"shift.png",renderer), splashSound(fs::path("assets")/"sounds"/"splash.wav"), crashOrInterceptSound(fs::path("assets")/"sounds"/"smallExplosion.wav"), hitTargetSound(fs::path("assets")/"sounds"/"hittarget.wav"), missileSound(fs::path("assets")/"sounds"/"missile.wav") {
+scenario::scenario(SDL_Renderer* renderer, TTF_Font* _font, std::default_random_engine& _generator) : background(fs::path("assets")/"background.png",renderer), hexSelectionOutline(fs::path("assets")/"hexoutline.png",renderer),circle10(fs::path("assets")/"circle10.png",renderer), grid(fs::path("assets"),renderer), myGui(fs::path("assets")/"gui",renderer,_font), flyingSSM(fs::path("assets")/"physicsGraphics"/"SSM.png",renderer), smokeParticleTexture(fs::path("assets")/"physicsGraphics"/"smoke.png",renderer), splashParticleTexture(fs::path("assets")/"physicsGraphics"/"splash.png",renderer), crashParticleTexture(fs::path("assets")/"physicsGraphics"/"crash.png",renderer), hitTargetTexture(fs::path("assets")/"physicsGraphics"/"hitTarget.png",renderer), interceptTexture(fs::path("assets")/"physicsGraphics"/"intercept.png",renderer), myCake(_generator),aiMovementClient(_generator),hpMarker(fs::path("assets")/"hitpoint.png",renderer),noPeopleMarker(fs::path("assets")/"nopeople.png",renderer),noPowerMarker(fs::path("assets")/"nopower.png",renderer),visibleMarker(fs::path("assets")/"visible.png",renderer),shiftMarker(fs::path("assets")/"shift.png",renderer), splashSound(fs::path("assets")/"sounds"/"splash.wav"), crashOrInterceptSound(fs::path("assets")/"sounds"/"smallExplosion.wav"), hitTargetSound(fs::path("assets")/"sounds"/"hittarget.wav"), missileSound(fs::path("assets")/"sounds"/"missile.wav") {
     inGameFont = _font;
     //Will instantly be overwritten
     mouseOverTile=0;
@@ -38,13 +39,14 @@ scenario::scenario(SDL_Renderer* renderer, TTF_Font* _font, std::default_random_
     std::cout<<"Loading units"<<std::endl;
     //TODO: load from disk, and allow spawning
     units.clear();
-    //units.emplace_back(unitLibrary[2],true,20,9);
+    units.emplace_back(unitLibrary[2],true,20,9);
     units.emplace_back(unitLibrary[2],true,19,10);
     units.emplace_back(unitLibrary[0],true,21,11);
     units.emplace_back(unitLibrary[2],true,21,12);
     units.emplace_back(unitLibrary[1],true,25,20);
     units.emplace_back(unitLibrary[1],true,32,15);
     units.emplace_back(unitLibrary[1],true,30,12);
+
 
     //Location of cities, mainly for gameplay purposes, not necessarily realism
     units.emplace_back(unitLibrary[5],true,18,13);//Nuuk, really not a city
@@ -72,8 +74,8 @@ scenario::scenario(SDL_Renderer* renderer, TTF_Font* _font, std::default_random_
     units.emplace_back(unitLibrary[9],true,20,12);
 
     //Russian Warship which ought to go fuck itself
-    units.emplace_back(unitLibrary[4],false,32,3);
-    units.emplace_back(unitLibrary[4],false,28,23);
+//    units.emplace_back(unitLibrary[4],false,32,3);
+//    units.emplace_back(unitLibrary[4],false,28,23);
     //Yankee destroyer spam
     units.emplace_back(unitLibrary[3],false,8,23);
     units.emplace_back(unitLibrary[3],false,9,23);
@@ -123,6 +125,22 @@ scenario::scenario(SDL_Renderer* renderer, TTF_Font* _font, std::default_random_
     attackExecutionDescription="Executing attack plans\n&press space to pause/unpause or replay";
 
     myGui.setInfoScreenText(movementPlanningDescription,renderer);
+
+    std::cout<<"Updating locations of all units"<<std::endl;
+    //Update animation of friendly and hostile units
+    for (auto & U : units) {
+        //It is the scenario which is responsible for the grid, so we are responsible for getting the coordinates
+        const int hexX = U.getHexX();
+        const int hexY = U.getHexY();
+
+        const hexTile& unitTile = grid.getHexTile(hexX, hexY);
+
+        U.setX(unitTile.getHexCenterX());
+        U.setY(unitTile.getHexCenterY());
+
+    }
+
+
 
     std::cout<< " constructor finished"<<std::endl;
 
@@ -197,7 +215,7 @@ void scenario::render(SDL_Renderer* renderer, int mouseX, int mouseY, bool shift
         for (int i = 0; i < units.size(); i++) {
             const unit& U = units[i];
             grid.drawTile(renderer,grid.getHexId(U.getHexX(),U.getHexY()),scale,hexGrid::COLOR,U.isFriendly()?128:255,U.isFriendly()? 255:128,128,255);
-            U.render(scale,millis,renderer,hpMarker,noPowerMarker,noPeopleMarker);
+            U.render(scale,millis,renderer,hpMarker,noPowerMarker,noPeopleMarker,visibleMarker);
 
             if (myGui.doShowSSMRange() || i == selectedUnit) {
                 //Show SSM range
@@ -210,6 +228,13 @@ void scenario::render(SDL_Renderer* renderer, int mouseX, int mouseY, bool shift
                 double samRange = U.getSAMRange();
                 if (samRange>0)
                     drawCircle(U.getX(), U.getY(), samRange, scale,255,255,0,i == selectedUnit ?128:64, renderer);
+            }
+            //TODO add gui option to show radar range
+            {
+                drawCircle(U.getX(), U.getY(), visualDetectionRange, scale,0,255,0,i == selectedUnit ?128:64, renderer);
+                double radarRange = U.getRadarRange();
+                if (radarRange>0 && U.hasRadarOn() && U.getHp()>0)
+                    drawCircle(U.getX(), U.getY(), radarRange, scale,0,255,0,i == selectedUnit ?128:64, renderer);
             }
         }
     }
@@ -233,7 +258,7 @@ void scenario::render(SDL_Renderer* renderer, int mouseX, int mouseY, bool shift
         grid.drawTile(renderer,mouseOverTile,scale);
 
         for (const auto & U : units) {
-            U.render(scale,millis,renderer,hpMarker,noPowerMarker,noPeopleMarker);
+            U.render(scale,millis,renderer,hpMarker,noPowerMarker,noPeopleMarker,visibleMarker);
 
             if (myGui.doShowSSMRange()) {
                 //Show SSM range
@@ -270,7 +295,7 @@ void scenario::render(SDL_Renderer* renderer, int mouseX, int mouseY, bool shift
             const unit& U = units[i];
             if (i != selectedUnit || millis%500<250)
                 grid.drawTile(renderer,grid.getHexId(U.getHexX(),U.getHexY()),scale,hexGrid::COLOR,U.isFriendly()?128:255,U.isFriendly()? 255:128,128,255);
-            U.render(scale,millis,renderer,hpMarker,noPowerMarker,noPeopleMarker);
+            U.render(scale,millis,renderer,hpMarker,noPowerMarker,noPeopleMarker,visibleMarker);
 
             if (myGui.doShowSSMRange() || i == selectedUnit) {
                 //Show SSM range
@@ -349,7 +374,7 @@ void scenario::render(SDL_Renderer* renderer, int mouseX, int mouseY, bool shift
 
         for (int i = 0; i < units.size(); i++) {
             const unit& U = units[i];
-            U.render(scale,millis,renderer,hpMarker,noPowerMarker,noPeopleMarker);
+            U.render(scale,millis,renderer,hpMarker,noPowerMarker,noPeopleMarker,visibleMarker);
 
             if (myGui.doShowSSMRange() || i == selectedUnit) {
                 //Show SSM range
@@ -404,6 +429,56 @@ void scenario::render(SDL_Renderer* renderer, int mouseX, int mouseY, bool shift
     //aiMovementClient.render(grid,renderer,scale);
 }
 
+void scenario::updateVisibility() {
+    //First set everything to undetected
+    for (unit& U : units) {
+        U.setVisible(U.getFiredWithoutMoving());
+    }
+
+
+    for (int i = 0; i < units.size(); i++) {
+        unit& U = units[i];
+        for (int j = i+1; j < units.size(); j++) {
+            unit& V = units[j];
+            //Only opposing units detect each other
+            if (V.isFriendly()!=U.isFriendly()) {
+                double dist = sqrt(pow(U.getX()-V.getX(),2)+pow(U.getY()-V.getY(),2));
+                if (dist<=visualDetectionRange) {
+                    V.setVisible(true);
+                    U.setVisible(true);
+                    }
+
+                //U has an active radar
+                if (U.getHp()>0 && U.hasRadarOn()) {
+                    //U detects V
+                    if (dist<=U.getRadarRange()) {
+                        V.setVisible(true);
+                    }
+                    //Radars are visible at twice their range
+                    if (dist<=U.getRadarRange()*2) {
+                        U.setVisible(true);
+                    }
+                }
+                if (V.getHp()>0 && V.hasRadarOn()) {
+                    //V detects U
+                    if (dist<=V.getRadarRange()) {
+                        U.setVisible(true);
+                    }
+                    //Radars are visible at twice their range
+                    if (dist<=V.getRadarRange()*2) {
+                        V.setVisible(true);
+                    }
+                }
+            }
+
+        }
+
+    }
+
+}
+
+
+
 void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,  int mouseX, int mouseY, bool isLeftMouseClick, bool isRightMouseClick, bool executeClick, bool shiftKey, bool playbuttonClick, int scrollwheel, uint32_t millis, uint32_t dmillis) {
     scale = std::min(static_cast<double>(screenWidth) / static_cast<double>(scenarioWidthPx+gui::getRightBarPixels()),
                      static_cast<double>(screenHeight) / static_cast<double>(scenarioHeightPx+gui::getBottomBarPixels()));
@@ -413,9 +488,9 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
     if (currentPhase==MOVEMENT_PLANNING) {
 
         if (!hasCalculatedMovementConstants) {
-            //Update factories, powerplants, cities and such
+            //Update factories, powerplants, cities, and such
 
-            //Update everyones effects
+            //Update everyone's effects
             for (unit& u : units) {
             //const std::set<int> tilesInMovementRange=grid.getNeighbours(selectedTile,units[selectedUnit].getMovementPoints(),obstructed);
 
@@ -467,6 +542,8 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
                     u.setPopulation(enemyPopulatedHexes.contains(hexID));
                 }
             }
+
+            updateVisibility();
 
 
 
@@ -589,6 +666,10 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
             hasCalculatedMovementConstants=false;
             myGui.setInfoScreenText(movementExecutionDescription,renderer);
 
+            for (const auto &unit: movementPlans | std::views::keys) {
+                units[unit].setFiredWithoutMoving(false);
+            }
+
 
             //Remove any empty plans which got added
             std::erase_if(movementPlans, [](const auto& userPlan) {
@@ -597,14 +678,12 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
         }
     }
     else if (currentPhase == MOVEMENT_EXECUTION) {
-        std::cout<<"Start movement execution"<<std::endl;
 
         //How many units have NOT finished their movements yet
         int pendingUnits=0;
 
         //Update animation of units, friends as well as foes
         for (int i = 0; i < units.size(); i++) {
-            std::cout<<"Unit "<<i<<std::endl;
             auto& U = units[i];
             U.unreadyAttack();
             {
@@ -623,7 +702,6 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
                     }
                 }
                 else {
-                    std::cout<<"Move unit "<<i<<std::endl;
                     ++pendingUnits;
                     double hexPerMs = 2.0/1000;
                     uint32_t millisSinceMovementStart = U.timeSinceAnimationStart(millis);
@@ -633,33 +711,23 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
 
                     //Have we arrived at our destination?
                     if (progress+1>=path.size()) {
-                        std::cout<<"Has arrived "<<i<<std::endl;
 
                         int hexX=0;
                         int hexY=0;
-                        std::cout<<"getting back hexId "<<i<<" from path size "<< path.size()<<std::endl;
                         //We can SAFELY ASSUME the path is not empty, because we removed empty movement plans
                         grid.getHexXYs(path.back(),hexX, hexY);
-                        std::cout<<"set hex x"<<std::endl;
                         U.setHexX(hexX);
-                        std::cout<<"set hex y"<<std::endl;
                         U.setHexY(hexY);
 
-                        std::cout<<"get hex"<<std::endl;
                         const hexTile& unitTile = grid.getHexTile(hexX, hexY);
 
-                        std::cout<<"set x"<<std::endl;
                         U.setX(unitTile.getHexCenterX());
-                        std::cout<<"set y"<<std::endl;
                         U.setY(unitTile.getHexCenterY());
 
-                        std::cout<<"Erase"<<i<<std::endl;
                         movementPlans.erase(i);
-                        std::cout<<"Setting animation"<<i<<std::endl;
                         U.setAnimation(millis,unitType::IDLE);
                     }
                     else {
-                        std::cout<<"Has not arrived "<<i<<std::endl;
 
                         //Get the hex just before, and just after the current location (id in the path)
                         int hexBefore = std::min(static_cast<int>(progress),static_cast<int>(path.size())-1);
@@ -695,8 +763,8 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
             }
         }
         if (pendingUnits==0) {
-            std::cout<<"Halt movement execution"<<std::endl;
             currentPhase=ATTACK_PLANNING;
+            updateVisibility();
             selectedAttackPlan=-1;
             selectedUnit=-1;
             selectedTile=-1;

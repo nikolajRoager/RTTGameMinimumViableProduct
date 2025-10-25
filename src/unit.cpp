@@ -7,7 +7,7 @@
 #include <format>
 
 
-void unit::render(double scale,uint32_t millis, SDL_Renderer *renderer, const texwrap& hpMarker, const texwrap& noPowerMarker, const texwrap& noPeopleMarker) const {
+void unit::render(double scale,uint32_t millis, SDL_Renderer *renderer, const texwrap& hpMarker, const texwrap& noPowerMarker, const texwrap& noPeopleMarker, const texwrap& visibleMarker) const {
     myType.render(x*scale, y*scale, scale,millis-animationStart, renderer,myPhase,flip);
     for (int i = 0; i < myType.getMaxHp(); ++i) {
         hpMarker.render((x+25/*hardcoded offset = gamejam syndrome*/)*scale,(y)*scale-i*hpMarker.getHeight(),renderer,scale,false,false,2,i<hp?0:1);
@@ -20,6 +20,11 @@ void unit::render(double scale,uint32_t millis, SDL_Renderer *renderer, const te
     //Ignore the warnings, this is NOT always true
     if (!hasPopulation && myType.getRequirePopulation())
         noPeopleMarker.render((x-25/*hardcoded offset = gamejam syndrome*/)*scale,(y-noPowerMarker.getHeight())*scale,renderer,scale);
+
+    //TODO, this is for debugging only, remove it, or make it a special debug option
+    //Ignore the warning, this is NOT always false
+    if (visible)
+        visibleMarker.render((x-25/*hardcoded offset = gamejam syndrome*/)*scale,(y-noPeopleMarker.getHeight()-noPowerMarker.getHeight())*scale,renderer,scale);
 }
 
 void unit::updateAnimation(uint32_t millis) {

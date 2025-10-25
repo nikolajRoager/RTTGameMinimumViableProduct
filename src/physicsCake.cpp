@@ -5,9 +5,13 @@
 //
 // Created by Nikolaj Christensen on 03/10/2025.
 //
-void physicsCake::bake(const hexGrid& grid, const std::vector<unit>& units, const std::map<int, std::vector<attackPlan> > &attackPlans) {
+void physicsCake::bake(const hexGrid& grid, std::vector<unit>& units, const std::map<int, std::vector<attackPlan> > &attackPlans) {
     SSMVectors.clear();
     SAMVectors.clear();
+
+    for (unit& u : units) {
+        u.setFiredWithoutMoving(false);
+    }
 
 
     //What owner,id attack plan does each of the SSM vectors in the list correspond to
@@ -47,6 +51,8 @@ void physicsCake::bake(const hexGrid& grid, const std::vector<unit>& units, cons
             SSMVectorsStatus.emplace_back(UNSTARTED);
             SAMTaskedAgainstSSM.emplace_back(-1);
         }
+        //By shooting, we have given our position away
+        units[unitPlans.first].setFiredWithoutMoving(true);
     }
 
     //End time serves as the current time when stepping through this
@@ -137,6 +143,9 @@ void physicsCake::bake(const hexGrid& grid, const std::vector<unit>& units, cons
                                     flyingSAMs.emplace_back(samX,samY,samVx,samVy,launcher.fuelTime,interceptTime,ssmId);
                                     SAMVectors.emplace_back(launcher.playerSide);
                                 }
+
+                                //We have given our position away
+                                units[launcher.unitId].setFiredWithoutMoving(true);
 
                                 //cool down, or reload the launcher
                                 launcher.loadedLaunchers--;

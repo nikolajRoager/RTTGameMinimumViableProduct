@@ -44,11 +44,26 @@ private:
     bool hasPower=false;
     ///Are we in range of a population source?
     bool hasPopulation=false;
+    bool radarOn = true;
+
+    bool visible = false;
+
+    bool firedWithoutMoving = false;
 
 public:
 
-    void setPower (bool power) {hasPower=power;}
-    void setPopulation (bool population) {hasPopulation=population;}
+    void setFiredWithoutMoving(bool state) {firedWithoutMoving=state;};
+
+    [[nodiscard]] bool getFiredWithoutMoving() const {return firedWithoutMoving;};
+
+    void setVisible(bool isVisible) { visible = isVisible; }
+    [[nodiscard]] bool getVisible() const { return visible; }
+
+    [[nodiscard]] double getRadarRange() const {return myType.getRadarRange();}
+    [[nodiscard]] bool hasRadarOn() const {return radarOn;}
+
+    void setPower (bool power) {hasPower=power; if (myType.getRequirePower() && !power) radarOn = false;}
+    void setPopulation (bool population) {hasPopulation=population; if (myType.getRequirePower() && !population) radarOn = false;}
 
 
 
@@ -117,7 +132,7 @@ public:
 
     [[nodiscard]] unitType::animationPhase getAnimationPhase() const { return myPhase; }
 
-    void render(double scale,uint32_t millis,SDL_Renderer *renderer, const texwrap& hpMarker, const texwrap& noPowerMarker, const texwrap& noPeopleMarker) const;
+    void render(double scale,uint32_t millis,SDL_Renderer *renderer, const texwrap& hpMarker, const texwrap& noPowerMarker, const texwrap& noPeopleMarker, const texwrap& visibleMarker) const;
     void updateAnimation(uint32_t millis);
 
 
