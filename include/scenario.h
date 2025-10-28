@@ -24,6 +24,9 @@
 
 class scenario {
 private:
+
+    std::default_random_engine generator;
+
     texwrap background;
     texwrap hexSelectionOutline;
     ///A white circle with a radius of 10 hex sizes
@@ -80,9 +83,6 @@ private:
     ///Union of the effect hexes of all friendly population units
     std::set<int> enemyPopulatedHexes;
 
-
-    //TODO, add hostile
-
     double scale;
 
     std::string movementPlanningDescription;
@@ -125,8 +125,6 @@ private:
     std::deque<particle> crashParticles;
     std::deque<particle> hitTargetParticles;
     std::deque<particle> interceptParticles;
-    //TODO: crash particle, detonate particle, splash particle intercept particle
-
 
     int smokeParticleLifetimeMs=1000;
     int splashParticleLifetimeMs=200;
@@ -142,9 +140,11 @@ private:
     physicsCake myCake;
 
     bool hasCalculatedMovementConstants=false;
+    bool hasCalculatedAttackConstants=false;
 
     AIMovementClient aiMovementClient;
 
+    void calculateEnemyAttackPlans(SDL_Renderer* renderer);
     void drawCircle(double x, double y, double radius, double scale, Uint8 r, Uint8 g, Uint8 b, Uint8 a, SDL_Renderer* renderer) const;
     void updateVisibility();
 public:

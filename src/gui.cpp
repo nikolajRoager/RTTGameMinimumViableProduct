@@ -192,25 +192,27 @@ void gui::renderAttackPlanning(int scenarioWidth, int scenarioHeight, int mouseX
     int sidebarTopY = BOTTOM_BAR_PIXELS;
     if (selectedUnit!=-1 && attackPlans.contains(selectedUnit)) {
         for (int i = 0; i < attackPlans.at(selectedUnit).size(); i++) {
-            int sidebarCurrentHeight = sidebarTopY;
-            sidebarLaunch.render(scenarioWidth*scale,sidebarCurrentHeight*scale,renderer,scale);
-            if (i==selectedPlan)
-                sidebarSelection.render((scenarioWidth-sidebarSelection.getWidth())*scale,sidebarCurrentHeight*scale,renderer,scale);
-            attackPlans.at(selectedUnit)[i].getTimeMarker(0).render((scenarioWidth+50)*scale,sidebarCurrentHeight*scale,renderer,scale);
-            sidebarCurrentHeight+=sidebarLaunch.getHeight();
+            if (attackPlans.at(selectedUnit)[i].isFriendly()) {
+                int sidebarCurrentHeight = sidebarTopY;
+                sidebarLaunch.render(scenarioWidth*scale,sidebarCurrentHeight*scale,renderer,scale);
+                if (i==selectedPlan)
+                    sidebarSelection.render((scenarioWidth-sidebarSelection.getWidth())*scale,sidebarCurrentHeight*scale,renderer,scale);
+                attackPlans.at(selectedUnit)[i].getTimeMarker(0).render((scenarioWidth+50)*scale,sidebarCurrentHeight*scale,renderer,scale);
+                sidebarCurrentHeight+=sidebarLaunch.getHeight();
 
-            for (int j = 1; j+1<attackPlans.at(selectedUnit)[i].getNodes(); ++j) {
-                sidebarNode.render(scenarioWidth*scale,sidebarCurrentHeight*scale,renderer,scale);
-                attackPlans.at(selectedUnit)[i].getTimeMarker(j).render((scenarioWidth+50)*scale,sidebarCurrentHeight*scale,renderer,scale);
-                sidebarCurrentHeight+=sidebarNode.getHeight();
+                for (int j = 1; j+1<attackPlans.at(selectedUnit)[i].getNodes(); ++j) {
+                    sidebarNode.render(scenarioWidth*scale,sidebarCurrentHeight*scale,renderer,scale);
+                    attackPlans.at(selectedUnit)[i].getTimeMarker(j).render((scenarioWidth+50)*scale,sidebarCurrentHeight*scale,renderer,scale);
+                    sidebarCurrentHeight+=sidebarNode.getHeight();
+                }
+                sidebarTarget.render(scenarioWidth*scale,sidebarCurrentHeight*scale,renderer,scale);
+                attackPlans.at(selectedUnit)[i].getTimeMarker(attackPlans.at(selectedUnit)[i].getNodes()-1).render((scenarioWidth+50)*scale,sidebarCurrentHeight*scale,renderer,scale);
+                sidebarCurrentHeight+=sidebarTarget.getHeight();
+
+                bool isSelected = mouseX_scaled>scenarioWidth&& mouseY_scaled>sidebarTopY && mouseY_scaled<sidebarCurrentHeight;
+                sidebarTrash.render((scenarioWidth+sidebarLaunch.getWidth()-sidebarTrash.getWidth())*scale,sidebarTopY*scale,renderer,scale,false,false,2,isSelected?1:0);
+                sidebarTopY=sidebarCurrentHeight;
             }
-            sidebarTarget.render(scenarioWidth*scale,sidebarCurrentHeight*scale,renderer,scale);
-            attackPlans.at(selectedUnit)[i].getTimeMarker(attackPlans.at(selectedUnit)[i].getNodes()-1).render((scenarioWidth+50)*scale,sidebarCurrentHeight*scale,renderer,scale);
-            sidebarCurrentHeight+=sidebarTarget.getHeight();
-
-            bool isSelected = mouseX_scaled>scenarioWidth&& mouseY_scaled>sidebarTopY && mouseY_scaled<sidebarCurrentHeight;
-            sidebarTrash.render((scenarioWidth+sidebarLaunch.getWidth()-sidebarTrash.getWidth())*scale,sidebarTopY*scale,renderer,scale,false,false,2,isSelected?1:0);
-            sidebarTopY=sidebarCurrentHeight;
         }
     }
     //currentTimeCounter.render((scenarioWidth+RIGHT_BAR_PIXELS/2)*scale,(BOTTOM_BAR_PIXELS/2)*scale,renderer,scale);

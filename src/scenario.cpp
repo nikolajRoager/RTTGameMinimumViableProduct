@@ -17,7 +17,7 @@ void scenario::drawCircle(double x, double y, double radius, double scale, Uint8
     circle10.render(x*scale,y*scale,r,g,b,a,renderer,scale*2*radius/circle10.getWidth(),true);
 }
 
-scenario::scenario(SDL_Renderer* renderer, TTF_Font* _font, std::default_random_engine& _generator) : background(fs::path("assets")/"background.png",renderer), hexSelectionOutline(fs::path("assets")/"hexoutline.png",renderer),circle10(fs::path("assets")/"circle10.png",renderer), grid(fs::path("assets"),renderer), myGui(fs::path("assets")/"gui",renderer,_font), flyingSSM(fs::path("assets")/"physicsGraphics"/"SSM.png",renderer), smokeParticleTexture(fs::path("assets")/"physicsGraphics"/"smoke.png",renderer), splashParticleTexture(fs::path("assets")/"physicsGraphics"/"splash.png",renderer), crashParticleTexture(fs::path("assets")/"physicsGraphics"/"crash.png",renderer), hitTargetTexture(fs::path("assets")/"physicsGraphics"/"hitTarget.png",renderer), interceptTexture(fs::path("assets")/"physicsGraphics"/"intercept.png",renderer), myCake(_generator),aiMovementClient(_generator),hpMarker(fs::path("assets")/"hitpoint.png",renderer),noPeopleMarker(fs::path("assets")/"nopeople.png",renderer),noPowerMarker(fs::path("assets")/"nopower.png",renderer),visibleMarker(fs::path("assets")/"visible.png",renderer),shiftMarker(fs::path("assets")/"shift.png",renderer), splashSound(fs::path("assets")/"sounds"/"splash.wav"), crashOrInterceptSound(fs::path("assets")/"sounds"/"smallExplosion.wav"), hitTargetSound(fs::path("assets")/"sounds"/"hittarget.wav"), missileSound(fs::path("assets")/"sounds"/"missile.wav") {
+scenario::scenario(SDL_Renderer* renderer, TTF_Font* _font, std::default_random_engine& _generator) : generator(_generator), background(fs::path("assets")/"background.png",renderer), hexSelectionOutline(fs::path("assets")/"hexoutline.png",renderer),circle10(fs::path("assets")/"circle10.png",renderer), grid(fs::path("assets"),renderer), myGui(fs::path("assets")/"gui",renderer,_font), flyingSSM(fs::path("assets")/"physicsGraphics"/"SSM.png",renderer), smokeParticleTexture(fs::path("assets")/"physicsGraphics"/"smoke.png",renderer), splashParticleTexture(fs::path("assets")/"physicsGraphics"/"splash.png",renderer), crashParticleTexture(fs::path("assets")/"physicsGraphics"/"crash.png",renderer), hitTargetTexture(fs::path("assets")/"physicsGraphics"/"hitTarget.png",renderer), interceptTexture(fs::path("assets")/"physicsGraphics"/"intercept.png",renderer), myCake(_generator),aiMovementClient(_generator),hpMarker(fs::path("assets")/"hitpoint.png",renderer),noPeopleMarker(fs::path("assets")/"nopeople.png",renderer),noPowerMarker(fs::path("assets")/"nopower.png",renderer),visibleMarker(fs::path("assets")/"visible.png",renderer),shiftMarker(fs::path("assets")/"shift.png",renderer), splashSound(fs::path("assets")/"sounds"/"splash.wav"), crashOrInterceptSound(fs::path("assets")/"sounds"/"smallExplosion.wav"), hitTargetSound(fs::path("assets")/"sounds"/"hittarget.wav"), missileSound(fs::path("assets")/"sounds"/"missile.wav") {
     inGameFont = _font;
     //Will instantly be overwritten
     mouseOverTile=0;
@@ -74,8 +74,8 @@ scenario::scenario(SDL_Renderer* renderer, TTF_Font* _font, std::default_random_
     units.emplace_back(unitLibrary[9],true,20,12);
 
     //Russian Warship which ought to go fuck itself
-//    units.emplace_back(unitLibrary[4],false,32,3);
-//    units.emplace_back(unitLibrary[4],false,28,23);
+    units.emplace_back(unitLibrary[4],false,32,3);
+    units.emplace_back(unitLibrary[4],false,28,23);
     //Yankee destroyer spam
     units.emplace_back(unitLibrary[3],false,8,23);
     units.emplace_back(unitLibrary[3],false,9,23);
@@ -195,19 +195,20 @@ void scenario::render(SDL_Renderer* renderer, int mouseX, int mouseY, bool shift
         }
 
         //Draw all planned movement
-        for (const auto &val: movementPlans | std::views::values) {
-            grid.drawPath(renderer,val,scale);
+        for (const auto &userPlan: movementPlans) {
+            if (units[userPlan.first].isFriendly())
+                grid.drawPath(renderer,userPlan.second,scale);
         }
 
         {
             if (myGui.doShowPowerRange()) {
                 grid.drawTiles(renderer,friendlyPoweredHexes,scale,hexGrid::COLOR,255,255,0);
-                //todo debug
+                //todo debug only, remove this
                 grid.drawTiles(renderer,enemyPoweredHexes,scale,hexGrid::COLOR,255,255,0);
             }
             if (myGui.doShowPopulationRange()) {
                 grid.drawTiles(renderer,friendlyPopulatedHexes,scale,hexGrid::COLOR,255,125,125);
-                //todo debug
+                //todo debug only, remove this
                 grid.drawTiles(renderer,enemyPopulatedHexes,scale,hexGrid::COLOR,255,125,125);
             }
         }
@@ -545,8 +546,6 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
 
             updateVisibility();
 
-
-
             std::cout <<"Calculating AI movement"<< std::endl;
             aiMovementClient.makeAIMovementPlans(grid,units,movementPlans);
             std::cout <<"Calculating effect hexes"<< std::endl;
@@ -679,6 +678,8 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
     }
     else if (currentPhase == MOVEMENT_EXECUTION) {
 
+        updateVisibility();
+
         //How many units have NOT finished their movements yet
         int pendingUnits=0;
 
@@ -764,6 +765,7 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
         }
         if (pendingUnits==0) {
             currentPhase=ATTACK_PLANNING;
+            hasCalculatedAttackConstants=false;
             updateVisibility();
             selectedAttackPlan=-1;
             selectedUnit=-1;
@@ -774,6 +776,12 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
         std::cout<<"End loop movement execution"<<std::endl;
     }
     else if (currentPhase == ATTACK_PLANNING) {
+
+        if (!hasCalculatedAttackConstants) {
+            calculateEnemyAttackPlans(renderer);
+            hasCalculatedAttackConstants=true;
+        }
+
         //Right click to select units
         if (isRightMouseClick) {
             //See if there is a new unit to select
@@ -814,7 +822,7 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
         //Left click to add new attack plan, or modify existing
         if (isLeftMouseClick) {
             //Obviously only possible if somebody is selected
-            if (selectedUnit!=-1) {
+            if (selectedUnit!=-1 && units[selectedUnit].isFriendly()) {
                 //We will add a new plan, if no plan is currently selected, or the selected plan has max number of nodes
                 if (!shiftKey || selectedAttackPlan==-1 || !attackPlans.contains(selectedUnit) || attackPlans[selectedUnit].size()<selectedAttackPlan || attackPlans[selectedUnit][selectedAttackPlan].getNodes()>=units[selectedUnit].getSSMNodes()) {
 
@@ -832,6 +840,7 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
                             attackPlans.emplace(selectedUnit,std::vector<attackPlan>());
 
                         //Check that we are not above the salvo size
+                        //TODO check ammo
                         if (attackPlans[selectedUnit].size()<units[selectedUnit].getSSMSalvoSize()) {
                             attackPlans[selectedUnit].emplace_back(selectedUnit,sourceX,sourceY,destinationX,destinationY,renderer,inGameFont,units[selectedUnit].isFriendly());
                             selectedAttackPlan=attackPlans[selectedUnit].size()-1;
@@ -849,21 +858,22 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
 
         //Scroll to adjust the launch timing of the selected attack plan in 1 second intervals
         if (scrollwheel!=0) {
-            if (selectedAttackPlan!=-1 && attackPlans.contains(selectedUnit) && attackPlans[selectedUnit].size()>selectedAttackPlan) {
+            if (selectedAttackPlan!=-1 && selectedUnit!=-1 && units[selectedUnit].isFriendly()&& attackPlans.contains(selectedUnit) && attackPlans[selectedUnit].size()>selectedAttackPlan) {
                 attackPlans[selectedUnit][selectedAttackPlan].modifyLaunchTime(scrollwheel,renderer,inGameFont);
             }
         }
 
-
-        //Mouse over element in the gui to select it
-        int newSelectedPlan = myGui.getSelectedAttackPlan(scenarioWidthPx,scenarioHeightPx,mouseX,mouseY,scale,attackPlans,selectedUnit,selectedAttackPlan);
-        if (newSelectedPlan != -1) {
-            selectedAttackPlan=newSelectedPlan;
-            //Click to delete
-            if (isLeftMouseClick || isRightMouseClick) {
-                //If we got here, we know the plan exists alright
-                attackPlans[selectedUnit].erase(attackPlans[selectedUnit].begin()+newSelectedPlan);
-                selectedAttackPlan=-1;
+        if (selectedUnit!=-1 && units[selectedUnit].isFriendly()) {
+            //Mouse over element in the gui to select it
+            int newSelectedPlan = myGui.getSelectedAttackPlan(scenarioWidthPx,scenarioHeightPx,mouseX,mouseY,scale,attackPlans,selectedUnit,selectedAttackPlan);
+            if (newSelectedPlan != -1) {
+                selectedAttackPlan=newSelectedPlan;
+                //Click to delete
+                if (isLeftMouseClick || isRightMouseClick) {
+                    //If we got here, we know the plan exists alright
+                    attackPlans[selectedUnit].erase(attackPlans[selectedUnit].begin()+newSelectedPlan);
+                    selectedAttackPlan=-1;
+                }
             }
         }
 
@@ -1010,4 +1020,49 @@ void scenario::update(SDL_Renderer* renderer, int screenWidth, int screenHeight,
     }
 
     myGui.update(mouseX,mouseY,isLeftMouseClick || isRightMouseClick,scenarioWidthPx,scenarioHeightPx,scale,dmillis);
+}
+
+void scenario::calculateEnemyAttackPlans(SDL_Renderer* renderer) {
+    for (int unitId = 0; unitId < units.size(); ++unitId) {
+        unit& U = units[unitId];
+        if (!U.isFriendly() && U.getHp()>0 && U.getSSMSalvoSize()>0) {
+            //Ids of all potential targets, which are inside range and spotted
+            std::vector<int> potentialTargets;
+
+            for (int id = 0; id < units.size(); ++id) {
+                //Only friendly units may be targeted
+                if (units[id].isFriendly() && units[id].getHp()>0 && units[id].getVisible()) {
+                    double x1 = units[id].getX();
+                    double y1 = units[id].getY();
+                    double x0 = U.getX();
+                    double y0 = U.getY();
+                    double dist = sqrt(pow(x0-x1,2)+pow(y0-y1,2));
+
+                    if (dist<U.getSSMRange()) {
+                        potentialTargets.emplace_back(id);
+                    }
+                }
+            }
+
+            //TODO, check ammo
+            if (!potentialTargets.empty()) {
+                if (!attackPlans.contains(unitId))
+                    attackPlans.emplace(unitId,std::vector<attackPlan>());
+                //Loop through all rockets in our salvo
+                //TODO, check ammo
+                for (int i = 0; i < U.getSSMSalvoSize(); ++i) {
+                    std::uniform_int_distribution<> dist(0,potentialTargets.size()-1);
+                    int targetID = potentialTargets[dist(generator)];
+
+                    double sourceX = U.getX();
+                    double sourceY = U.getY();
+                    double destinationX = units[targetID].getX();
+                    double destinationY = units[targetID].getY();
+
+                    attackPlans[unitId].emplace_back(unitId,sourceX,sourceY,destinationX,destinationY,renderer,inGameFont,false);
+                    attackPlans[unitId].back().modifyLaunchTime(i,renderer,inGameFont);
+                }
+            }
+        }
+    }
 }

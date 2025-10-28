@@ -780,8 +780,31 @@ Regarding the radar, do this:
 
 * Add GUI option to show/hide radar range
 * Continuously update visibility during movement execution
-* Hide display of hidden units, and also hide SSM and SAM range of hidden units
+* Hide display of hidden units, and also hide SSM, Radar and SAM range of hidden units
 * Add DEBUG option to still show them
 * Remember to check that dead, or unpowered radars don't work
 
 Regarding buildings: add "immortal" buildings (only damaged and deactivated at 0 hp, never deleted)
+
+Day 23, 26/10/2025 CE
+========
+background
+------
+I am honestly going through a bit of a writers block for this game ... I am also very afraid that it is not actually fun.
+
+work
+----
+I added enemy attacks, the enemy now autonomously throws missiles in my direction
+
+todo
+----
+Regarding the radar, do this:
+
+* Add GUI option to show/hide radar range
+* Continuously update visibility during movement execution
+* Hide display of hidden units, and also hide SSM, Radar and SAM range of hidden units
+* Add DEBUG option to still show them
+* Remember to check that dead, or unpowered radars don't work
+
+Regarding buildings: add "immortal" buildings (only damaged and deactivated at 0 hp, never deleted)
+

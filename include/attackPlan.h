@@ -31,6 +31,7 @@ private:
     std::vector<attackVectorPoint> attackVectors;
 
 public:
+    [[nodiscard]] bool isFriendly() const {return isPlayerSide;}
 
     attackPlan(int _launcherId,double x0,double y0, double x1,double y1, SDL_Renderer* renderer,  TTF_Font* font, bool isPlayerSide);
 
